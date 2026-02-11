@@ -75,12 +75,12 @@ export const EditorPage: React.FC = () => {
       <aside className="w-[85px] bg-amber-100 shrink-0"></aside>
 
       {/* 캔버스 영역 */}
-      <section className="h-full flex-1 min-w-0 bg-gray-300 relative flex flex-col items-center">
+      <section className="h-full flex-1 min-w-0 bg-[#E2E8F0] relative flex flex-col items-center">
         {/* 툴바 */}
         <Toolbar activeTool={activeTool} onToolChange={handleToolChange} />
 
         {/* Konva 캔버스 컨테이너 */}
-        <div ref={containerRef} className="flex-1 h-full w-full border">
+        <div ref={containerRef} className="flex-1 h-full w-full bg-white">
           <Stage
             width={stageSize.width}
             height={stageSize.height}
