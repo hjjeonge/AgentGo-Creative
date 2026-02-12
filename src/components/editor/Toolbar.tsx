@@ -9,6 +9,7 @@ import { ToolButton } from "./ToolButton";
 import { ColorPalette } from "../commons/ColorPalette";
 import { getPenColorImg, getPenStrokeWidthImg } from "../../utils/getImage";
 import { DiagramPopup } from "./DiagramPopup";
+import { TextEditor } from "./TextEditor";
 
 interface ToolbarProps {
   activeTool: string;
@@ -124,6 +125,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       {activeTool === "diagram" && (
         <DiagramPopup shapeType={shapeType} setShapeType={setShapeType} />
       )}
+      <TextEditor />
     </div>
   );
 };
