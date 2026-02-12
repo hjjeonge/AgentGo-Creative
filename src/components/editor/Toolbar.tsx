@@ -1,155 +1,79 @@
-import React, { useState } from "react";
-import { PencilIcon } from "../icons/PencilIcon";
+import React from "react";
 import { ClickIcon } from "../icons/ClickIcon";
-import { EraserIcon } from "../icons/EraserIcon";
-import { ShapeIcon } from "../icons/ShapeIcon";
 import { DiagramIcon } from "../icons/DiagramIcon";
+import { EraserIcon } from "../icons/EraserIcon";
+import { PencilIcon } from "../icons/PencilIcon";
+import { ShapeIcon } from "../icons/ShapeIcon";
 import { TextIcon } from "../icons/TextIcon";
+import PenSize_2 from "./../../assets/pen_size_2.svg";
+import PenSize_3 from "./../../assets/pen_size_3.svg";
+import PenSize_4 from "./../../assets/pen_size_4.svg";
+import PenSize_5 from "./../../assets/pen_size_5.svg";
+import { ToolButton } from "./ToolButton";
 
 interface ToolbarProps {
   activeTool: string;
   onToolChange: (tool: string) => void;
-  drawingColor?: string;
-  drawingLineWidth?: number;
-  setDrawingColor?: (color: string) => void;
-  setDrawingLineWidth?: (width: number) => void;
-  onAddText?: () => void;
-  onTriggerFileUpload?: () => void;
+  penStrokeWidth: number;
+  handlePenStrokeWidth: (value: number) => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
   activeTool,
   onToolChange,
-  drawingColor,
-  drawingLineWidth,
-  setDrawingColor,
-  setDrawingLineWidth,
-  onAddText,
-  onTriggerFileUpload,
+  penStrokeWidth,
+  handlePenStrokeWidth,
 }) => {
-  const presetColors = [
-    "#000000",
-    "#FF0000",
-    "#FFFF00",
-    "#0000FF",
-    "#008000",
-    "#FFFFFF",
+  const tools = [
+    { tool: "click", icon: <ClickIcon /> },
+    { tool: "pen", icon: <PencilIcon /> },
+    { tool: "eraser", icon: <EraserIcon /> },
+    { tool: "diagram", icon: <DiagramIcon /> },
+    { tool: "shape", icon: <ShapeIcon /> },
+    { tool: "text", icon: <TextIcon /> },
   ];
+  const penStrokeWidths = [2, 3, 5, 6];
 
-  const [isFreeDrawMenuOpen, setIsFreeDrawMenuOpen] = useState(false);
-  const [isShapesMenuOpen, setIsShapesMenuOpen] = useState(false);
-
-  const ToolButton: React.FC<{
-    toolName: string;
-    icon: React.ReactNode;
-    label: string;
-    onClick?: () => void;
-    isActive?: boolean;
-  }> = ({ toolName, icon, label, onClick, isActive }) => (
-    <button
-      title={label}
-      onClick={onClick || (() => onToolChange(toolName))}
-      className={`w-[54px] h-[54px] p-[10px] cursor-pointer flex items-center justify-center ${
-        isActive || activeTool === toolName
-          ? "border border-[#1447E6] bg-[#EFF6FF] text-[#155DFC] rounded-[6px]"
-          : "hover:bg-gray-100 rounded-[6px]"
-      }`}
-    >
-      {icon}
-    </button>
-  );
+  const getPenStrokeWidthImg = (value: number) => {
+    switch (value) {
+      case 2:
+        return PenSize_2;
+      case 3:
+        return PenSize_3;
+      case 5:
+        return PenSize_4;
+      case 6:
+        return PenSize_5;
+    }
+  };
 
   return (
-    <div className="flex justify-around w-[584px] p-[14px_18px] bg-white rounded-[24px] border border-[#90A1B9] shadow-md mt-[40px] mb-[40px]">
-      <ToolButton toolName="select" label="select" icon={<ClickIcon />} />
-      <div className="relative">
-        <ToolButton
-          toolName="pen"
-          label="pen"
-          icon={<PencilIcon />}
-          onClick={() => {
-            onToolChange("pen");
-            setIsFreeDrawMenuOpen(!isFreeDrawMenuOpen);
-          }}
-          isActive={activeTool === "pen"}
-        />
-        {/* {isFreeDrawMenuOpen && (
-          <div className="absolute left-full top-0 ml-2 p-2 bg-white rounded-lg shadow-md z-10">
-            <div className="font-bold mb-2 text-sm">Color</div>
-            <div className="flex gap-1 mb-2">
-              {presetColors.map((color) => (
-                <button
-                  key={color}
-                  title={color}
-                  className={`w-5 h-5 rounded-full ${
-                    drawingColor === color ? "border-2 border-blue-500" : ""
-                  }`}
-                  style={{ backgroundColor: color }}
-                  onClick={() => setDrawingColor(color)}
-                ></button>
-              ))}
-            </div>
-            <div className="font-bold mb-2 text-sm">Line Width</div>
-            <input
-              type="range"
-              min="1"
-              max="30"
-              step="1"
-              value={drawingLineWidth}
-              onChange={(e) => setSetDrawingLineWidth(Number(e.target.value))}
-              className="w-full"
-            />
-            <div className="text-right text-xs mt-1">{drawingLineWidth} px</div>
-          </div>
-        )} */}
+    <div className="flex flex-col gap-[7px] items-center mt-[40px] mb-[40px]">
+      <div className="flex justify-around w-[584px] p-[14px_18px] bg-white rounded-[24px] border border-[#90A1B9] shadow-md">
+        {tools.map((el) => (
+          <ToolButton
+            key={el.tool}
+            toolName={el.tool}
+            activeTool={activeTool}
+            icon={el.icon}
+            label={el.tool}
+            onToolChange={onToolChange}
+          />
+        ))}
       </div>
-      <ToolButton toolName="eraser" label="eraser" icon={<EraserIcon />} />
-      <ToolButton toolName="diagram" label="diagram" icon={<DiagramIcon />} />
-      {/* Shapes */}
-      <div className="relative">
-        <ToolButton
-          toolName="shape"
-          label="shape"
-          icon={<ShapeIcon />}
-          onClick={() => {
-            onToolChange("shape");
-            setIsShapesMenuOpen(!isShapesMenuOpen);
-          }}
-          isActive={
-            activeTool === "rectangle" ||
-            activeTool === "circle" ||
-            activeTool === "polygon-lasso"
-          }
-        />
-        {/* {isShapesMenuOpen && (
-          <div className="absolute left-full top-0 ml-2 p-2 bg-white rounded-lg shadow-md z-10 w-40">
+      {activeTool === "pen" && (
+        <div className="border flex gap-[12px] border-[#90A1B9] p-[8px_10px] rounded-[6px] bg-[#F1F5F9]">
+          {penStrokeWidths.map((el) => (
             <button
-              className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm"
-              onClick={() => onToolChange("rectangle")}
+              key={el}
+              className={`w-[34px] h-[34px] flex items-center justify-center cursor-pointer ${penStrokeWidth === el && "bg-[#CAD5E2] rounded-[6px]"}`}
+              onClick={() => handlePenStrokeWidth(el)}
             >
-              Rectangle
+              <img src={getPenStrokeWidthImg(el)} />
             </button>
-            <button
-              className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm"
-              onClick={() => onToolChange("circle")}
-            >
-              Circle
-            </button>
-            <button
-              className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-sm"
-              onClick={() => onToolChange("polygon-lasso")}
-            >
-              Polygonal Lasso
-            </button>
-          </div>
-        )} */}
-      </div>
-      <ToolButton
-        toolName="text"
-        label="text"
-        icon={<TextIcon />}
-        onClick={onAddText}
-      />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

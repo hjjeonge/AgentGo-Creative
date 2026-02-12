@@ -12,12 +12,19 @@ export const EditorPage: React.FC = () => {
 
   const [lines, setLines] = useState<any[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
+
+  const [penStrokeWidth, setPenStrokeWidth] = useState(2);
+
   const handleWorkHistory = () => {
     setIsHistoryOpen((prev) => !prev);
   };
 
   const handleToolChange = (tool: string) => {
     setActiveTool(tool);
+  };
+
+  const handlePenStrokeWidth = (value: number) => {
+    setPenStrokeWidth(value);
   };
 
   useEffect(() => {
@@ -77,7 +84,12 @@ export const EditorPage: React.FC = () => {
       {/* 캔버스 영역 */}
       <section className="h-full flex-1 min-w-0 bg-[#E2E8F0] relative flex flex-col items-center">
         {/* 툴바 */}
-        <Toolbar activeTool={activeTool} onToolChange={handleToolChange} />
+        <Toolbar
+          activeTool={activeTool}
+          onToolChange={handleToolChange}
+          penStrokeWidth={penStrokeWidth}
+          handlePenStrokeWidth={handlePenStrokeWidth}
+        />
 
         {/* Konva 캔버스 컨테이너 */}
         <div ref={containerRef} className="flex-1 h-full w-full bg-white">
@@ -93,8 +105,8 @@ export const EditorPage: React.FC = () => {
                 <Line
                   key={i}
                   points={line.points}
-                  stroke="#df4b26"
-                  strokeWidth={5}
+                  stroke="#000"
+                  strokeWidth={penStrokeWidth}
                   tension={0.5}
                   lineCap="round"
                   globalCompositeOperation={
