@@ -22,6 +22,7 @@ export const EditorPage: React.FC = () => {
   const [isDrawing, setIsDrawing] = useState(false);
 
   const [penStrokeWidth, setPenStrokeWidth] = useState(2);
+  const [penStrokeColor, setPenStrokeColor] = useState("#E7000B");
 
   const handleWorkHistory = () => {
     setIsHistoryOpen((prev) => !prev);
@@ -33,6 +34,10 @@ export const EditorPage: React.FC = () => {
 
   const handlePenStrokeWidth = (value: number) => {
     setPenStrokeWidth(value);
+  };
+
+  const handlePenStrokeColor = (value: string) => {
+    setPenStrokeColor(value);
   };
 
   useEffect(() => {
@@ -65,7 +70,7 @@ export const EditorPage: React.FC = () => {
       points: [pos.x, pos.y],
       tool: activeTool,
       strokeWidth: penStrokeWidth,
-      stroke: "#000",
+      stroke: penStrokeColor,
     });
   };
 
@@ -105,6 +110,8 @@ export const EditorPage: React.FC = () => {
           onToolChange={handleToolChange}
           penStrokeWidth={penStrokeWidth}
           handlePenStrokeWidth={handlePenStrokeWidth}
+          penStrokeColor={penStrokeColor}
+          handlePenStrokeColor={handlePenStrokeColor}
         />
 
         {/* Konva 캔버스 컨테이너 */}
@@ -121,7 +128,7 @@ export const EditorPage: React.FC = () => {
                 <Line
                   key={i}
                   points={line.points}
-                  stroke="#000"
+                  stroke={line.stroke}
                   strokeWidth={line.strokeWidth}
                   tension={0.5}
                   lineCap="round"
