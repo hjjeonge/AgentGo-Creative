@@ -25,7 +25,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   handlePenStrokeWidth,
 }) => {
   const tools = [
-    { tool: "click", icon: <ClickIcon /> },
+    { tool: "mouse", icon: <ClickIcon /> },
     { tool: "pen", icon: <PencilIcon /> },
     { tool: "eraser", icon: <EraserIcon /> },
     { tool: "diagram", icon: <DiagramIcon /> },

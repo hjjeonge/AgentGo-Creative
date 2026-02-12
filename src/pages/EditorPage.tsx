@@ -4,13 +4,21 @@ import { Stage, Layer, Line, Rect } from "react-konva";
 import { Toolbar } from "../components/editor/Toolbar";
 import { HistoryPanel } from "../components/editor/HistoryPanel";
 
+interface DrawLine {
+  points: number[];
+  tool: string;
+  strokeWidth: number;
+  stroke: string;
+}
+
 export const EditorPage: React.FC = () => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
   const [activeTool, setActiveTool] = useState<string>("mouse");
   const containerRef = useRef<HTMLDivElement>(null);
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
 
-  const [lines, setLines] = useState<any[]>([]);
+  const [lines, setLines] = useState<DrawLine[]>([]);
+  const [currentLine, setCurrentLine] = useState<DrawLine | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
 
   const [penStrokeWidth, setPenStrokeWidth] = useState(2);
@@ -53,7 +61,12 @@ export const EditorPage: React.FC = () => {
     }
     setIsDrawing(true);
     const pos = e.target.getStage().getPointerPosition();
-    setLines([...lines, { points: [pos.x, pos.y], tool: activeTool }]);
+    setCurrentLine({
+      points: [pos.x, pos.y],
+      tool: activeTool,
+      strokeWidth: penStrokeWidth,
+      stroke: "#000",
+    });
   };
 
   const handleMouseMove = (e: any) => {
@@ -62,18 +75,21 @@ export const EditorPage: React.FC = () => {
     const stage = e.target.getStage();
     const point = stage.getPointerPosition();
 
-    setLines((prevLines) => {
-      const lastLine = prevLines[prevLines.length - 1];
-      const updatedLine = {
-        ...lastLine,
-        points: [...lastLine.points, point.x, point.y],
-      };
-
-      return [...prevLines.slice(0, -1), updatedLine];
-    });
+    setCurrentLine((prev) =>
+      prev
+        ? {
+            ...prev,
+            points: [...prev.points, point.x, point.y],
+          }
+        : null,
+    );
   };
 
   const handleMouseUp = () => {
+    if (!currentLine) return;
+
+    setLines((prev) => [...prev, currentLine]);
+    setCurrentLine(null);
     setIsDrawing(false);
   };
 
@@ -106,7 +122,7 @@ export const EditorPage: React.FC = () => {
                   key={i}
                   points={line.points}
                   stroke="#000"
-                  strokeWidth={penStrokeWidth}
+                  strokeWidth={line.strokeWidth}
                   tension={0.5}
                   lineCap="round"
                   globalCompositeOperation={
@@ -114,6 +130,15 @@ export const EditorPage: React.FC = () => {
                   }
                 />
               ))}
+              {currentLine && (
+                <Line
+                  points={currentLine.points}
+                  stroke={currentLine.stroke}
+                  strokeWidth={currentLine.strokeWidth}
+                  tension={0.5}
+                  lineCap="round"
+                />
+              )}
             </Layer>
           </Stage>
         </div>
