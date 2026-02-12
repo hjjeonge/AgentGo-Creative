@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { Stage, Layer, Line, Rect } from "react-konva";
 import { Toolbar } from "../components/editor/Toolbar";
 import { HistoryPanel } from "../components/editor/HistoryPanel";
+import { Transformer } from "react-konva";
 
 interface DrawLine {
   points: number[];
@@ -35,6 +36,20 @@ export const EditorPage: React.FC = () => {
 
   const [penStrokeWidth, setPenStrokeWidth] = useState(2);
   const [penStrokeColor, setPenStrokeColor] = useState("#E7000B");
+
+  const [selectedShapeId, setSelectedShapeId] = useState<string | null>(null);
+  const shapeRefs = useRef<Record<string, any>>({});
+  const trRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (selectedShapeId && trRef.current) {
+      const node = shapeRefs.current[selectedShapeId];
+      if (node) {
+        trRef.current.nodes([node]);
+        trRef.current.getLayer().batchDraw();
+      }
+    }
+  }, [selectedShapeId]);
 
   const handleWorkHistory = () => {
     setIsHistoryOpen((prev) => !prev);
@@ -75,6 +90,9 @@ export const EditorPage: React.FC = () => {
   const handleMouseDown = (e: any) => {
     if (activeTool !== "pen" && activeTool !== "eraser") {
       return;
+    }
+    if (e.target === e.target.getStage()) {
+      setSelectedShapeId(null);
     }
     setIsDrawing(true);
     const pos = e.target.getStage().getPointerPosition();
@@ -192,11 +210,52 @@ export const EditorPage: React.FC = () => {
                       height={shape.height}
                       fill={shape.fill}
                       draggable
+                      onClick={() => setSelectedShapeId(shape.id)}
+                      onTap={() => setSelectedShapeId(shape.id)}
+                      ref={(node) => {
+                        if (node) {
+                          shapeRefs.current[shape.id] = node;
+                        }
+                      }}
+                      onTransformEnd={(e) => {
+                        const node = e.target;
+
+                        const scaleX = node.scaleX();
+                        const scaleY = node.scaleY();
+
+                        node.scaleX(1);
+                        node.scaleY(1);
+
+                        setShapes((prev) =>
+                          prev.map((shape) =>
+                            shape.id === selectedShapeId
+                              ? {
+                                  ...shape,
+                                  x: node.x(),
+                                  y: node.y(),
+                                  width: Math.max(5, node.width() * scaleX),
+                                  height: Math.max(5, node.height() * scaleY),
+                                }
+                              : shape,
+                          ),
+                        );
+                      }}
                     />
                   );
                 }
                 return null;
               })}
+              <Transformer
+                ref={trRef}
+                rotateEnabled={true}
+                keepRatio={true}
+                enabledAnchors={[
+                  "top-left",
+                  "top-right",
+                  "bottom-left",
+                  "bottom-right",
+                ]}
+              />
             </Layer>
           </Stage>
         </div>
