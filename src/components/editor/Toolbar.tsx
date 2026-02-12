@@ -8,6 +8,7 @@ import { TextIcon } from "../icons/TextIcon";
 import { ToolButton } from "./ToolButton";
 import { ColorPalette } from "../commons/ColorPalette";
 import { getPenColorImg, getPenStrokeWidthImg } from "../../utils/getImage";
+import { DiagramPopup } from "./DiagramPopup";
 
 interface ToolbarProps {
   activeTool: string;
@@ -49,6 +50,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   ];
   const penStrokeWidths = [2, 3, 5, 6];
   const displayColors = ["#E7000B", "#155DFC", "#FFD230", "empty"];
+  const [selectedDiagram, setSelectedDiagram] = useState("");
+
+  const handleSelectedDiagram = (value: string) => {
+    setSelectedDiagram(value);
+  };
 
   const onClickColorOption = (value: string) => {
     if (value === "empty") {
@@ -75,7 +81,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       {(activeTool === "pen" || activeTool === "eraser") && (
         <div
           ref={wrapperRef}
-          className="relative border flex items-center gap-[12px] border-[#90A1B9] p-[8px_10px] rounded-[6px] bg-[#F1F5F9]"
+          className={`absolute z-[50] top-[140px] ${activeTool === "pen" && "left-[415px]"} ${activeTool === "eraser" && "right-[455px]"} border flex items-center gap-[12px] border-[#90A1B9] p-[8px_10px] rounded-[6px] bg-[#F1F5F9]`}
         >
           {penStrokeWidths.map((el) => (
             <button
@@ -115,6 +121,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             </div>
           )}
         </div>
+      )}
+      {activeTool === "diagram" && (
+        <DiagramPopup
+          selected={selectedDiagram}
+          handleSelect={handleSelectedDiagram}
+        />
       )}
     </div>
   );
