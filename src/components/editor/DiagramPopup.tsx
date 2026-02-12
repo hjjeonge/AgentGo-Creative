@@ -36,21 +36,21 @@ const diagramList = [
 ];
 
 interface Props {
-  selected: string;
-  handleSelect: (value: string) => void;
+  shapeType: string;
+  setShapeType: (value: string) => void;
 }
 
 export const DiagramPopup: React.FC<Props> = ({
-  selected,
-  handleSelect,
+  shapeType,
+  setShapeType,
 }: Props) => {
   return (
     <div className="absolute z-[50] top-[140px] right-[290px] rounded-[6px] bg-[#F1F5F9] border border-[#90A1B9] p-[24px] grid grid-cols-4">
       {diagramList.map((el) => (
         <button
           key={el.name}
-          className={`w-[55px] h-[55px] p-[10px] flex items-center justify-center cursor-pointer rounded-[6px] ${selected === el.name && "bg-[#CAD5E2]"}`}
-          onClick={() => handleSelect(el.name)}
+          className={`w-[55px] h-[55px] p-[10px] flex items-center justify-center cursor-pointer rounded-[6px] ${shapeType === el.name && "bg-[#CAD5E2]"}`}
+          onClick={() => setShapeType(el.name)}
         >
           <img src={el.img} />
         </button>

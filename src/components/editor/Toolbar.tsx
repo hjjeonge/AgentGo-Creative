@@ -17,6 +17,8 @@ interface ToolbarProps {
   handlePenStrokeWidth: (value: number) => void;
   penStrokeColor: string;
   handlePenStrokeColor: (value: string) => void;
+  shapeType: string;
+  setShapeType: (value: string) => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -26,6 +28,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   handlePenStrokeWidth,
   penStrokeColor,
   handlePenStrokeColor,
+  shapeType,
+  setShapeType,
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [colorPaletteOpen, setColorPaletteOpen] = useState(false);
@@ -50,11 +54,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   ];
   const penStrokeWidths = [2, 3, 5, 6];
   const displayColors = ["#E7000B", "#155DFC", "#FFD230", "empty"];
-  const [selectedDiagram, setSelectedDiagram] = useState("");
-
-  const handleSelectedDiagram = (value: string) => {
-    setSelectedDiagram(value);
-  };
 
   const onClickColorOption = (value: string) => {
     if (value === "empty") {
@@ -123,10 +122,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </div>
       )}
       {activeTool === "diagram" && (
-        <DiagramPopup
-          selected={selectedDiagram}
-          handleSelect={handleSelectedDiagram}
-        />
+        <DiagramPopup shapeType={shapeType} setShapeType={setShapeType} />
       )}
     </div>
   );

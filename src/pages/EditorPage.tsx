@@ -11,6 +11,16 @@ interface DrawLine {
   stroke: string;
 }
 
+interface Shape {
+  id: string;
+  type: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  fill: string;
+}
+
 export const EditorPage: React.FC = () => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
   const [activeTool, setActiveTool] = useState<string>("mouse");
@@ -18,8 +28,10 @@ export const EditorPage: React.FC = () => {
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
 
   const [lines, setLines] = useState<DrawLine[]>([]);
+  const [shapes, setShapes] = useState<Shape[]>([]);
   const [currentLine, setCurrentLine] = useState<DrawLine | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [shapeType, setShapeType] = useState("square");
 
   const [penStrokeWidth, setPenStrokeWidth] = useState(2);
   const [penStrokeColor, setPenStrokeColor] = useState("#E7000B");
@@ -98,6 +110,22 @@ export const EditorPage: React.FC = () => {
     setIsDrawing(false);
   };
 
+  const handleAddShape = (shapeType: string) => {
+    setShapeType(shapeType);
+    if (shapeType === "square") {
+      const newSquare: Shape = {
+        id: `shape_${shapes.length}`,
+        type: "square",
+        x: 100,
+        y: 100,
+        width: 50,
+        height: 50,
+        fill: "red",
+      };
+      setShapes((prev) => [...prev, newSquare]);
+    }
+  };
+
   return (
     <div className="h-full w-full flex relative">
       <aside className="w-[85px] bg-amber-100 shrink-0"></aside>
@@ -112,6 +140,8 @@ export const EditorPage: React.FC = () => {
           handlePenStrokeWidth={handlePenStrokeWidth}
           penStrokeColor={penStrokeColor}
           handlePenStrokeColor={handlePenStrokeColor}
+          shapeType={shapeType}
+          setShapeType={handleAddShape}
         />
 
         {/* Konva 캔버스 컨테이너 */}
@@ -151,6 +181,22 @@ export const EditorPage: React.FC = () => {
                   }
                 />
               )}
+              {shapes.map((shape) => {
+                if (shape.type === "square") {
+                  return (
+                    <Rect
+                      key={shape.id}
+                      x={shape.x}
+                      y={shape.y}
+                      width={shape.width}
+                      height={shape.height}
+                      fill={shape.fill}
+                      draggable
+                    />
+                  );
+                }
+                return null;
+              })}
             </Layer>
           </Stage>
         </div>
