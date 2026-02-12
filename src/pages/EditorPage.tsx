@@ -61,7 +61,7 @@ export const EditorPage: React.FC = () => {
   }, [isHistoryOpen]);
 
   const handleMouseDown = (e: any) => {
-    if (activeTool !== "pen") {
+    if (activeTool !== "pen" && activeTool !== "eraser") {
       return;
     }
     setIsDrawing(true);
@@ -75,7 +75,7 @@ export const EditorPage: React.FC = () => {
   };
 
   const handleMouseMove = (e: any) => {
-    if (!isDrawing || activeTool !== "pen") return;
+    if (!isDrawing || (activeTool !== "pen" && activeTool !== "eraser")) return;
 
     const stage = e.target.getStage();
     const point = stage.getPointerPosition();
@@ -144,6 +144,11 @@ export const EditorPage: React.FC = () => {
                   strokeWidth={currentLine.strokeWidth}
                   tension={0.5}
                   lineCap="round"
+                  globalCompositeOperation={
+                    currentLine.tool === "eraser"
+                      ? "destination-out"
+                      : "source-over"
+                  }
                 />
               )}
             </Layer>

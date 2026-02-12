@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { act, useEffect, useRef, useState } from "react";
 import { ClickIcon } from "../icons/ClickIcon";
 import { DiagramIcon } from "../icons/DiagramIcon";
 import { EraserIcon } from "../icons/EraserIcon";
@@ -72,7 +72,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           />
         ))}
       </div>
-      {activeTool === "pen" && (
+      {(activeTool === "pen" || activeTool === "eraser") && (
         <div
           ref={wrapperRef}
           className="relative border flex items-center gap-[12px] border-[#90A1B9] p-[8px_10px] rounded-[6px] bg-[#F1F5F9]"
@@ -86,22 +86,26 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               <img src={getPenStrokeWidthImg(el)} />
             </button>
           ))}
-          <div className="w-[2.5px] h-[25px] bg-[#45556C]" />
-          {displayColors.map((el) => {
-            const isPresetColor = displayColors.includes(penStrokeColor);
+          {activeTool == "pen" && (
+            <>
+              <div className="w-[2.5px] h-[25px] bg-[#45556C]" />
+              {displayColors.map((el) => {
+                const isPresetColor = displayColors.includes(penStrokeColor);
 
-            const isActive =
-              penStrokeColor === el || (el === "empty" && !isPresetColor);
-            return (
-              <button
-                key={el}
-                className={`w-[30px] h-[30px] p-[5px] flex items-center justify-center cursor-pointer ${isActive && "bg-[#CAD5E2] rounded-[20px]"}`}
-                onClick={() => onClickColorOption(el)}
-              >
-                <img src={getPenColorImg(el)} />
-              </button>
-            );
-          })}
+                const isActive =
+                  penStrokeColor === el || (el === "empty" && !isPresetColor);
+                return (
+                  <button
+                    key={el}
+                    className={`w-[30px] h-[30px] p-[5px] flex items-center justify-center cursor-pointer ${isActive && "bg-[#CAD5E2] rounded-[20px]"}`}
+                    onClick={() => onClickColorOption(el)}
+                  >
+                    <img src={getPenColorImg(el)} />
+                  </button>
+                );
+              })}
+            </>
+          )}
           {colorPaletteOpen && (
             <div className="absolute top-[5px] right-[-180px] mt-[20px] z-50">
               <ColorPalette
