@@ -13,25 +13,30 @@ import ListBulleted from "./../../assets/format_list_bulleted.svg";
 import TextColor from "./../../assets/format_color_text.svg";
 import Highlighter from "./../../assets/format_ink_highlighter.svg";
 import Satisfied from "./../../assets/sentiment_satisfied.svg";
+import { CustomSwitch } from "../commons/CustomSwitch";
+import { CustomTooltip } from "../commons/CustomTooltip";
+import { TextAlignPopover } from "./TextAlignPopver";
+import { VerticalAlignPopover } from "./VerticalAlignPopover";
+import { TypographyPopover } from "./TypographyPopover";
 
 const fontStyle = [
-  { name: "bold", img: Bold },
-  { name: "italic", img: Italic },
-  { name: "underlined", img: Underlined },
-  { name: "strikethrough", img: StrikeThrough },
+  { name: "bold", img: Bold, tooltip: "굵게" },
+  { name: "italic", img: Italic, tooltip: "기울임" },
+  { name: "underlined", img: Underlined, tooltip: "밑줄" },
+  { name: "strikethrough", img: StrikeThrough, tooltip: "취소선" },
 ];
 
 const fontAlign = [
-  { name: "align", img: AlignCenter },
-  { name: "vertical", img: VerticalTop },
-  { name: "spacing", img: LineSpacing },
-  { name: "bulleted", img: ListBulleted },
+  { name: "align", img: AlignCenter, tooltip: "글자정렬" },
+  { name: "vertical", img: VerticalTop, tooltip: "상단정렬" },
+  { name: "spacing", img: LineSpacing, tooltip: "글자조절" },
+  { name: "bulleted", img: ListBulleted, tooltip: "글머리기호" },
 ];
 
 const fontDeco = [
-  { name: "color", img: TextColor },
-  { name: "highlighter", img: Highlighter },
-  { name: "satisfied", img: Satisfied },
+  { name: "color", img: TextColor, tooltip: "글자색" },
+  { name: "highlighter", img: Highlighter, tooltip: "배경색" },
+  { name: "satisfied", img: Satisfied, tooltip: "특수문자" },
 ];
 
 export const TextEditor: React.FC = () => {
@@ -54,45 +59,93 @@ export const TextEditor: React.FC = () => {
           </div>
           <div className="flex items-center border border-[#90A1B9] rounded-[6px] overflow-hidden">
             {fontStyle.map((el) => (
-              <button
-                key={el.name}
-                className="flex items-center justify-center border-l border-[#90A1B9] last:border-r-0 first:border-l-0 w-[45px] h-[40px] p-[11px_5px] cursor-pointer"
-              >
-                <img src={el.img} />
-              </button>
+              <CustomTooltip key={el.name} content={el.tooltip}>
+                <button className="flex items-center justify-center border-l border-[#90A1B9] last:border-r-0 first:border-l-0 w-[45px] h-[40px] p-[11px_5px] cursor-pointer">
+                  <img src={el.img} />
+                </button>
+              </CustomTooltip>
             ))}
           </div>
         </div>
         <div className="flex items-center justify-between gap-[26px]">
           <div className="flex items-center justify-between flex-1">
-            {fontAlign.map((el) => (
-              <button
-                key={el.name}
-                className="flex items-center justify-center w-[40px] h-[40px] cursor-pointer"
-              >
-                <img src={el.img} />
+            <TextAlignPopover>
+              <button className="flex items-center justify-center w-[40px] h-[40px] cursor-pointer">
+                <CustomTooltip content={"글자정렬"}>
+                  <img src={AlignCenter} />
+                </CustomTooltip>
               </button>
-            ))}
+            </TextAlignPopover>
+            <VerticalAlignPopover>
+              <button className="flex items-center justify-center w-[40px] h-[40px] cursor-pointer">
+                <CustomTooltip content={"상단정렬"}>
+                  <img src={VerticalTop} />
+                </CustomTooltip>
+              </button>
+            </VerticalAlignPopover>
+            <TypographyPopover>
+              <button className="flex items-center justify-center w-[40px] h-[40px] cursor-pointer">
+                <CustomTooltip content={"글자조절"}>
+                  <img src={LineSpacing} />
+                </CustomTooltip>
+              </button>
+            </TypographyPopover>
+            <CustomTooltip content={"글머리기호"}>
+              <button className="flex items-center justify-center w-[40px] h-[40px] cursor-pointer">
+                <img src={ListBulleted} />
+              </button>
+            </CustomTooltip>
           </div>
           <div className="w-[1px] h-[30px] bg-[#90A1B9]" />
           <div className="flex items-center justify-between flex-1">
             {fontDeco.map((el) => (
-              <button
-                key={el.name}
-                className="flex items-center justify-center w-[40px] h-[40px] cursor-pointer"
-              >
-                <img src={el.img} />
-              </button>
+              <CustomTooltip key={el.name} content={el.tooltip}>
+                <button className="flex items-center justify-center w-[40px] h-[40px] cursor-pointer">
+                  <img src={el.img} />
+                </button>
+              </CustomTooltip>
             ))}
           </div>
         </div>
       </div>
       <div className="h-[1px] bg-[#90A1B9]" />
       <div>
-        <div>외곽선</div>
-        <div>그림자</div>
-        <div>곡선</div>
-        <div>세로쓰기</div>
+        <div className="flex items-center justify-between p-[7px]">
+          <div className="flex items-center justify-center gap-[4px]">
+            <button className="flex items-center justify-center">
+              <img src={Arrow} className="-rotate-90" />
+            </button>
+            <span>외곽선</span>
+          </div>
+          <CustomSwitch />
+        </div>
+        <div className="flex items-center justify-between p-[7px]">
+          <div className="flex items-center justify-center gap-[4px]">
+            <button className="flex items-center justify-center">
+              <img src={Arrow} className="-rotate-90" />
+            </button>
+            <span>그림자</span>
+          </div>
+          <CustomSwitch />
+        </div>
+        <div className="flex items-center justify-between p-[7px]">
+          <div className="flex items-center justify-center gap-[4px]">
+            <button className="flex items-center justify-center">
+              <img src={Arrow} className="-rotate-90" />
+            </button>
+            <span>곡선</span>
+          </div>
+          <CustomSwitch />
+        </div>
+        <div className="flex items-center justify-between p-[7px]">
+          <div className="flex items-center justify-center gap-[4px]">
+            <button className="flex items-center justify-center">
+              <img src={Arrow} className="-rotate-90" />
+            </button>
+            <span>세로쓰기</span>
+          </div>
+          <CustomSwitch />
+        </div>
       </div>
     </div>
   );
