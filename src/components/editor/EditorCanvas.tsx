@@ -26,6 +26,8 @@ export interface TextObject {
   fontSize: number;
   fill: string;
   fontFamily?: string;
+  fontStyle?: string;
+  textDecoration?: string;
 }
 
 interface EditorCanvasProps {
@@ -158,6 +160,8 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               text={text.text}
               fontSize={text.fontSize}
               fontFamily={text.fontFamily}
+              fontStyle={text.fontStyle}
+              textDecoration={text.textDecoration}
               fill={text.fill}
               draggable
               visible={text.id !== editingTextId}
@@ -205,6 +209,8 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             overflow: "hidden",
             lineHeight: 1.2,
             fontFamily: editingText.fontFamily,
+            fontStyle: editingText.fontStyle,
+            textDecoration: editingText.textDecoration,
           }}
         />
       )}

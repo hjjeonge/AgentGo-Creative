@@ -23,7 +23,7 @@ import { VerticalAlignPopover } from "./VerticalAlignPopover";
 const fontStyle = [
   { name: "bold", img: Bold, tooltip: "굵게" },
   { name: "italic", img: Italic, tooltip: "기울임" },
-  { name: "underlined", img: Underlined, tooltip: "밑줄" },
+  { name: "underline", img: Underlined, tooltip: "밑줄" },
   { name: "strikethrough", img: StrikeThrough, tooltip: "취소선" },
 ];
 
@@ -44,6 +44,41 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   selectedTextObject,
   handleUpdateTextObject,
 }) => {
+  const handleStyleToggle = (style: "bold" | "italic" | "underline" | "strikethrough") => {
+    if (!selectedTextObject) return;
+
+    if (style === "bold" || style === "italic") {
+      const currentStyles = new Set((selectedTextObject.fontStyle || '').split(' ').filter(s => s && s !== 'normal'));
+      
+      if (currentStyles.has(style)) {
+        currentStyles.delete(style);
+      } else {
+        currentStyles.add(style);
+      }
+
+      let newFontStyle = '';
+      if (currentStyles.has('bold')) newFontStyle += 'bold ';
+      if (currentStyles.has('italic')) newFontStyle += 'italic ';
+
+      newFontStyle = newFontStyle.trim();
+      if (newFontStyle === '') newFontStyle = 'normal';
+
+      handleUpdateTextObject(selectedTextObject.id, { fontStyle: newFontStyle });
+
+    } else { // underline or strikethrough
+      const decorationName = style === "underline" ? "underline" : "line-through";
+      const currentDecorations = new Set((selectedTextObject.textDecoration || '').split(' ').filter(d => d));
+      
+      if (currentDecorations.has(decorationName)) {
+        currentDecorations.delete(decorationName);
+      } else {
+        currentDecorations.add(decorationName);
+      }
+    
+      handleUpdateTextObject(selectedTextObject.id, { textDecoration: Array.from(currentDecorations).join(" ") });
+    }
+  };
+
   return (
     <div className="absolute z-[50] top-[140px] right-[195px] rounded-[6px] bg-[#F1F5F9] border border-[#90A1B9] p-[24px] flex flex-col gap-[7px]">
       <div className="flex flex-col gap-[14px]">
@@ -93,6 +128,14 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                 key={el.name}
                 icon={el.img}
                 tooltip={el.tooltip}
+                onClick={() => handleStyleToggle(el.name as any)}
+                isActive={
+                  (el.name === 'bold' && selectedTextObject?.fontStyle?.includes('bold')) ||
+                  (el.name === 'italic' && selectedTextObject?.fontStyle?.includes('italic')) ||
+                  (el.name === 'underline' && selectedTextObject?.textDecoration?.includes('underline')) ||
+                  (el.name === 'strikethrough' && selectedTextObject?.textDecoration?.includes('line-through')) ||
+                  false
+                }
                 className="border-l border-[#90A1B9] last:border-r-0 first:border-l-0 w-[45px] h-[40px] p-[11px_5px]"
               />
             ))}

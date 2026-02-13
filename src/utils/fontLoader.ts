@@ -13,7 +13,8 @@ export const loadGoogleFont = (fontFamily: string) => {
   const link = document.createElement('link');
   link.id = fontId;
   link.rel = 'stylesheet';
-  link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/ /g, '+')}&display=swap`;
+  // Request Regular (400), Bold (700), Italic (400), Bold Italic (700) styles
+  link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/ /g, '+')}:ital,wght@0,400;0,700;1,400;1,700&display=swap`;
   
   document.head.appendChild(link);
 };

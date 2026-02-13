@@ -61,6 +61,8 @@ export const EditorPage: React.FC = () => {
       fontSize: 24,
       fill: "#000000",
       fontFamily: defaultFont,
+      fontStyle: "normal",
+      textDecoration: "",
     };
     setTexts((prev) => [...prev, newText]);
     // Immediately select the newly added text
