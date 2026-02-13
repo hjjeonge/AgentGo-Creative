@@ -6,6 +6,7 @@ import {
   EditorCanvas,
   type DrawLine,
   type Shape,
+  type TextObject,
 } from "../components/editor/EditorCanvas";
 
 export const EditorPage: React.FC = () => {
@@ -16,6 +17,7 @@ export const EditorPage: React.FC = () => {
 
   const [lines, setLines] = useState<DrawLine[]>([]);
   const [shapes, setShapes] = useState<Shape[]>([]);
+  const [texts, setTexts] = useState<TextObject[]>([]);
   const [currentLine, setCurrentLine] = useState<DrawLine | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [shapeType, setShapeType] = useState("square");
@@ -23,14 +25,15 @@ export const EditorPage: React.FC = () => {
   const [penStrokeWidth, setPenStrokeWidth] = useState(2);
   const [penStrokeColor, setPenStrokeColor] = useState("#E7000B");
 
-  const [selectedShapeId, setSelectedShapeId] = useState<string | null>(null);
-  const shapeRefs = useRef<Record<string, any>>({});
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [editingTextId, setEditingTextId] = useState<string | null>(null);
+  const objectRefs = useRef<Record<string, any>>({});
   const trRef = useRef<any>(null);
 
   useEffect(() => {
     if (trRef.current) {
-      if (selectedShapeId) {
-        const node = shapeRefs.current[selectedShapeId];
+      if (selectedId && !editingTextId) {
+        const node = objectRefs.current[selectedId];
         if (node) {
           trRef.current.nodes([node]);
         }
@@ -39,15 +42,41 @@ export const EditorPage: React.FC = () => {
       }
       trRef.current.getLayer()?.batchDraw();
     }
-  }, [selectedShapeId, shapes]);
+  }, [selectedId, shapes, texts, editingTextId]);
 
   const handleWorkHistory = () => {
     setIsHistoryOpen((prev) => !prev);
   };
 
+  const handleAddText = () => {
+    const newText: TextObject = {
+      id: `text_${texts.length}`,
+      text: "텍스트를 입력하세요",
+      x: 150,
+      y: 150,
+      fontSize: 24,
+      fill: "#000000",
+    };
+    setTexts((prev) => [...prev, newText]);
+    // Immediately select the newly added text
+    setSelectedId(newText.id);
+    setActiveTool("mouse");
+  };
+
   const handleToolChange = (tool: string) => {
+    if (tool === "text") {
+      handleAddText();
+      return;
+    }
     setActiveTool(tool);
-    setSelectedShapeId(null);
+    setSelectedId(null);
+    setEditingTextId(null);
+  };
+
+  const handleTextChange = (id: string, newText: string) => {
+    setTexts((prev) =>
+      prev.map((text) => (text.id === id ? { ...text, text: newText } : text)),
+    );
   };
 
   const handlePenStrokeWidth = (value: number) => {
@@ -81,7 +110,8 @@ export const EditorPage: React.FC = () => {
   const handleMouseDown = (e: any) => {
     const clickedOnEmpty = e.target === e.target.getStage();
     if (clickedOnEmpty) {
-      setSelectedShapeId(null);
+      setSelectedId(null);
+      setEditingTextId(null);
     }
 
     if (activeTool !== "pen" && activeTool !== "eraser") {
@@ -142,24 +172,42 @@ export const EditorPage: React.FC = () => {
     const node = e.target;
     const scaleX = node.scaleX();
     const scaleY = node.scaleY();
+    const id = node.id();
 
     node.scaleX(1);
     node.scaleY(1);
 
+    setTexts((prev) =>
+      prev.map((text) =>
+        text.id === id
+          ? {
+              ...text,
+              x: node.x(),
+              y: node.y(),
+              fontSize: Math.max(5, text.fontSize * scaleY),
+            }
+          : text,
+      ),
+    );
+
     setShapes((prev) =>
       prev.map((s) =>
-        s.id === selectedShapeId
+        s.id === id
           ? {
               ...s,
               x: node.x(),
               y: node.y(),
-              width: Math.max(5, node.width() * scaleX),
-              height: Math.max(5, node.height() * scaleY),
+              width: Math.max(5, s.width * scaleX),
+              height: Math.max(5, s.height * scaleY),
             }
           : s,
       ),
     );
   };
+
+  // Determine if a text object is selected to show TextEditor
+  const isTextSelected = selectedId?.startsWith('text_') && !editingTextId;
+  const selectedTextObject = isTextSelected ? texts.find(t => t.id === selectedId) : undefined;
 
   return (
     <div className="h-full w-full flex relative">
@@ -177,6 +225,9 @@ export const EditorPage: React.FC = () => {
           handlePenStrokeColor={handlePenStrokeColor}
           shapeType={shapeType}
           setShapeType={handleAddShape}
+          isTextEditorVisible={!!isTextSelected}
+          selectedTextObject={selectedTextObject}
+          handleTextChange={handleTextChange}
         />
 
         {/* Konva 캔버스 컨테이너 */}
@@ -189,10 +240,14 @@ export const EditorPage: React.FC = () => {
             lines={lines}
             currentLine={currentLine}
             shapes={shapes}
-            setSelectedShapeId={setSelectedShapeId}
-            shapeRefs={shapeRefs}
+            texts={texts}
+            setSelectedId={setSelectedId}
+            objectRefs={objectRefs}
             trRef={trRef}
             handleTransformEnd={handleTransformEnd}
+            editingTextId={editingTextId}
+            setEditingTextId={setEditingTextId}
+            handleTextChange={handleTextChange}
           />
         </div>
         {/* 접혔을 때 보이는 버튼 */}

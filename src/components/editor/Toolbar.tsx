@@ -11,6 +11,7 @@ import { DiagramPopup } from "./DiagramPopup";
 import { TextEditor } from "./TextEditor";
 import { ToolButton } from "./ToolButton";
 import { ToolbarButton } from "./ToolbarButton";
+import type { TextObject } from "./EditorCanvas";
 
 interface ToolbarProps {
   activeTool: string;
@@ -21,6 +22,9 @@ interface ToolbarProps {
   handlePenStrokeColor: (value: string) => void;
   shapeType: string;
   setShapeType: (value: string) => void;
+  isTextEditorVisible: boolean; // New prop
+  selectedTextObject?: TextObject; // New prop
+  handleTextChange: (id: string, newText: string) => void; // New prop
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -32,6 +36,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   handlePenStrokeColor,
   shapeType,
   setShapeType,
+  isTextEditorVisible,
+  selectedTextObject,
+  handleTextChange,
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [colorPaletteOpen, setColorPaletteOpen] = useState(false);
@@ -127,7 +134,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       {activeTool === "diagram" && (
         <DiagramPopup shapeType={shapeType} setShapeType={setShapeType} />
       )}
-      {activeTool === "text" && <TextEditor />}
+      {isTextEditorVisible && selectedTextObject && (
+        <TextEditor
+          selectedTextObject={selectedTextObject}
+          handleTextChange={handleTextChange}
+        />
+      )}
     </div>
   );
 };

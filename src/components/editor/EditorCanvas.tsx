@@ -1,7 +1,6 @@
-import type React from "react";
-import { Stage, Layer, Line, Rect, Transformer } from "react-konva";
+import React, { useRef, useEffect } from "react";
+import { Stage, Layer, Line, Rect, Transformer, Text } from "react-konva";
 
-// EditorPage.tsx에서 이동된 타입 정의
 export interface DrawLine {
   points: number[];
   tool: string;
@@ -19,7 +18,15 @@ export interface Shape {
   fill: string;
 }
 
-// 캔버스 컴포넌트가 받을 props 정의
+export interface TextObject {
+  id: string;
+  x: number;
+  y: number;
+  text: string;
+  fontSize: number;
+  fill: string;
+}
+
 interface EditorCanvasProps {
   stageSize: { width: number; height: number };
   handleMouseDown: (e: any) => void;
@@ -28,10 +35,14 @@ interface EditorCanvasProps {
   lines: DrawLine[];
   currentLine: DrawLine | null;
   shapes: Shape[];
-  setSelectedShapeId: (id: string | null) => void;
-  shapeRefs: React.MutableRefObject<Record<string, any>>;
+  texts: TextObject[];
+  setSelectedId: (id: string | null) => void;
+  objectRefs: React.MutableRefObject<Record<string, any>>;
   trRef: React.MutableRefObject<any>;
   handleTransformEnd: (e: any) => void;
+  editingTextId: string | null;
+  setEditingTextId: (id: string | null) => void;
+  handleTextChange: (id: string, newText: string) => void;
 }
 
 export const EditorCanvas: React.FC<EditorCanvasProps> = ({
@@ -42,83 +53,159 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   lines,
   currentLine,
   shapes,
-  setSelectedShapeId,
-  shapeRefs,
+  texts,
+  setSelectedId,
+  objectRefs,
   trRef,
   handleTransformEnd,
+  editingTextId,
+  setEditingTextId,
+  handleTextChange,
 }) => {
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (editingTextId && textAreaRef.current) {
+      textAreaRef.current.focus();
+    }
+  }, [editingTextId]);
+
+  const handleTextDblClick = (e: any, text: TextObject) => {
+    setSelectedId(null);
+    setEditingTextId(text.id);
+  };
+
+  const finishEditing = () => {
+    const textId = editingTextId;
+    setEditingTextId(null);
+    if (textId) {
+      setSelectedId(textId);
+    }
+  };
+
+  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" || e.key === "Escape") {
+      finishEditing();
+    }
+  };
+
+  const editingText = texts.find((t) => t.id === editingTextId);
+  const stageRef = useRef<any>(null);
+
   return (
-    <Stage
-      width={stageSize.width}
-      height={stageSize.height}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-    >
-      <Layer>
-        {lines.map((line, i) => (
-          <Line
-            key={i}
-            points={line.points}
-            stroke={line.stroke}
-            strokeWidth={line.strokeWidth}
-            tension={0.5}
-            lineCap="round"
-            globalCompositeOperation={
-              line.tool === "eraser" ? "destination-out" : "source-over"
-            }
+    <div style={{ position: "relative" }}>
+      <Stage
+        ref={stageRef}
+        width={stageSize.width}
+        height={stageSize.height}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+      >
+        <Layer>
+          {lines.map((line, i) => (
+            <Line
+              key={i}
+              points={line.points}
+              stroke={line.stroke}
+              strokeWidth={line.strokeWidth}
+              tension={0.5}
+              lineCap="round"
+              globalCompositeOperation={
+                line.tool === "eraser" ? "destination-out" : "source-over"
+              }
+            />
+          ))}
+          {currentLine && (
+            <Line
+              points={currentLine.points}
+              stroke={currentLine.stroke}
+              strokeWidth={currentLine.strokeWidth}
+              tension={0.5}
+              lineCap="round"
+              globalCompositeOperation={
+                currentLine.tool === "eraser"
+                  ? "destination-out"
+                  : "source-over"
+              }
+            />
+          )}
+          {shapes.map((shape) => (
+            <Rect
+              key={shape.id}
+              id={shape.id}
+              x={shape.x}
+              y={shape.y}
+              width={shape.width}
+              height={shape.height}
+              fill={shape.fill}
+              draggable
+              onClick={() => setSelectedId(shape.id)}
+              onTap={() => setSelectedId(shape.id)}
+              ref={(node) => {
+                if (node) objectRefs.current[shape.id] = node;
+              }}
+              onTransformEnd={handleTransformEnd}
+            />
+          ))}
+          {texts.map((text) => (
+            <Text
+              key={text.id}
+              id={text.id}
+              x={text.x}
+              y={text.y}
+              text={text.text}
+              fontSize={text.fontSize}
+              fill={text.fill}
+              draggable
+              visible={text.id !== editingTextId}
+              onClick={() => setSelectedId(text.id)}
+              onTap={() => setSelectedId(text.id)}
+              onDblClick={(e) => handleTextDblClick(e, text)}
+              onDblTap={(e) => handleTextDblClick(e, text)}
+              ref={(node) => {
+                if (node) objectRefs.current[text.id] = node;
+              }}
+              onTransformEnd={handleTransformEnd}
+            />
+          ))}
+          <Transformer
+            ref={trRef}
+            rotateEnabled={true}
+            keepRatio={true}
+            enabledAnchors={[
+              "top-left",
+              "top-right",
+              "bottom-left",
+              "bottom-right",
+            ]}
           />
-        ))}
-        {currentLine && (
-          <Line
-            points={currentLine.points}
-            stroke={currentLine.stroke}
-            strokeWidth={currentLine.strokeWidth}
-            tension={0.5}
-            lineCap="round"
-            globalCompositeOperation={
-              currentLine.tool === "eraser"
-                ? "destination-out"
-                : "source-over"
-            }
-          />
-        )}
-        {shapes.map((shape) => {
-          if (shape.type === "square") {
-            return (
-              <Rect
-                key={shape.id}
-                x={shape.x}
-                y={shape.y}
-                width={shape.width}
-                height={shape.height}
-                fill={shape.fill}
-                draggable
-                onClick={() => setSelectedShapeId(shape.id)}
-                onTap={() => setSelectedShapeId(shape.id)}
-                ref={(node) => {
-                  if (node) {
-                    shapeRefs.current[shape.id] = node;
-                  }
-                }}
-                onTransformEnd={handleTransformEnd}
-              />
-            );
-          }
-          return null;
-        })}
-        <Transformer
-          ref={trRef}
-          rotateEnabled={true}
-          keepRatio={true}
-          enabledAnchors={[
-            "top-left",
-            "top-right",
-            "bottom-left",
-            "bottom-right",
-          ]}
+        </Layer>
+      </Stage>
+      {editingText && (
+        <textarea
+          ref={textAreaRef}
+          value={editingText.text}
+          onChange={(e) => handleTextChange(editingText.id, e.target.value)}
+          onKeyDown={handleTextareaKeyDown}
+          onBlur={finishEditing}
+          style={{
+            position: "absolute",
+            top: `${editingText.y}px`,
+            left: `${editingText.x}px`,
+            width: `${objectRefs.current[editingText.id]?.width()}px`,
+            height: `${objectRefs.current[editingText.id]?.height()}px`,
+            fontSize: `${editingText.fontSize}px`,
+            color: editingText.fill,
+            border: "1px solid #000",
+            background: "none",
+            resize: "none",
+            overflow: "hidden",
+            lineHeight: 1.2,
+            fontFamily: "sans-serif",
+          }}
         />
-      </Layer>
-    </Stage>
+      )}
+    </div>
   );
 };
