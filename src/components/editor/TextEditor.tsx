@@ -1,36 +1,30 @@
 import type React from "react";
-import Arrow from "./../../assets/arrow_down.svg";
-import Bold from "./../../assets/format_bold.svg";
-import Italic from "./../../assets/format_italic.svg";
-import Underlined from "./../../assets/format_underlined.svg";
-import StrikeThrough from "./../../assets/format_strikethrough.svg";
-import Remove from "./../../assets/remove.svg";
-import Add from "./../../assets/add.svg";
-import AlignCenter from "./../../assets/format_align_center.svg";
-import VerticalTop from "./../../assets/vertical_align_top.svg";
-import LineSpacing from "./../../assets/format_line_spacing.svg";
-import ListBulleted from "./../../assets/format_list_bulleted.svg";
-import TextColor from "./../../assets/format_color_text.svg";
-import Highlighter from "./../../assets/format_ink_highlighter.svg";
-import Satisfied from "./../../assets/sentiment_satisfied.svg";
 import { CustomSwitch } from "../commons/CustomSwitch";
 import { CustomTooltip } from "../commons/CustomTooltip";
+import Add from "./../../assets/add.svg";
+import Arrow from "./../../assets/arrow_down.svg";
+import AlignCenter from "./../../assets/format_align_center.svg";
+import Bold from "./../../assets/format_bold.svg";
+import TextColor from "./../../assets/format_color_text.svg";
+import Highlighter from "./../../assets/format_ink_highlighter.svg";
+import Italic from "./../../assets/format_italic.svg";
+import LineSpacing from "./../../assets/format_line_spacing.svg";
+import ListBulleted from "./../../assets/format_list_bulleted.svg";
+import StrikeThrough from "./../../assets/format_strikethrough.svg";
+import Underlined from "./../../assets/format_underlined.svg";
+import Remove from "./../../assets/remove.svg";
+import Satisfied from "./../../assets/sentiment_satisfied.svg";
+import VerticalTop from "./../../assets/vertical_align_top.svg";
+import { FontFamilySelect } from "./FontFamilySelect";
 import { TextAlignPopover } from "./TextAlignPopver";
-import { VerticalAlignPopover } from "./VerticalAlignPopover";
 import { TypographyPopover } from "./TypographyPopover";
+import { VerticalAlignPopover } from "./VerticalAlignPopover";
 
 const fontStyle = [
   { name: "bold", img: Bold, tooltip: "굵게" },
   { name: "italic", img: Italic, tooltip: "기울임" },
   { name: "underlined", img: Underlined, tooltip: "밑줄" },
   { name: "strikethrough", img: StrikeThrough, tooltip: "취소선" },
-];
-
-const fontAlign = [
-  { name: "align", img: AlignCenter, tooltip: "글자정렬" },
-  { name: "vertical", img: VerticalTop, tooltip: "상단정렬" },
-  { name: "spacing", img: LineSpacing, tooltip: "글자조절" },
-  { name: "bulleted", img: ListBulleted, tooltip: "글머리기호" },
 ];
 
 const fontDeco = [
@@ -43,10 +37,7 @@ export const TextEditor: React.FC = () => {
   return (
     <div className="absolute z-[50] top-[140px] right-[195px] rounded-[6px] bg-[#F1F5F9] border border-[#90A1B9] p-[24px] flex flex-col gap-[7px]">
       <div className="flex flex-col gap-[14px]">
-        <button className="border border-[#90A1B9] rounded-[6px] p-[14px] flex items-center justify-between">
-          <span>나눔고딕</span>
-          <img src={Arrow} />
-        </button>
+        <FontFamilySelect />
         <div className="flex items-center gap-[28px]">
           <div className="flex items-center border border-[#90A1B9] rounded-[6px] overflow-hidden">
             <button className="flex items-center justify-center border-r border-[#90A1B9] last:border-r-0 w-[40px] h-[40px] p-[11px_5px] cursor-pointer">
