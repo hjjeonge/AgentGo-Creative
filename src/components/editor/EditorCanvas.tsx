@@ -42,7 +42,7 @@ interface EditorCanvasProps {
   handleTransformEnd: (e: any) => void;
   editingTextId: string | null;
   setEditingTextId: (id: string | null) => void;
-  handleTextChange: (id: string, newText: string) => void;
+  handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void; // Changed prop
 }
 
 export const EditorCanvas: React.FC<EditorCanvasProps> = ({
@@ -60,7 +60,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   handleTransformEnd,
   editingTextId,
   setEditingTextId,
-  handleTextChange,
+  handleUpdateTextObject, // Changed prop
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -186,7 +186,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
         <textarea
           ref={textAreaRef}
           value={editingText.text}
-          onChange={(e) => handleTextChange(editingText.id, e.target.value)}
+          onChange={(e) => handleUpdateTextObject(editingText.id, { text: e.target.value })}
           onKeyDown={handleTextareaKeyDown}
           onBlur={finishEditing}
           style={{

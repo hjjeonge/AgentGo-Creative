@@ -12,13 +12,13 @@ import Underlined from "./../../assets/format_underlined.svg";
 import Remove from "./../../assets/remove.svg";
 import Satisfied from "./../../assets/sentiment_satisfied.svg";
 import VerticalTop from "./../../assets/vertical_align_top.svg";
+import type { TextObject } from "./EditorCanvas"; // Import TextObject
 import { FontFamilySelect } from "./FontFamilySelect";
 import { SettingsSwitchRow } from "./SettingsSwitchRow";
 import { TextAlignPopover } from "./TextAlignPopver";
 import { ToolbarButton } from "./ToolbarButton";
 import { TypographyPopover } from "./TypographyPopover";
 import { VerticalAlignPopover } from "./VerticalAlignPopover";
-import type { TextObject } from "./EditorCanvas";
 
 const fontStyle = [
   { name: "bold", img: Bold, tooltip: "굵게" },
@@ -37,12 +37,12 @@ const settingMenus = ["외곽선", "그림자", "곡선", "세로쓰기"];
 
 interface TextEditorProps {
   selectedTextObject?: TextObject;
-  handleTextChange: (id: string, newText: string) => void;
+  handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void; // Updated prop
 }
 
 export const TextEditor: React.FC<TextEditorProps> = ({
   selectedTextObject,
-  handleTextChange,
+  handleUpdateTextObject,
 }) => {
   return (
     <div className="absolute z-[50] top-[140px] right-[195px] rounded-[6px] bg-[#F1F5F9] border border-[#90A1B9] p-[24px] flex flex-col gap-[7px]">
@@ -50,18 +50,37 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         <FontFamilySelect />
         <div className="flex items-center gap-[28px]">
           <div className="flex items-center border border-[#90A1B9] rounded-[6px] overflow-hidden">
-            <button className="flex items-center justify-center border-r border-[#90A1B9] last:border-r-0 w-[40px] h-[40px] p-[11px_5px] cursor-pointer">
+            <button
+              className="flex items-center justify-center border-r border-[#90A1B9] last:border-r-0 w-[40px] h-[40px] p-[11px_5px] cursor-pointer"
+              onClick={() =>
+                selectedTextObject &&
+                handleUpdateTextObject(selectedTextObject.id, {
+                  fontSize: Math.max(5, selectedTextObject.fontSize - 1),
+                })
+              }
+            >
               <img src={Remove} />
             </button>
             <input
+              type="number"
               className="w-full text-center bg-transparent focus:outline-none"
-              value={selectedTextObject?.text || ""}
+              value={selectedTextObject?.fontSize || 0}
               onChange={(e) =>
                 selectedTextObject &&
-                handleTextChange(selectedTextObject.id, e.target.value)
+                handleUpdateTextObject(selectedTextObject.id, {
+                  fontSize: parseInt(e.target.value) || 0,
+                })
               }
             />
-            <button className="flex items-center justify-center border-l border-[#90A1B9]  w-[40px] h-[40px] p-[11px_5px] cursor-pointer">
+            <button
+              className="flex items-center justify-center border-l border-[#90A1B9]  w-[40px] h-[40px] p-[11px_5px] cursor-pointer"
+              onClick={() =>
+                selectedTextObject &&
+                handleUpdateTextObject(selectedTextObject.id, {
+                  fontSize: selectedTextObject.fontSize + 1,
+                })
+              }
+            >
               <img src={Add} />
             </button>
           </div>

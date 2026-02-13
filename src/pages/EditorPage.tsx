@@ -73,9 +73,9 @@ export const EditorPage: React.FC = () => {
     setEditingTextId(null);
   };
 
-  const handleTextChange = (id: string, newText: string) => {
+  const handleUpdateTextObject = (id: string, updates: Partial<TextObject>) => {
     setTexts((prev) =>
-      prev.map((text) => (text.id === id ? { ...text, text: newText } : text)),
+      prev.map((text) => (text.id === id ? { ...text, ...updates } : text)),
     );
   };
 
@@ -227,7 +227,7 @@ export const EditorPage: React.FC = () => {
           setShapeType={handleAddShape}
           isTextEditorVisible={!!isTextSelected}
           selectedTextObject={selectedTextObject}
-          handleTextChange={handleTextChange}
+          handleUpdateTextObject={handleUpdateTextObject}
         />
 
         {/* Konva 캔버스 컨테이너 */}
@@ -247,7 +247,7 @@ export const EditorPage: React.FC = () => {
             handleTransformEnd={handleTransformEnd}
             editingTextId={editingTextId}
             setEditingTextId={setEditingTextId}
-            handleTextChange={handleTextChange}
+            handleUpdateTextObject={handleUpdateTextObject}
           />
         </div>
         {/* 접혔을 때 보이는 버튼 */}

@@ -24,7 +24,7 @@ interface ToolbarProps {
   setShapeType: (value: string) => void;
   isTextEditorVisible: boolean; // New prop
   selectedTextObject?: TextObject; // New prop
-  handleTextChange: (id: string, newText: string) => void; // New prop
+  handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void; // Updated prop
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -38,7 +38,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   setShapeType,
   isTextEditorVisible,
   selectedTextObject,
-  handleTextChange,
+  handleUpdateTextObject,
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [colorPaletteOpen, setColorPaletteOpen] = useState(false);
@@ -137,7 +137,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       {isTextEditorVisible && selectedTextObject && (
         <TextEditor
           selectedTextObject={selectedTextObject}
-          handleTextChange={handleTextChange}
+          handleUpdateTextObject={handleUpdateTextObject}
         />
       )}
     </div>
