@@ -47,7 +47,10 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   return (
     <div className="absolute z-[50] top-[140px] right-[195px] rounded-[6px] bg-[#F1F5F9] border border-[#90A1B9] p-[24px] flex flex-col gap-[7px]">
       <div className="flex flex-col gap-[14px]">
-        <FontFamilySelect />
+        <FontFamilySelect
+          selectedTextObject={selectedTextObject}
+          handleUpdateTextObject={handleUpdateTextObject}
+        />
         <div className="flex items-center gap-[28px]">
           <div className="flex items-center border border-[#90A1B9] rounded-[6px] overflow-hidden">
             <button

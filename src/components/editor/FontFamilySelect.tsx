@@ -7,24 +7,56 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import type { TextObject } from "./EditorCanvas";
+import { loadGoogleFont } from "../../utils/fontLoader";
 
-export const FontFamilySelect: React.FC = () => {
+interface FontFamilySelectProps {
+  selectedTextObject?: TextObject;
+  handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void;
+}
+
+const googleFonts = [
+  "Roboto",
+  "Open Sans",
+  "Lato",
+  "Montserrat",
+  "Oswald",
+  "Source Sans Pro",
+  "Raleway",
+  "PT Sans",
+  "Merriweather",
+  "Noto Sans KR",
+];
+
+export const FontFamilySelect: React.FC<FontFamilySelectProps> = ({
+  selectedTextObject,
+  handleUpdateTextObject,
+}) => {
+  const handleFontChange = (fontFamily: string) => {
+    if (!selectedTextObject) return;
+
+    // Load the font from Google Fonts
+    loadGoogleFont(fontFamily);
+
+    // Update the text object's state
+    handleUpdateTextObject(selectedTextObject.id, { fontFamily });
+  };
+
   return (
-    <Select>
+    <Select
+      value={selectedTextObject?.fontFamily || "Noto Sans KR"}
+      onValueChange={handleFontChange}
+    >
       <SelectTrigger className="border border-[#90A1B9] rounded-[6px] w-full focus:outline-0 p-[14px] h-[52px]">
         <SelectValue placeholder="글씨체 선택" />
       </SelectTrigger>
       <SelectContent position="popper">
         <SelectGroup>
-          <SelectItem value="1">글씨체 1</SelectItem>
-          <SelectItem value="2">글씨체 2</SelectItem>
-          <SelectItem value="3">글씨체 3</SelectItem>
-          <SelectItem value="4">글씨체 4</SelectItem>
-          <SelectItem value="5">글씨체 5</SelectItem>
-          <SelectItem value="6">글씨체 6</SelectItem>
-          <SelectItem value="7">글씨체 7</SelectItem>
-          <SelectItem value="8">글씨체 8</SelectItem>
-          <SelectItem value="9">글씨체 9</SelectItem>
+          {googleFonts.map((font) => (
+            <SelectItem key={font} value={font} style={{ fontFamily: font }}>
+              {font}
+            </SelectItem>
+          ))}
         </SelectGroup>
       </SelectContent>
     </Select>

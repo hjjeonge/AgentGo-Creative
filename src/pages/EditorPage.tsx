@@ -8,6 +8,7 @@ import {
   type Shape,
   type TextObject,
 } from "../components/editor/EditorCanvas";
+import { loadGoogleFont } from "../utils/fontLoader";
 
 export const EditorPage: React.FC = () => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
@@ -49,6 +50,9 @@ export const EditorPage: React.FC = () => {
   };
 
   const handleAddText = () => {
+    const defaultFont = "Noto Sans KR";
+    loadGoogleFont(defaultFont); // Ensure the default font is loaded
+
     const newText: TextObject = {
       id: `text_${texts.length}`,
       text: "텍스트를 입력하세요",
@@ -56,6 +60,7 @@ export const EditorPage: React.FC = () => {
       y: 150,
       fontSize: 24,
       fill: "#000000",
+      fontFamily: defaultFont,
     };
     setTexts((prev) => [...prev, newText]);
     // Immediately select the newly added text
