@@ -1,15 +1,16 @@
-import React, { act, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { getPenColorImg, getPenStrokeWidthImg } from "../../utils/getImage";
+import { ColorPalette } from "../commons/ColorPalette";
 import { ClickIcon } from "../icons/ClickIcon";
 import { DiagramIcon } from "../icons/DiagramIcon";
 import { EraserIcon } from "../icons/EraserIcon";
 import { PencilIcon } from "../icons/PencilIcon";
 import { ShapeIcon } from "../icons/ShapeIcon";
 import { TextIcon } from "../icons/TextIcon";
-import { ToolButton } from "./ToolButton";
-import { ColorPalette } from "../commons/ColorPalette";
-import { getPenColorImg, getPenStrokeWidthImg } from "../../utils/getImage";
 import { DiagramPopup } from "./DiagramPopup";
 import { TextEditor } from "./TextEditor";
+import { ToolButton } from "./ToolButton";
+import { ToolbarButton } from "./ToolbarButton";
 
 interface ToolbarProps {
   activeTool: string;
@@ -84,30 +85,31 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           className={`absolute z-[50] top-[140px] ${activeTool === "pen" && "left-[415px]"} ${activeTool === "eraser" && "right-[455px]"} border flex items-center gap-[12px] border-[#90A1B9] p-[8px_10px] rounded-[6px] bg-[#F1F5F9]`}
         >
           {penStrokeWidths.map((el) => (
-            <button
+            <ToolbarButton
               key={el}
-              className={`w-[34px] h-[34px] flex items-center justify-center cursor-pointer ${penStrokeWidth === el && "bg-[#CAD5E2] rounded-[6px]"}`}
+              tooltip={`${el}px`}
+              icon={getPenStrokeWidthImg(el)}
               onClick={() => handlePenStrokeWidth(el)}
-            >
-              <img src={getPenStrokeWidthImg(el)} />
-            </button>
+              isActive={penStrokeWidth === el}
+              className="w-[34px] h-[34px] rounded-[6px]"
+            />
           ))}
           {activeTool == "pen" && (
             <>
               <div className="w-[2.5px] h-[25px] bg-[#45556C]" />
               {displayColors.map((el) => {
                 const isPresetColor = displayColors.includes(penStrokeColor);
-
                 const isActive =
                   penStrokeColor === el || (el === "empty" && !isPresetColor);
                 return (
-                  <button
+                  <ToolbarButton
                     key={el}
-                    className={`w-[30px] h-[30px] p-[5px] flex items-center justify-center cursor-pointer ${isActive && "bg-[#CAD5E2] rounded-[20px]"}`}
+                    tooltip={el}
+                    icon={getPenColorImg(el)}
                     onClick={() => onClickColorOption(el)}
-                  >
-                    <img src={getPenColorImg(el)} />
-                  </button>
+                    isActive={isActive}
+                    className="w-[30px] h-[30px] p-[5px] rounded-[20px]"
+                  />
                 );
               })}
             </>
@@ -125,7 +127,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       {activeTool === "diagram" && (
         <DiagramPopup shapeType={shapeType} setShapeType={setShapeType} />
       )}
-      <TextEditor />
+      {activeTool === "text" && <TextEditor />}
     </div>
   );
 };

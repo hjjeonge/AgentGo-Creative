@@ -1,8 +1,5 @@
 import type React from "react";
-import { CustomSwitch } from "../commons/CustomSwitch";
-import { CustomTooltip } from "../commons/CustomTooltip";
 import Add from "./../../assets/add.svg";
-import Arrow from "./../../assets/arrow_down.svg";
 import AlignCenter from "./../../assets/format_align_center.svg";
 import Bold from "./../../assets/format_bold.svg";
 import TextColor from "./../../assets/format_color_text.svg";
@@ -16,7 +13,9 @@ import Remove from "./../../assets/remove.svg";
 import Satisfied from "./../../assets/sentiment_satisfied.svg";
 import VerticalTop from "./../../assets/vertical_align_top.svg";
 import { FontFamilySelect } from "./FontFamilySelect";
+import { SettingsSwitchRow } from "./SettingsSwitchRow";
 import { TextAlignPopover } from "./TextAlignPopver";
+import { ToolbarButton } from "./ToolbarButton";
 import { TypographyPopover } from "./TypographyPopover";
 import { VerticalAlignPopover } from "./VerticalAlignPopover";
 
@@ -32,6 +31,8 @@ const fontDeco = [
   { name: "highlighter", img: Highlighter, tooltip: "배경색" },
   { name: "satisfied", img: Satisfied, tooltip: "특수문자" },
 ];
+
+const settingMenus = ["외곽선", "그림자", "곡선", "세로쓰기"];
 
 export const TextEditor: React.FC = () => {
   return (
@@ -50,93 +51,41 @@ export const TextEditor: React.FC = () => {
           </div>
           <div className="flex items-center border border-[#90A1B9] rounded-[6px] overflow-hidden">
             {fontStyle.map((el) => (
-              <CustomTooltip key={el.name} content={el.tooltip}>
-                <button className="flex items-center justify-center border-l border-[#90A1B9] last:border-r-0 first:border-l-0 w-[45px] h-[40px] p-[11px_5px] cursor-pointer">
-                  <img src={el.img} />
-                </button>
-              </CustomTooltip>
+              <ToolbarButton
+                key={el.name}
+                icon={el.img}
+                tooltip={el.tooltip}
+                className="border-l border-[#90A1B9] last:border-r-0 first:border-l-0 w-[45px] h-[40px] p-[11px_5px]"
+              />
             ))}
           </div>
         </div>
         <div className="flex items-center justify-between gap-[26px]">
           <div className="flex items-center justify-between flex-1">
             <TextAlignPopover>
-              <button className="flex items-center justify-center w-[40px] h-[40px] cursor-pointer">
-                <CustomTooltip content={"글자정렬"}>
-                  <img src={AlignCenter} />
-                </CustomTooltip>
-              </button>
+              <ToolbarButton icon={AlignCenter} tooltip="글자정렬" />
             </TextAlignPopover>
             <VerticalAlignPopover>
-              <button className="flex items-center justify-center w-[40px] h-[40px] cursor-pointer">
-                <CustomTooltip content={"상단정렬"}>
-                  <img src={VerticalTop} />
-                </CustomTooltip>
-              </button>
+              <ToolbarButton icon={VerticalTop} tooltip="상단정렬" />
             </VerticalAlignPopover>
             <TypographyPopover>
-              <button className="flex items-center justify-center w-[40px] h-[40px] cursor-pointer">
-                <CustomTooltip content={"글자조절"}>
-                  <img src={LineSpacing} />
-                </CustomTooltip>
-              </button>
+              <ToolbarButton icon={LineSpacing} tooltip="글자조절" />
             </TypographyPopover>
-            <CustomTooltip content={"글머리기호"}>
-              <button className="flex items-center justify-center w-[40px] h-[40px] cursor-pointer">
-                <img src={ListBulleted} />
-              </button>
-            </CustomTooltip>
+            <ToolbarButton icon={ListBulleted} tooltip="글머리기호" />
           </div>
           <div className="w-[1px] h-[30px] bg-[#90A1B9]" />
           <div className="flex items-center justify-between flex-1">
             {fontDeco.map((el) => (
-              <CustomTooltip key={el.name} content={el.tooltip}>
-                <button className="flex items-center justify-center w-[40px] h-[40px] cursor-pointer">
-                  <img src={el.img} />
-                </button>
-              </CustomTooltip>
+              <ToolbarButton key={el.name} icon={el.img} tooltip={el.tooltip} />
             ))}
           </div>
         </div>
       </div>
       <div className="h-[1px] bg-[#90A1B9]" />
       <div>
-        <div className="flex items-center justify-between p-[7px]">
-          <div className="flex items-center justify-center gap-[4px]">
-            <button className="flex items-center justify-center">
-              <img src={Arrow} className="-rotate-90" />
-            </button>
-            <span>외곽선</span>
-          </div>
-          <CustomSwitch />
-        </div>
-        <div className="flex items-center justify-between p-[7px]">
-          <div className="flex items-center justify-center gap-[4px]">
-            <button className="flex items-center justify-center">
-              <img src={Arrow} className="-rotate-90" />
-            </button>
-            <span>그림자</span>
-          </div>
-          <CustomSwitch />
-        </div>
-        <div className="flex items-center justify-between p-[7px]">
-          <div className="flex items-center justify-center gap-[4px]">
-            <button className="flex items-center justify-center">
-              <img src={Arrow} className="-rotate-90" />
-            </button>
-            <span>곡선</span>
-          </div>
-          <CustomSwitch />
-        </div>
-        <div className="flex items-center justify-between p-[7px]">
-          <div className="flex items-center justify-center gap-[4px]">
-            <button className="flex items-center justify-center">
-              <img src={Arrow} className="-rotate-90" />
-            </button>
-            <span>세로쓰기</span>
-          </div>
-          <CustomSwitch />
-        </div>
+        {settingMenus.map((menu) => (
+          <SettingsSwitchRow key={menu} label={menu} />
+        ))}
       </div>
     </div>
   );

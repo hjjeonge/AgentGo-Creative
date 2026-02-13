@@ -1,26 +1,12 @@
 import type React from "react";
 import { useState, useRef, useEffect } from "react";
-import { Stage, Layer, Line, Rect } from "react-konva";
 import { Toolbar } from "../components/editor/Toolbar";
 import { HistoryPanel } from "../components/editor/HistoryPanel";
-import { Transformer } from "react-konva";
-
-interface DrawLine {
-  points: number[];
-  tool: string;
-  strokeWidth: number;
-  stroke: string;
-}
-
-interface Shape {
-  id: string;
-  type: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  fill: string;
-}
+import {
+  EditorCanvas,
+  type DrawLine,
+  type Shape,
+} from "../components/editor/EditorCanvas";
 
 export const EditorPage: React.FC = () => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
@@ -42,14 +28,18 @@ export const EditorPage: React.FC = () => {
   const trRef = useRef<any>(null);
 
   useEffect(() => {
-    if (selectedShapeId && trRef.current) {
-      const node = shapeRefs.current[selectedShapeId];
-      if (node) {
-        trRef.current.nodes([node]);
-        trRef.current.getLayer().batchDraw();
+    if (trRef.current) {
+      if (selectedShapeId) {
+        const node = shapeRefs.current[selectedShapeId];
+        if (node) {
+          trRef.current.nodes([node]);
+        }
+      } else {
+        trRef.current.nodes([]);
       }
+      trRef.current.getLayer()?.batchDraw();
     }
-  }, [selectedShapeId]);
+  }, [selectedShapeId, shapes]);
 
   const handleWorkHistory = () => {
     setIsHistoryOpen((prev) => !prev);
@@ -57,6 +47,7 @@ export const EditorPage: React.FC = () => {
 
   const handleToolChange = (tool: string) => {
     setActiveTool(tool);
+    setSelectedShapeId(null);
   };
 
   const handlePenStrokeWidth = (value: number) => {
@@ -88,12 +79,15 @@ export const EditorPage: React.FC = () => {
   }, [isHistoryOpen]);
 
   const handleMouseDown = (e: any) => {
+    const clickedOnEmpty = e.target === e.target.getStage();
+    if (clickedOnEmpty) {
+      setSelectedShapeId(null);
+    }
+
     if (activeTool !== "pen" && activeTool !== "eraser") {
       return;
     }
-    if (e.target === e.target.getStage()) {
-      setSelectedShapeId(null);
-    }
+
     setIsDrawing(true);
     const pos = e.target.getStage().getPointerPosition();
     setCurrentLine({
@@ -144,6 +138,29 @@ export const EditorPage: React.FC = () => {
     }
   };
 
+  const handleTransformEnd = (e: any) => {
+    const node = e.target;
+    const scaleX = node.scaleX();
+    const scaleY = node.scaleY();
+
+    node.scaleX(1);
+    node.scaleY(1);
+
+    setShapes((prev) =>
+      prev.map((s) =>
+        s.id === selectedShapeId
+          ? {
+              ...s,
+              x: node.x(),
+              y: node.y(),
+              width: Math.max(5, node.width() * scaleX),
+              height: Math.max(5, node.height() * scaleY),
+            }
+          : s,
+      ),
+    );
+  };
+
   return (
     <div className="h-full w-full flex relative">
       <aside className="w-[85px] bg-amber-100 shrink-0"></aside>
@@ -164,100 +181,19 @@ export const EditorPage: React.FC = () => {
 
         {/* Konva 캔버스 컨테이너 */}
         <div ref={containerRef} className="flex-1 h-full w-full bg-white">
-          <Stage
-            width={stageSize.width}
-            height={stageSize.height}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-          >
-            <Layer>
-              {lines.map((line, i) => (
-                <Line
-                  key={i}
-                  points={line.points}
-                  stroke={line.stroke}
-                  strokeWidth={line.strokeWidth}
-                  tension={0.5}
-                  lineCap="round"
-                  globalCompositeOperation={
-                    line.tool === "eraser" ? "destination-out" : "source-over"
-                  }
-                />
-              ))}
-              {currentLine && (
-                <Line
-                  points={currentLine.points}
-                  stroke={currentLine.stroke}
-                  strokeWidth={currentLine.strokeWidth}
-                  tension={0.5}
-                  lineCap="round"
-                  globalCompositeOperation={
-                    currentLine.tool === "eraser"
-                      ? "destination-out"
-                      : "source-over"
-                  }
-                />
-              )}
-              {shapes.map((shape) => {
-                if (shape.type === "square") {
-                  return (
-                    <Rect
-                      key={shape.id}
-                      x={shape.x}
-                      y={shape.y}
-                      width={shape.width}
-                      height={shape.height}
-                      fill={shape.fill}
-                      draggable
-                      onClick={() => setSelectedShapeId(shape.id)}
-                      onTap={() => setSelectedShapeId(shape.id)}
-                      ref={(node) => {
-                        if (node) {
-                          shapeRefs.current[shape.id] = node;
-                        }
-                      }}
-                      onTransformEnd={(e) => {
-                        const node = e.target;
-
-                        const scaleX = node.scaleX();
-                        const scaleY = node.scaleY();
-
-                        node.scaleX(1);
-                        node.scaleY(1);
-
-                        setShapes((prev) =>
-                          prev.map((shape) =>
-                            shape.id === selectedShapeId
-                              ? {
-                                  ...shape,
-                                  x: node.x(),
-                                  y: node.y(),
-                                  width: Math.max(5, node.width() * scaleX),
-                                  height: Math.max(5, node.height() * scaleY),
-                                }
-                              : shape,
-                          ),
-                        );
-                      }}
-                    />
-                  );
-                }
-                return null;
-              })}
-              <Transformer
-                ref={trRef}
-                rotateEnabled={true}
-                keepRatio={true}
-                enabledAnchors={[
-                  "top-left",
-                  "top-right",
-                  "bottom-left",
-                  "bottom-right",
-                ]}
-              />
-            </Layer>
-          </Stage>
+          <EditorCanvas
+            stageSize={stageSize}
+            handleMouseDown={handleMouseDown}
+            handleMouseMove={handleMouseMove}
+            handleMouseUp={handleMouseUp}
+            lines={lines}
+            currentLine={currentLine}
+            shapes={shapes}
+            setSelectedShapeId={setSelectedShapeId}
+            shapeRefs={shapeRefs}
+            trRef={trRef}
+            handleTransformEnd={handleTransformEnd}
+          />
         </div>
         {/* 접혔을 때 보이는 버튼 */}
         {!isHistoryOpen && (
