@@ -18,7 +18,7 @@ interface Props {
   handleSwitch?: (value: boolean) => void;
   isOpen?: boolean;
   handleOpen?: (value: boolean) => void;
-  content?: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export const SwitchAccordion: React.FC<Props> = ({
@@ -27,7 +27,7 @@ export const SwitchAccordion: React.FC<Props> = ({
   isShow,
   isSwitchOn,
   isOpen,
-  content,
+  children,
 }: Props) => {
   console.log(title, " : ", isShow);
   const [openValue, setOpenValue] = useState<string | undefined>();
@@ -41,7 +41,7 @@ export const SwitchAccordion: React.FC<Props> = ({
       <AccordionItem value={value}>
         <AccordionTrigger asChild>
           <div className="flex items-center justify-between p-[7px] w-full">
-            <div className="flex items-center justify-center gap-[4px]">
+            <div className="flex items-center justify-center gap-[4px]  text-[16px] leading-[24px] text-[#0F172B]">
               {isShow && (
                 <button className="flex items-center justify-center">
                   <img
@@ -57,7 +57,7 @@ export const SwitchAccordion: React.FC<Props> = ({
             <CustomSwitch />
           </div>
         </AccordionTrigger>
-        <AccordionContent>{content}</AccordionContent>
+        <AccordionContent>{children}</AccordionContent>
       </AccordionItem>
     </Accordion>
   );

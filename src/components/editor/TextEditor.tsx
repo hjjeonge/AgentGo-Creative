@@ -20,6 +20,8 @@ import { TextAlignPopover } from "./TextAlignPopver";
 import { ToolbarButton } from "./ToolbarButton";
 import { TypographyPopover } from "./TypographyPopover";
 import { VerticalAlignPopover } from "./VerticalAlignPopover";
+import { StrokeContent } from "./StrokeContent";
+import { ShadowContent } from "./ShadowContent";
 
 const fontStyle = [
   { name: "bold", img: Bold, tooltip: "굵게" },
@@ -35,9 +37,9 @@ const fontDeco = [
 ];
 
 const settingMenus = [
-  { name: "외곽선", isShow: true, content: "" },
-  { name: "그림자", isShow: true, content: "" },
-  { name: "세로쓰기", isShow: false, content: "" },
+  { name: "외곽선", isShow: true, content: <StrokeContent /> },
+  { name: "그림자", isShow: true, content: <ShadowContent /> },
+  { name: "세로쓰기", isShow: false, content: null },
 ];
 
 interface TextEditorProps {
@@ -241,7 +243,9 @@ export const TextEditor: React.FC<TextEditorProps> = ({
             value={menu.name}
             title={menu.name}
             isShow={menu.isShow}
-          />
+          >
+            {menu.content}
+          </SwitchAccordion>
         ))}
       </div>
     </div>
