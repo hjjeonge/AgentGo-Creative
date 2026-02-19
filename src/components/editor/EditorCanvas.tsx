@@ -1,5 +1,14 @@
-import React, { useRef, useEffect } from "react";
-import { Stage, Layer, Line, Rect, Transformer, Text } from "react-konva";
+import Konva from "konva";
+import React, { useEffect, useRef } from "react";
+import {
+  Group,
+  Layer,
+  Line,
+  Rect,
+  Stage,
+  Text,
+  Transformer,
+} from "react-konva";
 
 export interface DrawLine {
   points: number[];
@@ -47,6 +56,8 @@ export interface TextObject {
   shadowDistance?: number;
   shadowEnabled?: boolean;
   verticalWriting?: boolean;
+  backgroundColor?: string;
+  backgroundEnabled?: boolean;
 }
 
 interface EditorCanvasProps {
@@ -118,23 +129,35 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   const toVerticalText = (value: string) => {
     return value
       .split("\n")
-      .map((line) =>
-        line.split("").join("\n"),
-      )
+      .map((line) => line.split("").join("\n"))
       .join("\n\n");
   };
 
-  const getDisplayText = (text: TextObject) => {
+  const getListFormattedText = (text: TextObject) => {
     let baseText = text.text;
     if (text.listFormat && text.listFormat !== "none") {
       const lines = baseText.split("\n");
       if (text.listFormat === "unordered") {
         baseText = lines.map((line) => `• ${line}`).join("\n");
       } else {
-        baseText = lines.map((line, index) => `${index + 1}. ${line}`).join("\n");
+        baseText = lines
+          .map((line, index) => `${index + 1}. ${line}`)
+          .join("\n");
       }
     }
+    return baseText;
+  };
+
+  const getDisplayText = (text: TextObject) => {
+    const baseText = getListFormattedText(text);
     return text.verticalWriting ? toVerticalText(baseText) : baseText;
+  };
+
+  const getNodeSize = (id: string) => {
+    const node = objectRefs.current[id];
+    if (!node) return { width: 0, height: 0 };
+    const rect = node.getClientRect({ skipTransform: false });
+    return { width: rect.width, height: rect.height };
   };
 
   return (
@@ -193,44 +216,133 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               onTransformEnd={handleTransformEnd}
             />
           ))}
-          {texts.map((text) => (
-            <Text
-              key={text.id}
-              id={text.id}
-              x={text.x}
-              y={text.y}
-              text={getDisplayText(text)}
-              width={text.width}
-              fontSize={text.fontSize}
-              fontFamily={text.fontFamily}
-              fontStyle={text.fontStyle}
-              textDecoration={text.textDecoration}
-              align={text.align}
-              verticalAlign={text.verticalAlign}
-              letterSpacing={text.letterSpacing}
-              lineHeight={text.lineHeight}
-              scaleX={text.scaleX}
-              stroke={text.strokeEnabled ? text.stroke : undefined}
-              strokeWidth={text.strokeEnabled ? text.strokeWidth : 0}
-              shadowColor={text.shadowEnabled ? text.shadowColor : undefined}
-              shadowBlur={text.shadowEnabled ? text.shadowBlur : 0}
-              shadowOpacity={text.shadowEnabled ? text.shadowOpacity : 0}
-              shadowOffsetX={text.shadowEnabled ? text.shadowOffsetX : 0}
-              shadowOffsetY={text.shadowEnabled ? text.shadowOffsetY : 0}
-              fill={text.fill}
-              draggable
-              visible={text.id !== editingTextId}
-              onClick={() => setSelectedId(text.id)}
-              onTap={() => setSelectedId(text.id)}
-              onDblClick={(e) => handleTextDblClick(e, text)}
-              onDblTap={(e) => handleTextDblClick(e, text)}
-              ref={(node) => {
-                if (node) objectRefs.current[text.id] = node;
-              }}
-              onTransformEnd={handleTransformEnd}
-              fillAfterStrokeEnabled
-            />
-          ))}
+          {texts.map((text) => {
+            const commonTextProps = {
+              text: getDisplayText(text),
+              width: text.width,
+              fontSize: text.fontSize,
+              fontFamily: text.fontFamily,
+              fontStyle: text.fontStyle,
+              textDecoration: text.textDecoration,
+              align: text.align,
+              verticalAlign: text.verticalAlign,
+              letterSpacing: text.letterSpacing,
+              lineHeight: text.lineHeight,
+              scaleX: text.scaleX,
+              stroke: text.strokeEnabled ? text.stroke : undefined,
+              strokeWidth: text.strokeEnabled ? text.strokeWidth : 0,
+              shadowColor: text.shadowEnabled ? text.shadowColor : undefined,
+              shadowBlur: text.shadowEnabled ? text.shadowBlur : 0,
+              shadowOpacity: text.shadowEnabled ? text.shadowOpacity : 0,
+              shadowOffsetX: text.shadowEnabled ? text.shadowOffsetX : 0,
+              shadowOffsetY: text.shadowEnabled ? text.shadowOffsetY : 0,
+              fill: text.fill,
+              fillAfterStrokeEnabled: true,
+            };
+
+            if (
+              text.backgroundEnabled &&
+              text.backgroundColor &&
+              text.backgroundColor !== "transparent"
+            ) {
+              const displayText = getDisplayText(text);
+              const lines = displayText.split("\n");
+
+              return (
+                <Group
+                  key={text.id}
+                  id={text.id}
+                  x={text.x}
+                  y={text.y}
+                  draggable
+                  visible={text.id !== editingTextId}
+                  onClick={() => setSelectedId(text.id)}
+                  onTap={() => setSelectedId(text.id)}
+                  onDblClick={(e) => handleTextDblClick(e, text)}
+                  onDblTap={(e) => handleTextDblClick(e, text)}
+                  ref={(node) => {
+                    if (node) objectRefs.current[text.id] = node;
+                  }}
+                  onTransformEnd={handleTransformEnd}
+                >
+                  {lines.map((line, index) => {
+                    const tempText = new Konva.Text({
+                      text: line,
+                      fontSize: text.fontSize,
+                      fontFamily: text.fontFamily,
+                      fontStyle: text.fontStyle,
+                      textDecoration: text.textDecoration,
+                      letterSpacing: text.letterSpacing,
+                      lineHeight: text.lineHeight,
+                    });
+
+                    const textWidth = tempText.getTextWidth();
+                    const rawTextHeight = tempText.height();
+                    const rectHeight = rawTextHeight * 0.9;
+                    const rectOffsetY = (rawTextHeight - rectHeight) / 2;
+                    const requestedWidth = text.width;
+                    const align = text.align ?? "left";
+                    const maxWidth =
+                      align === "left" || !requestedWidth
+                        ? textWidth
+                        : Math.max(requestedWidth, textWidth);
+                    let rectOffsetX = 0;
+                    if (maxWidth && align !== "left") {
+                      if (align === "center") {
+                        rectOffsetX = (maxWidth - textWidth) / 2;
+                      } else if (align === "right") {
+                        rectOffsetX = maxWidth - textWidth;
+                      }
+                    }
+
+                    return (
+                      <Group key={index} y={index * rawTextHeight}>
+                        <Rect
+                          x={rectOffsetX}
+                          width={textWidth}
+                          height={rectHeight}
+                          y={rectOffsetY}
+                          fill={text.backgroundColor}
+                        />
+                        <Text
+                          text={line}
+                          fontSize={text.fontSize}
+                          fontFamily={text.fontFamily}
+                          fontStyle={text.fontStyle}
+                          textDecoration={text.textDecoration}
+                          letterSpacing={text.letterSpacing}
+                          lineHeight={text.lineHeight}
+                          fill={text.fill}
+                          width={maxWidth}
+                          align={align}
+                        />
+                      </Group>
+                    );
+                  })}
+                </Group>
+              );
+            }
+
+            return (
+              <Text
+                key={text.id}
+                id={text.id}
+                x={text.x}
+                y={text.y}
+                draggable
+                visible={text.id !== editingTextId}
+                onClick={() => setSelectedId(text.id)}
+                onTap={() => setSelectedId(text.id)}
+                onDblClick={(e) => handleTextDblClick(e, text)}
+                onDblTap={(e) => handleTextDblClick(e, text)}
+                ref={(node) => {
+                  if (node) objectRefs.current[text.id] = node;
+                }}
+                onTransformEnd={handleTransformEnd}
+                {...commonTextProps}
+              />
+            );
+          })}
           <Transformer
             ref={trRef}
             rotateEnabled={true}
@@ -257,12 +369,11 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             position: "absolute",
             top: `${editingText.y}px`,
             left: `${editingText.x}px`,
-            width: `${editingText.width ?? objectRefs.current[editingText.id]?.width()}px`,
-            height: `${objectRefs.current[editingText.id]?.height()}px`,
+            width: `${editingText.width ?? getNodeSize(editingText.id).width}px`,
+            height: `${getNodeSize(editingText.id).height}px`,
             fontSize: `${editingText.fontSize}px`,
             color: editingText.fill,
             border: "1px solid #000",
-            background: "none",
             resize: "none",
             overflow: "hidden",
             fontFamily: editingText.fontFamily,

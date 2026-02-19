@@ -54,6 +54,9 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   const [colorPopupMode, setColorPopupMode] = useState<
     "picker" | "palette" | null
   >(null);
+  const [highlightPopupMode, setHighlightPopupMode] = useState<
+    "picker" | "palette" | null
+  >(null);
   const recentTextColors = useColorHistoryStore((state) => state.recentColors);
   const addRecentColor = useColorHistoryStore((state) => state.addRecentColor);
 
@@ -63,6 +66,13 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       ? selectedTextObject.fill.toUpperCase()
       : `#${selectedTextObject.fill}`.toUpperCase();
   }, [selectedTextObject?.fill]);
+
+  const normalizedHighlightColor = useMemo(() => {
+    if (!selectedTextObject?.backgroundColor) return "#FFFF00";
+    return selectedTextObject.backgroundColor.startsWith("#")
+      ? selectedTextObject.backgroundColor.toUpperCase()
+      : `#${selectedTextObject.backgroundColor}`.toUpperCase();
+  }, [selectedTextObject?.backgroundColor]);
 
 
   useEffect(() => {
@@ -364,58 +374,113 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           </div>
           <div className="w-[1px] h-[30px] bg-[#90A1B9]" />
           <div className="flex items-center justify-between flex-1">
-            {fontDeco.map((el) =>
-              el.name === "color" ? (
-                <div key={el.name} className="relative">
-                  <ToolbarButton
-                    icon={el.img}
-                    tooltip={el.tooltip}
-                    onClick={() =>
-                      setColorPopupMode((prev) =>
-                        prev === null ? "picker" : null,
-                      )
-                    }
-                  />
-                  {colorPopupMode && (
-                    <div className="absolute top-full left-0 mt-[6px] z-[100]">
-                      {colorPopupMode === "picker" ? (
-                        <ColorPickerPopup
-                          onClose={() => setColorPopupMode(null)}
-                          onOpenPalette={() => setColorPopupMode("palette")}
-                          currentColor={normalizedCurrentColor}
-                          recentlyUseColorList={recentTextColors}
-                          onSelectColor={(value) => {
-                            if (!selectedTextObject) return;
-                            handleUpdateTextObject(selectedTextObject.id, {
-                              fill: value,
-                            });
-                            addRecentColor(value);
-                          }}
-                        />
-                      ) : (
-                        <ColorPalette
-                          colorCode={normalizedCurrentColor}
-                          handleColorCode={(value) => {
-                            if (!selectedTextObject) return;
-                            handleUpdateTextObject(selectedTextObject.id, {
-                              fill: value,
-                            });
-                            addRecentColor(value);
-                          }}
-                          onBack={() => setColorPopupMode("picker")}
-                        />
-                      )}
-                    </div>
-                  )}
-                </div>
-              ) : (
+            {fontDeco.map((el) => {
+              if (el.name === "color") {
+                return (
+                  <div key={el.name} className="relative">
+                    <ToolbarButton
+                      icon={el.img}
+                      tooltip={el.tooltip}
+                      onClick={() =>
+                        setColorPopupMode((prev) =>
+                          prev === null ? "picker" : null,
+                        )
+                      }
+                    />
+                    {colorPopupMode && (
+                      <div className="absolute top-full left-0 mt-[6px] z-[100]">
+                        {colorPopupMode === "picker" ? (
+                          <ColorPickerPopup
+                            onClose={() => setColorPopupMode(null)}
+                            onOpenPalette={() => setColorPopupMode("palette")}
+                            currentColor={normalizedCurrentColor}
+                            recentlyUseColorList={recentTextColors}
+                            onSelectColor={(value) => {
+                              if (!selectedTextObject) return;
+                              handleUpdateTextObject(selectedTextObject.id, {
+                                fill: value,
+                              });
+                              addRecentColor(value);
+                            }}
+                          />
+                        ) : (
+                          <ColorPalette
+                            colorCode={normalizedCurrentColor}
+                            handleColorCode={(value) => {
+                              if (!selectedTextObject) return;
+                              handleUpdateTextObject(selectedTextObject.id, {
+                                fill: value,
+                              });
+                              addRecentColor(value);
+                            }}
+                            onBack={() => setColorPopupMode("picker")}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              if (el.name === "highlighter") {
+                return (
+                  <div key={el.name} className="relative">
+                    <ToolbarButton
+                      icon={el.img}
+                      tooltip={el.tooltip}
+                      onClick={() =>
+                        setHighlightPopupMode((prev) =>
+                          prev === null ? "picker" : null,
+                        )
+                      }
+                    />
+                    {highlightPopupMode && (
+                      <div className="absolute top-full left-0 mt-[6px] z-[100]">
+                        {highlightPopupMode === "picker" ? (
+                          <ColorPickerPopup
+                            onClose={() => setHighlightPopupMode(null)}
+                            onOpenPalette={() =>
+                              setHighlightPopupMode("palette")
+                            }
+                            currentColor={normalizedHighlightColor}
+                            recentlyUseColorList={recentTextColors}
+                            onSelectColor={(value) => {
+                              if (!selectedTextObject) return;
+                              handleUpdateTextObject(selectedTextObject.id, {
+                                backgroundColor: value,
+                                backgroundEnabled: value !== "transparent",
+                              });
+                              addRecentColor(value);
+                            }}
+                          />
+                        ) : (
+                          <ColorPalette
+                            colorCode={normalizedHighlightColor}
+                            handleColorCode={(value) => {
+                              if (!selectedTextObject) return;
+                              handleUpdateTextObject(selectedTextObject.id, {
+                                backgroundColor: value,
+                                backgroundEnabled: value !== "transparent",
+                              });
+                              addRecentColor(value);
+                            }}
+                            onBack={() => setHighlightPopupMode("picker")}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              return (
                 <ToolbarButton
                   key={el.name}
                   icon={el.img}
                   tooltip={el.tooltip}
                 />
-              ),
-            )}
+              );
+            })}
           </div>
         </div>
       </div>
