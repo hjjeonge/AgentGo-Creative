@@ -21,7 +21,7 @@ export const ToolButton: React.FC<Props> = ({
     <button
       title={label}
       onClick={onClick || (() => onToolChange(toolName))}
-      className={`w-[54px] h-[54px] p-[10px] cursor-pointer flex items-center justify-center ${
+      className={`w-[54px] h-[54px] p-[10px] flex items-center justify-center ${
         activeTool === toolName
           ? "border border-[#1447E6] bg-[#EFF6FF] text-[#155DFC] rounded-[6px]"
           : "hover:bg-gray-100 rounded-[6px]"

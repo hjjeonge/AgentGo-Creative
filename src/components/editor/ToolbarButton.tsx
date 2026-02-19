@@ -15,7 +15,7 @@ export const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
       <CustomTooltip content={tooltip}>
         <button
           ref={ref}
-          className={`flex items-center justify-center cursor-pointer w-[40px] h-[40px] ${className} ${activeClass}`}
+          className={`flex items-center justify-center w-[40px] h-[40px] ${className} ${activeClass}`}
           {...props}
         >
           <img src={icon} alt={tooltip} />

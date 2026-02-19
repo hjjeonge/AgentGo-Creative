@@ -29,7 +29,7 @@ export const VerticalAlignPopover: React.FC<Props> = ({
           {list.map((el) => (
             <button
               key={el.name}
-              className={`flex items-center justify-center w-[40px] h-[40px] p-[3px] cursor-pointer ${value === el.name ? "bg-[#E2E8F0] rounded-[6px]" : ""}`}
+              className={`flex items-center justify-center w-[40px] h-[40px] p-[3px] ${value === el.name ? "bg-[#E2E8F0] rounded-[6px]" : ""}`}
               onClick={() => onChange((el.name as Props["value"]) ?? "top")}
             >
               <img src={el.img} />

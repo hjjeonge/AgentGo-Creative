@@ -49,7 +49,7 @@ export const DiagramPopup: React.FC<Props> = ({
       {diagramList.map((el) => (
         <button
           key={el.name}
-          className={`w-[55px] h-[55px] p-[10px] flex items-center justify-center cursor-pointer rounded-[6px] ${shapeType === el.name && "bg-[#CAD5E2]"}`}
+          className={`w-[55px] h-[55px] p-[10px] flex items-center justify-center rounded-[6px] ${shapeType === el.name && "bg-[#CAD5E2]"}`}
           onClick={() => setShapeType(el.name)}
         >
           <img src={el.img} />
