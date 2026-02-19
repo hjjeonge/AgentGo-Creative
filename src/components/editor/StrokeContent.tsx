@@ -1,6 +1,7 @@
 import type React from "react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ColorPalette } from "../commons/ColorPalette";
+import { ColorPickerPopup } from "../commons/ColorPickerPopup";
 
 interface Props {
   stroke?: string;
@@ -15,7 +16,23 @@ export const StrokeContent: React.FC<Props> = ({
   onChangeStroke,
   onChangeStrokeWidth,
 }: Props) => {
-  const [colorPaletteOpen, setColorPaletteOpen] = useState(false);
+  const [colorPopupMode, setColorPopupMode] = useState<
+    "picker" | "palette" | null
+  >(null);
+  const [recentColors, setRecentColors] = useState<string[]>([]);
+
+  const normalizedCurrent = useMemo(() => {
+    if (!stroke) return "#000000";
+    return stroke.startsWith("#") ? stroke.toUpperCase() : `#${stroke}`.toUpperCase();
+  }, [stroke]);
+
+  const addRecentColor = (value: string) => {
+    const normalized = value.toUpperCase();
+    setRecentColors((prev) => {
+      const next = [normalized, ...prev.filter((c) => c !== normalized)];
+      return next.slice(0, 7);
+    });
+  };
 
   return (
     <div className="flex flex-col p-[7px] border-b border-[#E2E8F0]  text-[16px] leading-[24px] text-[#0F172B]">
@@ -24,19 +41,38 @@ export const StrokeContent: React.FC<Props> = ({
         <div className="relative">
           <button
             className="w-[24px] h-[24px] p-[1px] border border-[#90A1B9] rounded-[4px] box-border"
-            onClick={() => setColorPaletteOpen((prev) => !prev)}
+            onClick={() =>
+              setColorPopupMode((prev) => (prev === null ? "picker" : null))
+            }
           >
             <div
               className="w-full h-full rounded-[3px]"
               style={{ backgroundColor: stroke ?? "#000000" }}
             />
           </button>
-          {colorPaletteOpen && (
+          {colorPopupMode && (
             <div className="absolute left-full top-0 ml-[8px] z-[100]">
-              <ColorPalette
-                colorCode={stroke ?? "#000000"}
-                handleColorCode={onChangeStroke}
-              />
+              {colorPopupMode === "picker" ? (
+                <ColorPickerPopup
+                  onClose={() => setColorPopupMode(null)}
+                  onOpenPalette={() => setColorPopupMode("palette")}
+                  currentColor={normalizedCurrent}
+                  recentlyUseColorList={recentColors}
+                  onSelectColor={(value) => {
+                    onChangeStroke(value);
+                    addRecentColor(value);
+                  }}
+                />
+              ) : (
+                <ColorPalette
+                  colorCode={normalizedCurrent}
+                  handleColorCode={(value) => {
+                    onChangeStroke(value);
+                    addRecentColor(value);
+                  }}
+                  onBack={() => setColorPopupMode("picker")}
+                />
+              )}
             </div>
           )}
         </div>
