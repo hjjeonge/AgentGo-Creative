@@ -38,6 +38,14 @@ export interface TextObject {
   stroke?: string;
   strokeWidth?: number;
   strokeEnabled?: boolean;
+  shadowColor?: string;
+  shadowBlur?: number;
+  shadowOpacity?: number;
+  shadowOffsetX?: number;
+  shadowOffsetY?: number;
+  shadowDirection?: number;
+  shadowDistance?: number;
+  shadowEnabled?: boolean;
 }
 
 interface EditorCanvasProps {
@@ -190,6 +198,11 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               scaleX={text.scaleX}
               stroke={text.strokeEnabled ? text.stroke : undefined}
               strokeWidth={text.strokeEnabled ? text.strokeWidth : 0}
+              shadowColor={text.shadowEnabled ? text.shadowColor : undefined}
+              shadowBlur={text.shadowEnabled ? text.shadowBlur : 0}
+              shadowOpacity={text.shadowEnabled ? text.shadowOpacity : 0}
+              shadowOffsetX={text.shadowEnabled ? text.shadowOffsetX : 0}
+              shadowOffsetY={text.shadowEnabled ? text.shadowOffsetY : 0}
               fill={text.fill}
               draggable
               visible={text.id !== editingTextId}

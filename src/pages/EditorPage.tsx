@@ -73,6 +73,14 @@ export const EditorPage: React.FC = () => {
       stroke: "#000000",
       strokeWidth: 0,
       strokeEnabled: false,
+      shadowColor: "#000000",
+      shadowBlur: 4,
+      shadowOpacity: 0.4,
+      shadowOffsetX: 4,
+      shadowOffsetY: 4,
+      shadowDirection: 45,
+      shadowDistance: 4,
+      shadowEnabled: false,
     };
     setTexts((prev) => [...prev, newText]);
     // Immediately select the newly added text
@@ -225,8 +233,10 @@ export const EditorPage: React.FC = () => {
   };
 
   // Determine if a text object is selected to show TextEditor
-  const isTextSelected = selectedId?.startsWith('text_') && !editingTextId;
-  const selectedTextObject = isTextSelected ? texts.find(t => t.id === selectedId) : undefined;
+  const isTextSelected = selectedId?.startsWith("text_") && !editingTextId;
+  const selectedTextObject = isTextSelected
+    ? texts.find((t) => t.id === selectedId)
+    : undefined;
 
   return (
     <div className="h-full w-full flex relative">

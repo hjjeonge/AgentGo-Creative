@@ -47,10 +47,12 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   handleUpdateTextObject,
 }) => {
   const [strokeOpen, setStrokeOpen] = useState(false);
+  const [shadowOpen, setShadowOpen] = useState(false);
 
   useEffect(() => {
     if (!selectedTextObject) {
       setStrokeOpen(false);
+      setShadowOpen(false);
     }
     if (
       selectedTextObject &&
@@ -59,10 +61,23 @@ export const TextEditor: React.FC<TextEditorProps> = ({
     ) {
       handleUpdateTextObject(selectedTextObject.id, { strokeEnabled: true });
     }
+    if (selectedTextObject) {
+      const hasShadow =
+        (selectedTextObject.shadowBlur ?? 0) > 0 ||
+        (selectedTextObject.shadowOpacity ?? 0) > 0 ||
+        (selectedTextObject.shadowDistance ?? 0) > 0;
+      if (hasShadow && !selectedTextObject.shadowEnabled) {
+        handleUpdateTextObject(selectedTextObject.id, { shadowEnabled: true });
+      }
+    }
   }, [
     selectedTextObject?.id,
     selectedTextObject?.strokeWidth,
     selectedTextObject?.strokeEnabled,
+    selectedTextObject?.shadowBlur,
+    selectedTextObject?.shadowOpacity,
+    selectedTextObject?.shadowDistance,
+    selectedTextObject?.shadowEnabled,
     handleUpdateTextObject,
   ]);
   const handleStyleToggle = (
@@ -139,7 +154,63 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         />
       ),
     },
-    { name: "그림자", isShow: true, content: <ShadowContent /> },
+    {
+      name: "그림자",
+      isShow: true,
+      contentClassName: "overflow-visible",
+      content: (
+        <ShadowContent
+          shadowColor={selectedTextObject?.shadowColor}
+          shadowDirection={selectedTextObject?.shadowDirection}
+          shadowOpacity={selectedTextObject?.shadowOpacity}
+          shadowDistance={selectedTextObject?.shadowDistance}
+          shadowBlur={selectedTextObject?.shadowBlur}
+          onChangeShadowColor={(value) =>
+            selectedTextObject &&
+            handleUpdateTextObject(selectedTextObject.id, {
+              shadowColor: value,
+              shadowEnabled: true,
+            })
+          }
+          onChangeShadowDirection={(value) => {
+            if (!selectedTextObject) return;
+            const rad = (value * Math.PI) / 180;
+            const distance = selectedTextObject.shadowDistance ?? 0;
+            handleUpdateTextObject(selectedTextObject.id, {
+              shadowDirection: value,
+              shadowOffsetX: Math.cos(rad) * distance,
+              shadowOffsetY: Math.sin(rad) * distance,
+              shadowEnabled: true,
+            });
+          }}
+          onChangeShadowOpacity={(value) =>
+            selectedTextObject &&
+            handleUpdateTextObject(selectedTextObject.id, {
+              shadowOpacity: value,
+              shadowEnabled: true,
+            })
+          }
+          onChangeShadowDistance={(value) => {
+            if (!selectedTextObject) return;
+            const direction = selectedTextObject.shadowDirection ?? 45;
+            const rad = (direction * Math.PI) / 180;
+            handleUpdateTextObject(selectedTextObject.id, {
+              shadowDistance: value,
+              shadowOffsetX: Math.cos(rad) * value,
+              shadowOffsetY: Math.sin(rad) * value,
+              shadowEnabled: true,
+            });
+          }}
+          onChangeShadowBlur={(value) =>
+            selectedTextObject &&
+            handleUpdateTextObject(selectedTextObject.id, {
+              shadowBlur: value,
+              shadowEnabled: true,
+            })
+          }
+        />
+      ),
+    },
     { name: "세로쓰기", isShow: false, content: null },
   ];
 
@@ -291,7 +362,9 @@ export const TextEditor: React.FC<TextEditorProps> = ({
             isSwitchOn={
               menu.name === "외곽선"
                 ? (selectedTextObject?.strokeEnabled ?? false)
-                : undefined
+                : menu.name === "그림자"
+                  ? (selectedTextObject?.shadowEnabled ?? false)
+                  : undefined
             }
             handleSwitch={
               menu.name === "외곽선"
@@ -316,11 +389,67 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                       });
                     }
                   }
+                : menu.name === "그림자"
+                  ? (checked) => {
+                      if (!selectedTextObject) return;
+                      if (checked) {
+                        handleUpdateTextObject(selectedTextObject.id, {
+                          shadowEnabled: true,
+                          shadowColor:
+                            selectedTextObject.shadowColor ?? "#000000",
+                          shadowOpacity:
+                            selectedTextObject.shadowOpacity ?? 0.5,
+                          shadowBlur:
+                            selectedTextObject.shadowBlur && selectedTextObject.shadowBlur > 0
+                              ? selectedTextObject.shadowBlur
+                              : 4,
+                          shadowDistance:
+                            selectedTextObject.shadowDistance &&
+                            selectedTextObject.shadowDistance > 0
+                              ? selectedTextObject.shadowDistance
+                              : 4,
+                        });
+                        const direction =
+                          selectedTextObject.shadowDirection ?? 45;
+                        const distance =
+                          selectedTextObject.shadowDistance &&
+                          selectedTextObject.shadowDistance > 0
+                            ? selectedTextObject.shadowDistance
+                            : 4;
+                        const rad = (direction * Math.PI) / 180;
+                        handleUpdateTextObject(selectedTextObject.id, {
+                          shadowOffsetX: Math.cos(rad) * distance,
+                          shadowOffsetY: Math.sin(rad) * distance,
+                        });
+                        setShadowOpen(true);
+                      } else {
+                        handleUpdateTextObject(selectedTextObject.id, {
+                          shadowEnabled: false,
+                          shadowColor: "#000000",
+                          shadowOpacity: 0,
+                          shadowBlur: 0,
+                          shadowDistance: 0,
+                          shadowOffsetX: 0,
+                          shadowOffsetY: 0,
+                          shadowDirection: 45,
+                        });
+                      }
+                    }
                 : undefined
             }
-            isOpen={menu.name === "외곽선" ? strokeOpen : undefined}
+            isOpen={
+              menu.name === "외곽선"
+                ? strokeOpen
+                : menu.name === "그림자"
+                  ? shadowOpen
+                  : undefined
+            }
             handleOpen={
-              menu.name === "외곽선" ? (open) => setStrokeOpen(open) : undefined
+              menu.name === "외곽선"
+                ? (open) => setStrokeOpen(open)
+                : menu.name === "그림자"
+                  ? (open) => setShadowOpen(open)
+                  : undefined
             }
           >
             {menu.content}

@@ -46,6 +46,7 @@ export const StrokeContent: React.FC<Props> = ({
         <input
           type="number"
           value={strokeWidth ?? 0}
+          min={0}
           onChange={(e) => onChangeStrokeWidth(parseFloat(e.target.value) || 0)}
           className="border border-[#CAD5E2] rounded-[6px] p-[7px] max-w-[100px]"
         />
