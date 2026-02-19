@@ -1,4 +1,5 @@
 import type React from "react";
+import { SwitchAccordion } from "../commons/SwitchAccordion";
 import Add from "./../../assets/add.svg";
 import AlignCenter from "./../../assets/format_align_center.svg";
 import Bold from "./../../assets/format_bold.svg";
@@ -14,12 +15,11 @@ import Satisfied from "./../../assets/sentiment_satisfied.svg";
 import VerticalTop from "./../../assets/vertical_align_top.svg";
 import type { TextObject } from "./EditorCanvas"; // Import TextObject
 import { FontFamilySelect } from "./FontFamilySelect";
-import { SettingsSwitchRow } from "./SettingsSwitchRow";
+import { ListFOrmatPopover } from "./ListFormatPopover";
 import { TextAlignPopover } from "./TextAlignPopver";
 import { ToolbarButton } from "./ToolbarButton";
 import { TypographyPopover } from "./TypographyPopover";
 import { VerticalAlignPopover } from "./VerticalAlignPopover";
-import { ListFOrmatPopover } from "./ListFormatPopover";
 
 const fontStyle = [
   { name: "bold", img: Bold, tooltip: "굵게" },
@@ -34,7 +34,11 @@ const fontDeco = [
   { name: "satisfied", img: Satisfied, tooltip: "특수문자" },
 ];
 
-const settingMenus = ["외곽선", "그림자", "곡선", "세로쓰기"];
+const settingMenus = [
+  { name: "외곽선", isShow: true, content: "" },
+  { name: "그림자", isShow: true, content: "" },
+  { name: "세로쓰기", isShow: false, content: "" },
+];
 
 interface TextEditorProps {
   selectedTextObject?: TextObject;
@@ -232,7 +236,12 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       <div className="h-[1px] bg-[#90A1B9]" />
       <div>
         {settingMenus.map((menu) => (
-          <SettingsSwitchRow key={menu} label={menu} />
+          <SwitchAccordion
+            key={menu.name}
+            value={menu.name}
+            title={menu.name}
+            isShow={menu.isShow}
+          />
         ))}
       </div>
     </div>
