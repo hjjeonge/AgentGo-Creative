@@ -19,6 +19,7 @@ import { TextAlignPopover } from "./TextAlignPopver";
 import { ToolbarButton } from "./ToolbarButton";
 import { TypographyPopover } from "./TypographyPopover";
 import { VerticalAlignPopover } from "./VerticalAlignPopover";
+import { ListFOrmatPopover } from "./ListFormatPopover";
 
 const fontStyle = [
   { name: "bold", img: Bold, tooltip: "굵게" },
@@ -207,7 +208,18 @@ export const TextEditor: React.FC<TextEditorProps> = ({
             >
               <ToolbarButton icon={LineSpacing} tooltip="글자조절" />
             </TypographyPopover>
-            <ToolbarButton icon={ListBulleted} tooltip="글머리기호" />
+            <ListFOrmatPopover
+              value={selectedTextObject?.listFormat}
+              onChange={(value) =>
+                selectedTextObject &&
+                handleUpdateTextObject(selectedTextObject.id, {
+                  listFormat:
+                    selectedTextObject.listFormat === value ? "none" : value,
+                })
+              }
+            >
+              <ToolbarButton icon={ListBulleted} tooltip="글머리기호" />
+            </ListFOrmatPopover>
           </div>
           <div className="w-[1px] h-[30px] bg-[#90A1B9]" />
           <div className="flex items-center justify-between flex-1">

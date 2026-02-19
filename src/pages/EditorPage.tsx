@@ -69,6 +69,7 @@ export const EditorPage: React.FC = () => {
       letterSpacing: 0,
       lineHeight: 1.2,
       scaleX: 1,
+      listFormat: "none",
     };
     setTexts((prev) => [...prev, newText]);
     // Immediately select the newly added text

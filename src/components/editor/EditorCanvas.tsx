@@ -34,6 +34,7 @@ export interface TextObject {
   letterSpacing?: number;
   lineHeight?: number;
   scaleX?: number;
+  listFormat?: "none" | "unordered" | "ordered";
 }
 
 interface EditorCanvasProps {
@@ -102,6 +103,14 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
 
   const editingText = texts.find((t) => t.id === editingTextId);
   const stageRef = useRef<any>(null);
+  const getDisplayText = (text: TextObject) => {
+    if (!text.listFormat || text.listFormat === "none") return text.text;
+    const lines = text.text.split("\n");
+    if (text.listFormat === "unordered") {
+      return lines.map((line) => `• ${line}`).join("\n");
+    }
+    return lines.map((line, index) => `${index + 1}. ${line}`).join("\n");
+  };
 
   return (
     <div style={{ position: "relative" }}>
@@ -165,7 +174,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               id={text.id}
               x={text.x}
               y={text.y}
-              text={text.text}
+              text={getDisplayText(text)}
               width={text.width}
               fontSize={text.fontSize}
               fontFamily={text.fontFamily}
