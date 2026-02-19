@@ -70,6 +70,9 @@ export const EditorPage: React.FC = () => {
       lineHeight: 1.2,
       scaleX: 1,
       listFormat: "none",
+      stroke: "#000000",
+      strokeWidth: 0,
+      strokeEnabled: false,
     };
     setTexts((prev) => [...prev, newText]);
     // Immediately select the newly added text

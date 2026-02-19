@@ -1,4 +1,5 @@
 import type React from "react";
+import { useEffect, useState } from "react";
 import { SwitchAccordion } from "../commons/SwitchAccordion";
 import Add from "./../../assets/add.svg";
 import AlignCenter from "./../../assets/format_align_center.svg";
@@ -36,12 +37,6 @@ const fontDeco = [
   { name: "satisfied", img: Satisfied, tooltip: "특수문자" },
 ];
 
-const settingMenus = [
-  { name: "외곽선", isShow: true, content: <StrokeContent /> },
-  { name: "그림자", isShow: true, content: <ShadowContent /> },
-  { name: "세로쓰기", isShow: false, content: null },
-];
-
 interface TextEditorProps {
   selectedTextObject?: TextObject;
   handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void; // Updated prop
@@ -51,6 +46,25 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   selectedTextObject,
   handleUpdateTextObject,
 }) => {
+  const [strokeOpen, setStrokeOpen] = useState(false);
+
+  useEffect(() => {
+    if (!selectedTextObject) {
+      setStrokeOpen(false);
+    }
+    if (
+      selectedTextObject &&
+      (selectedTextObject.strokeWidth ?? 0) > 0 &&
+      !selectedTextObject.strokeEnabled
+    ) {
+      handleUpdateTextObject(selectedTextObject.id, { strokeEnabled: true });
+    }
+  }, [
+    selectedTextObject?.id,
+    selectedTextObject?.strokeWidth,
+    selectedTextObject?.strokeEnabled,
+    handleUpdateTextObject,
+  ]);
   const handleStyleToggle = (
     style: "bold" | "italic" | "underline" | "strikethrough",
   ) => {
@@ -98,6 +112,36 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       });
     }
   };
+
+  const settingMenus = [
+    {
+      name: "외곽선",
+      isShow: true,
+      contentClassName: "overflow-visible",
+      content: (
+        <StrokeContent
+          stroke={selectedTextObject?.stroke}
+          strokeWidth={selectedTextObject?.strokeWidth}
+          onChangeStroke={(value) =>
+            selectedTextObject &&
+            handleUpdateTextObject(selectedTextObject.id, {
+              stroke: value,
+              strokeEnabled: true,
+            })
+          }
+          onChangeStrokeWidth={(value) =>
+            selectedTextObject &&
+            handleUpdateTextObject(selectedTextObject.id, {
+              strokeWidth: Math.max(0, value),
+              strokeEnabled: true,
+            })
+          }
+        />
+      ),
+    },
+    { name: "그림자", isShow: true, content: <ShadowContent /> },
+    { name: "세로쓰기", isShow: false, content: null },
+  ];
 
   return (
     <div className="absolute z-[50] top-[140px] right-[195px] rounded-[6px] bg-[#F1F5F9] border border-[#90A1B9] p-[24px] flex flex-col gap-[7px]">
@@ -243,6 +287,41 @@ export const TextEditor: React.FC<TextEditorProps> = ({
             value={menu.name}
             title={menu.name}
             isShow={menu.isShow}
+            contentClassName={menu.contentClassName}
+            isSwitchOn={
+              menu.name === "외곽선"
+                ? (selectedTextObject?.strokeEnabled ?? false)
+                : undefined
+            }
+            handleSwitch={
+              menu.name === "외곽선"
+                ? (checked) => {
+                    if (!selectedTextObject) return;
+                    if (checked) {
+                      handleUpdateTextObject(selectedTextObject.id, {
+                        strokeEnabled: true,
+                        stroke: selectedTextObject.stroke ?? "#000000",
+                        strokeWidth:
+                          selectedTextObject.strokeWidth &&
+                          selectedTextObject.strokeWidth > 0
+                            ? selectedTextObject.strokeWidth
+                            : 1,
+                      });
+                      setStrokeOpen(true);
+                    } else {
+                      handleUpdateTextObject(selectedTextObject.id, {
+                        strokeEnabled: false,
+                        stroke: "#000000",
+                        strokeWidth: 0,
+                      });
+                    }
+                  }
+                : undefined
+            }
+            isOpen={menu.name === "외곽선" ? strokeOpen : undefined}
+            handleOpen={
+              menu.name === "외곽선" ? (open) => setStrokeOpen(open) : undefined
+            }
           >
             {menu.content}
           </SwitchAccordion>

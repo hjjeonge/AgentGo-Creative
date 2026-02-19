@@ -35,6 +35,9 @@ export interface TextObject {
   lineHeight?: number;
   scaleX?: number;
   listFormat?: "none" | "unordered" | "ordered";
+  stroke?: string;
+  strokeWidth?: number;
+  strokeEnabled?: boolean;
 }
 
 interface EditorCanvasProps {
@@ -185,6 +188,8 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               letterSpacing={text.letterSpacing}
               lineHeight={text.lineHeight}
               scaleX={text.scaleX}
+              stroke={text.strokeEnabled ? text.stroke : undefined}
+              strokeWidth={text.strokeEnabled ? text.strokeWidth : 0}
               fill={text.fill}
               draggable
               visible={text.id !== editingTextId}
@@ -196,6 +201,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
                 if (node) objectRefs.current[text.id] = node;
               }}
               onTransformEnd={handleTransformEnd}
+              fillAfterStrokeEnabled
             />
           ))}
           <Transformer

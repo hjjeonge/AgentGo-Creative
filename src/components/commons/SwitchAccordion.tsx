@@ -18,6 +18,7 @@ interface Props {
   handleSwitch?: (value: boolean) => void;
   isOpen?: boolean;
   handleOpen?: (value: boolean) => void;
+  contentClassName?: string;
   children?: React.ReactNode;
 }
 
@@ -26,17 +27,24 @@ export const SwitchAccordion: React.FC<Props> = ({
   title,
   isShow,
   isSwitchOn,
+  handleSwitch,
   isOpen,
+  handleOpen,
   children,
+  contentClassName,
 }: Props) => {
-  console.log(title, " : ", isShow);
   const [openValue, setOpenValue] = useState<string | undefined>();
+  const resolvedOpenValue =
+    isOpen !== undefined ? (isOpen ? value : undefined) : openValue;
   return (
     <Accordion
       type="single"
       collapsible
-      value={openValue}
-      onValueChange={setOpenValue}
+      value={resolvedOpenValue}
+      onValueChange={(nextValue) => {
+        setOpenValue(nextValue);
+        handleOpen?.(nextValue === value);
+      }}
     >
       <AccordionItem value={value}>
         <AccordionTrigger asChild>
@@ -47,17 +55,33 @@ export const SwitchAccordion: React.FC<Props> = ({
                   <img
                     src={Arrow}
                     className={cn(
-                      `ransition-transform duration-200 ${openValue === value ? "rotate-0" : "-rotate-90"}`,
+                      `transition-transform duration-200 ${resolvedOpenValue === value ? "rotate-0" : "-rotate-90"}`,
                     )}
                   />
                 </button>
               )}
               <span>{title}</span>
             </div>
-            <CustomSwitch />
+            <div
+              onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              <CustomSwitch
+                checked={isSwitchOn}
+                onCheckedChange={(checked) => {
+                  handleSwitch?.(checked);
+                  if (checked) {
+                    handleOpen?.(true);
+                    setOpenValue(value);
+                  }
+                }}
+              />
+            </div>
           </div>
         </AccordionTrigger>
-        <AccordionContent>{children}</AccordionContent>
+        <AccordionContent className={contentClassName}>
+          {children}
+        </AccordionContent>
       </AccordionItem>
     </Accordion>
   );
