@@ -31,6 +31,9 @@ export interface TextObject {
   textDecoration?: string;
   align?: "left" | "center" | "right" | "justify";
   verticalAlign?: "top" | "middle" | "bottom";
+  letterSpacing?: number;
+  lineHeight?: number;
+  scaleX?: number;
 }
 
 interface EditorCanvasProps {
@@ -170,6 +173,9 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               textDecoration={text.textDecoration}
               align={text.align}
               verticalAlign={text.verticalAlign}
+              letterSpacing={text.letterSpacing}
+              lineHeight={text.lineHeight}
+              scaleX={text.scaleX}
               fill={text.fill}
               draggable
               visible={text.id !== editingTextId}
@@ -217,12 +223,21 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             background: "none",
             resize: "none",
             overflow: "hidden",
-            lineHeight: 1.2,
             fontFamily: editingText.fontFamily,
             fontStyle: editingText.fontStyle,
             textDecoration: editingText.textDecoration,
             textAlign: editingText.align,
             verticalAlign: editingText.verticalAlign,
+            letterSpacing:
+              editingText.letterSpacing !== undefined
+                ? `${editingText.letterSpacing}px`
+                : undefined,
+            lineHeight: editingText.lineHeight,
+            transform:
+              editingText.scaleX && editingText.scaleX !== 1
+                ? `scaleX(${editingText.scaleX})`
+                : undefined,
+            transformOrigin: "left top",
           }}
         />
       )}

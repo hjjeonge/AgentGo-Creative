@@ -66,6 +66,9 @@ export const EditorPage: React.FC = () => {
       textDecoration: "",
       align: "left",
       verticalAlign: "top",
+      letterSpacing: 0,
+      lineHeight: 1.2,
+      scaleX: 1,
     };
     setTexts((prev) => [...prev, newText]);
     // Immediately select the newly added text
@@ -188,17 +191,18 @@ export const EditorPage: React.FC = () => {
     node.scaleY(1);
 
     setTexts((prev) =>
-      prev.map((text) =>
-        text.id === id
-          ? {
-              ...text,
-              x: node.x(),
-              y: node.y(),
-              width: Math.max(5, (text.width ?? node.width()) * scaleX),
-              fontSize: Math.max(5, text.fontSize * scaleY),
-            }
-          : text,
-      ),
+      prev.map((text) => {
+        if (text.id !== id) return text;
+        const baseScaleX = text.scaleX ?? 1;
+        const effectiveScaleX = scaleX / baseScaleX;
+        return {
+          ...text,
+          x: node.x(),
+          y: node.y(),
+          width: Math.max(5, (text.width ?? node.width()) * effectiveScaleX),
+          fontSize: Math.max(5, text.fontSize * scaleY),
+        };
+      }),
     );
 
     setShapes((prev) =>

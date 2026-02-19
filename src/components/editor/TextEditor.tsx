@@ -184,7 +184,27 @@ export const TextEditor: React.FC<TextEditorProps> = ({
             >
               <ToolbarButton icon={VerticalTop} tooltip="상단정렬" />
             </VerticalAlignPopover>
-            <TypographyPopover>
+            <TypographyPopover
+              letterSpacing={selectedTextObject?.letterSpacing}
+              lineHeight={selectedTextObject?.lineHeight}
+              scaleX={selectedTextObject?.scaleX}
+              onChangeLetterSpacing={(value) =>
+                selectedTextObject &&
+                handleUpdateTextObject(selectedTextObject.id, {
+                  letterSpacing: value,
+                })
+              }
+              onChangeLineHeight={(value) =>
+                selectedTextObject &&
+                handleUpdateTextObject(selectedTextObject.id, {
+                  lineHeight: value,
+                })
+              }
+              onChangeScaleX={(value) =>
+                selectedTextObject &&
+                handleUpdateTextObject(selectedTextObject.id, { scaleX: value })
+              }
+            >
               <ToolbarButton icon={LineSpacing} tooltip="글자조절" />
             </TypographyPopover>
             <ToolbarButton icon={ListBulleted} tooltip="글머리기호" />
