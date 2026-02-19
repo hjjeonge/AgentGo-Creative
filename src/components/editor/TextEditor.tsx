@@ -44,38 +44,51 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   selectedTextObject,
   handleUpdateTextObject,
 }) => {
-  const handleStyleToggle = (style: "bold" | "italic" | "underline" | "strikethrough") => {
+  const handleStyleToggle = (
+    style: "bold" | "italic" | "underline" | "strikethrough",
+  ) => {
     if (!selectedTextObject) return;
 
     if (style === "bold" || style === "italic") {
-      const currentStyles = new Set((selectedTextObject.fontStyle || '').split(' ').filter(s => s && s !== 'normal'));
-      
+      const currentStyles = new Set(
+        (selectedTextObject.fontStyle || "")
+          .split(" ")
+          .filter((s) => s && s !== "normal"),
+      );
+
       if (currentStyles.has(style)) {
         currentStyles.delete(style);
       } else {
         currentStyles.add(style);
       }
 
-      let newFontStyle = '';
-      if (currentStyles.has('bold')) newFontStyle += 'bold ';
-      if (currentStyles.has('italic')) newFontStyle += 'italic ';
+      let newFontStyle = "";
+      if (currentStyles.has("bold")) newFontStyle += "bold ";
+      if (currentStyles.has("italic")) newFontStyle += "italic ";
 
       newFontStyle = newFontStyle.trim();
-      if (newFontStyle === '') newFontStyle = 'normal';
+      if (newFontStyle === "") newFontStyle = "normal";
 
-      handleUpdateTextObject(selectedTextObject.id, { fontStyle: newFontStyle });
+      handleUpdateTextObject(selectedTextObject.id, {
+        fontStyle: newFontStyle,
+      });
+    } else {
+      // underline or strikethrough
+      const decorationName =
+        style === "underline" ? "underline" : "line-through";
+      const currentDecorations = new Set(
+        (selectedTextObject.textDecoration || "").split(" ").filter((d) => d),
+      );
 
-    } else { // underline or strikethrough
-      const decorationName = style === "underline" ? "underline" : "line-through";
-      const currentDecorations = new Set((selectedTextObject.textDecoration || '').split(' ').filter(d => d));
-      
       if (currentDecorations.has(decorationName)) {
         currentDecorations.delete(decorationName);
       } else {
         currentDecorations.add(decorationName);
       }
-    
-      handleUpdateTextObject(selectedTextObject.id, { textDecoration: Array.from(currentDecorations).join(" ") });
+
+      handleUpdateTextObject(selectedTextObject.id, {
+        textDecoration: Array.from(currentDecorations).join(" "),
+      });
     }
   };
 
@@ -130,10 +143,18 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                 tooltip={el.tooltip}
                 onClick={() => handleStyleToggle(el.name as any)}
                 isActive={
-                  (el.name === 'bold' && selectedTextObject?.fontStyle?.includes('bold')) ||
-                  (el.name === 'italic' && selectedTextObject?.fontStyle?.includes('italic')) ||
-                  (el.name === 'underline' && selectedTextObject?.textDecoration?.includes('underline')) ||
-                  (el.name === 'strikethrough' && selectedTextObject?.textDecoration?.includes('line-through')) ||
+                  (el.name === "bold" &&
+                    selectedTextObject?.fontStyle?.includes("bold")) ||
+                  (el.name === "italic" &&
+                    selectedTextObject?.fontStyle?.includes("italic")) ||
+                  (el.name === "underline" &&
+                    selectedTextObject?.textDecoration?.includes(
+                      "underline",
+                    )) ||
+                  (el.name === "strikethrough" &&
+                    selectedTextObject?.textDecoration?.includes(
+                      "line-through",
+                    )) ||
                   false
                 }
                 className="border-l border-[#90A1B9] last:border-r-0 first:border-l-0 w-[45px] h-[40px] p-[11px_5px]"
@@ -143,10 +164,24 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         </div>
         <div className="flex items-center justify-between gap-[26px]">
           <div className="flex items-center justify-between flex-1">
-            <TextAlignPopover>
+            <TextAlignPopover
+              value={selectedTextObject?.align}
+              onChange={(value) =>
+                selectedTextObject &&
+                handleUpdateTextObject(selectedTextObject.id, { align: value })
+              }
+            >
               <ToolbarButton icon={AlignCenter} tooltip="글자정렬" />
             </TextAlignPopover>
-            <VerticalAlignPopover>
+            <VerticalAlignPopover
+              value={selectedTextObject?.verticalAlign}
+              onChange={(value) =>
+                selectedTextObject &&
+                handleUpdateTextObject(selectedTextObject.id, {
+                  verticalAlign: value,
+                })
+              }
+            >
               <ToolbarButton icon={VerticalTop} tooltip="상단정렬" />
             </VerticalAlignPopover>
             <TypographyPopover>

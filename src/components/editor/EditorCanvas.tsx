@@ -23,11 +23,14 @@ export interface TextObject {
   x: number;
   y: number;
   text: string;
+  width?: number;
   fontSize: number;
   fill: string;
   fontFamily?: string;
   fontStyle?: string;
   textDecoration?: string;
+  align?: "left" | "center" | "right" | "justify";
+  verticalAlign?: "top" | "middle" | "bottom";
 }
 
 interface EditorCanvasProps {
@@ -86,8 +89,10 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
     }
   };
 
-  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" || e.key === "Escape") {
+  const handleTextareaKeyDown = (
+    e: React.KeyboardEvent<HTMLTextAreaElement>,
+  ) => {
+    if (e.key === "Escape") {
       finishEditing();
     }
   };
@@ -158,10 +163,13 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               x={text.x}
               y={text.y}
               text={text.text}
+              width={text.width}
               fontSize={text.fontSize}
               fontFamily={text.fontFamily}
               fontStyle={text.fontStyle}
               textDecoration={text.textDecoration}
+              align={text.align}
+              verticalAlign={text.verticalAlign}
               fill={text.fill}
               draggable
               visible={text.id !== editingTextId}
@@ -192,14 +200,16 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
         <textarea
           ref={textAreaRef}
           value={editingText.text}
-          onChange={(e) => handleUpdateTextObject(editingText.id, { text: e.target.value })}
+          onChange={(e) =>
+            handleUpdateTextObject(editingText.id, { text: e.target.value })
+          }
           onKeyDown={handleTextareaKeyDown}
           onBlur={finishEditing}
           style={{
             position: "absolute",
             top: `${editingText.y}px`,
             left: `${editingText.x}px`,
-            width: `${objectRefs.current[editingText.id]?.width()}px`,
+            width: `${editingText.width ?? objectRefs.current[editingText.id]?.width()}px`,
             height: `${objectRefs.current[editingText.id]?.height()}px`,
             fontSize: `${editingText.fontSize}px`,
             color: editingText.fill,
@@ -211,6 +221,8 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             fontFamily: editingText.fontFamily,
             fontStyle: editingText.fontStyle,
             textDecoration: editingText.textDecoration,
+            textAlign: editingText.align,
+            verticalAlign: editingText.verticalAlign,
           }}
         />
       )}

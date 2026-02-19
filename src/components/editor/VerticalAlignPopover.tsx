@@ -6,12 +6,18 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 interface Props {
   children: React.ReactNode;
+  value?: "top" | "middle" | "bottom";
+  onChange: (value: "top" | "middle" | "bottom") => void;
 }
 
-export const VerticalAlignPopover: React.FC<Props> = ({ children }: Props) => {
+export const VerticalAlignPopover: React.FC<Props> = ({
+  children,
+  value,
+  onChange,
+}: Props) => {
   const list = [
     { name: "top", img: Top },
-    { name: "center", img: Center },
+    { name: "middle", img: Center },
     { name: "bottom", img: Bottom },
   ];
 
@@ -23,7 +29,8 @@ export const VerticalAlignPopover: React.FC<Props> = ({ children }: Props) => {
           {list.map((el) => (
             <button
               key={el.name}
-              className="flex items-center justify-center w-[40px] h-[40px] p-[3px] cursor-pointer"
+              className={`flex items-center justify-center w-[40px] h-[40px] p-[3px] cursor-pointer ${value === el.name ? "bg-[#E2E8F0] rounded-[6px]" : ""}`}
+              onClick={() => onChange((el.name as Props["value"]) ?? "top")}
             >
               <img src={el.img} />
             </button>

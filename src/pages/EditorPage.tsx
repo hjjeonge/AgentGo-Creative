@@ -58,11 +58,14 @@ export const EditorPage: React.FC = () => {
       text: "텍스트를 입력하세요",
       x: 150,
       y: 150,
+      width: 200,
       fontSize: 24,
       fill: "#000000",
       fontFamily: defaultFont,
       fontStyle: "normal",
       textDecoration: "",
+      align: "left",
+      verticalAlign: "top",
     };
     setTexts((prev) => [...prev, newText]);
     // Immediately select the newly added text
@@ -191,6 +194,7 @@ export const EditorPage: React.FC = () => {
               ...text,
               x: node.x(),
               y: node.y(),
+              width: Math.max(5, (text.width ?? node.width()) * scaleX),
               fontSize: Math.max(5, text.fontSize * scaleY),
             }
           : text,
