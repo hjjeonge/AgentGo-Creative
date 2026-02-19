@@ -46,6 +46,7 @@ export interface TextObject {
   shadowDirection?: number;
   shadowDistance?: number;
   shadowEnabled?: boolean;
+  verticalWriting?: boolean;
 }
 
 interface EditorCanvasProps {
@@ -114,13 +115,26 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
 
   const editingText = texts.find((t) => t.id === editingTextId);
   const stageRef = useRef<any>(null);
+  const toVerticalText = (value: string) => {
+    return value
+      .split("\n")
+      .map((line) =>
+        line.split("").join("\n"),
+      )
+      .join("\n\n");
+  };
+
   const getDisplayText = (text: TextObject) => {
-    if (!text.listFormat || text.listFormat === "none") return text.text;
-    const lines = text.text.split("\n");
-    if (text.listFormat === "unordered") {
-      return lines.map((line) => `• ${line}`).join("\n");
+    let baseText = text.text;
+    if (text.listFormat && text.listFormat !== "none") {
+      const lines = baseText.split("\n");
+      if (text.listFormat === "unordered") {
+        baseText = lines.map((line) => `• ${line}`).join("\n");
+      } else {
+        baseText = lines.map((line, index) => `${index + 1}. ${line}`).join("\n");
+      }
     }
-    return lines.map((line, index) => `${index + 1}. ${line}`).join("\n");
+    return text.verticalWriting ? toVerticalText(baseText) : baseText;
   };
 
   return (

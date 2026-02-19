@@ -81,6 +81,7 @@ export const EditorPage: React.FC = () => {
       shadowDirection: 45,
       shadowDistance: 4,
       shadowEnabled: false,
+      verticalWriting: false,
     };
     setTexts((prev) => [...prev, newText]);
     // Immediately select the newly added text

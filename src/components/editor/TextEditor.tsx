@@ -211,7 +211,11 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         />
       ),
     },
-    { name: "세로쓰기", isShow: false, content: null },
+    {
+      name: "세로쓰기",
+      isShow: false,
+      content: null,
+    },
   ];
 
   return (
@@ -364,6 +368,8 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                 ? (selectedTextObject?.strokeEnabled ?? false)
                 : menu.name === "그림자"
                   ? (selectedTextObject?.shadowEnabled ?? false)
+                  : menu.name === "세로쓰기"
+                    ? (selectedTextObject?.verticalWriting ?? false)
                   : undefined
             }
             handleSwitch={
@@ -434,6 +440,13 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                           shadowDirection: 45,
                         });
                       }
+                    }
+                : menu.name === "세로쓰기"
+                  ? (checked) => {
+                      if (!selectedTextObject) return;
+                      handleUpdateTextObject(selectedTextObject.id, {
+                        verticalWriting: checked,
+                      });
                     }
                 : undefined
             }

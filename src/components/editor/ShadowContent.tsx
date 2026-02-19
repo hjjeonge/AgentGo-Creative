@@ -93,7 +93,7 @@ export const ShadowContent: React.FC<Props> = ({
         <input
           type="number"
           min={0}
-          max={500}
+          max={100}
           step={1}
           value={shadowDistance ?? 0}
           onChange={(e) =>
