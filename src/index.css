@@ -132,3 +132,28 @@
     @apply bg-background text-foreground;
   }
 }
+
+button {
+  cursor: pointer;
+}
+
+.rcp-root.rcp {
+  padding: 10px;
+  background: white;
+}
+
+.rcp-alpha {
+  display: none;
+}
+
+.rcp-body {
+  background: white;
+}
+
+#hex {
+  color: black;
+}
+
+.rcp-field label {
+  display: none;
+}

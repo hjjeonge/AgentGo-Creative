@@ -1,6 +1,8 @@
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SwitchAccordion } from "../commons/SwitchAccordion";
+import { ColorPickerPopup } from "../commons/ColorPickerPopup";
+import { ColorPalette } from "../commons/ColorPalette";
 import Add from "./../../assets/add.svg";
 import AlignCenter from "./../../assets/format_align_center.svg";
 import Bold from "./../../assets/format_bold.svg";
@@ -48,6 +50,25 @@ export const TextEditor: React.FC<TextEditorProps> = ({
 }) => {
   const [strokeOpen, setStrokeOpen] = useState(false);
   const [shadowOpen, setShadowOpen] = useState(false);
+  const [colorPopupMode, setColorPopupMode] = useState<
+    "picker" | "palette" | null
+  >(null);
+  const [recentTextColors, setRecentTextColors] = useState<string[]>([]);
+
+  const normalizedCurrentColor = useMemo(() => {
+    if (!selectedTextObject?.fill) return "#000000";
+    return selectedTextObject.fill.startsWith("#")
+      ? selectedTextObject.fill.toUpperCase()
+      : `#${selectedTextObject.fill}`.toUpperCase();
+  }, [selectedTextObject?.fill]);
+
+  const addRecentColor = (value: string) => {
+    const normalized = value.toUpperCase();
+    setRecentTextColors((prev) => {
+      const next = [normalized, ...prev.filter((c) => c !== normalized)];
+      return next.slice(0, 7);
+    });
+  };
 
   useEffect(() => {
     if (!selectedTextObject) {
@@ -228,7 +249,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         <div className="flex items-center gap-[28px]">
           <div className="flex items-center border border-[#90A1B9] rounded-[6px] overflow-hidden">
             <button
-              className="flex items-center justify-center border-r border-[#90A1B9] last:border-r-0 w-[40px] h-[40px] p-[11px_5px] cursor-pointer"
+              className="flex items-center justify-center border-r border-[#90A1B9] last:border-r-0 w-[40px] h-[40px] p-[11px_5px]"
               onClick={() =>
                 selectedTextObject &&
                 handleUpdateTextObject(selectedTextObject.id, {
@@ -250,7 +271,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
               }
             />
             <button
-              className="flex items-center justify-center border-l border-[#90A1B9]  w-[40px] h-[40px] p-[11px_5px] cursor-pointer"
+              className="flex items-center justify-center border-l border-[#90A1B9]  w-[40px] h-[40px] p-[11px_5px]"
               onClick={() =>
                 selectedTextObject &&
                 handleUpdateTextObject(selectedTextObject.id, {
@@ -348,9 +369,58 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           </div>
           <div className="w-[1px] h-[30px] bg-[#90A1B9]" />
           <div className="flex items-center justify-between flex-1">
-            {fontDeco.map((el) => (
-              <ToolbarButton key={el.name} icon={el.img} tooltip={el.tooltip} />
-            ))}
+            {fontDeco.map((el) =>
+              el.name === "color" ? (
+                <div key={el.name} className="relative">
+                  <ToolbarButton
+                    icon={el.img}
+                    tooltip={el.tooltip}
+                    onClick={() =>
+                      setColorPopupMode((prev) =>
+                        prev === null ? "picker" : null,
+                      )
+                    }
+                  />
+                  {colorPopupMode && (
+                    <div className="absolute top-full left-0 mt-[6px] z-[100]">
+                      {colorPopupMode === "picker" ? (
+                        <ColorPickerPopup
+                          onClose={() => setColorPopupMode(null)}
+                          onOpenPalette={() => setColorPopupMode("palette")}
+                          currentColor={normalizedCurrentColor}
+                          recentlyUseColorList={recentTextColors}
+                          onSelectColor={(value) => {
+                            if (!selectedTextObject) return;
+                            handleUpdateTextObject(selectedTextObject.id, {
+                              fill: value,
+                            });
+                            addRecentColor(value);
+                          }}
+                        />
+                      ) : (
+                        <ColorPalette
+                          colorCode={normalizedCurrentColor}
+                          handleColorCode={(value) => {
+                            if (!selectedTextObject) return;
+                            handleUpdateTextObject(selectedTextObject.id, {
+                              fill: value,
+                            });
+                            addRecentColor(value);
+                          }}
+                          onBack={() => setColorPopupMode("picker")}
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <ToolbarButton
+                  key={el.name}
+                  icon={el.img}
+                  tooltip={el.tooltip}
+                />
+              ),
+            )}
           </div>
         </div>
       </div>
@@ -370,7 +440,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                   ? (selectedTextObject?.shadowEnabled ?? false)
                   : menu.name === "세로쓰기"
                     ? (selectedTextObject?.verticalWriting ?? false)
-                  : undefined
+                    : undefined
             }
             handleSwitch={
               menu.name === "외곽선"
@@ -406,7 +476,8 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                           shadowOpacity:
                             selectedTextObject.shadowOpacity ?? 0.5,
                           shadowBlur:
-                            selectedTextObject.shadowBlur && selectedTextObject.shadowBlur > 0
+                            selectedTextObject.shadowBlur &&
+                            selectedTextObject.shadowBlur > 0
                               ? selectedTextObject.shadowBlur
                               : 4,
                           shadowDistance:
@@ -441,14 +512,14 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                         });
                       }
                     }
-                : menu.name === "세로쓰기"
-                  ? (checked) => {
-                      if (!selectedTextObject) return;
-                      handleUpdateTextObject(selectedTextObject.id, {
-                        verticalWriting: checked,
-                      });
-                    }
-                : undefined
+                  : menu.name === "세로쓰기"
+                    ? (checked) => {
+                        if (!selectedTextObject) return;
+                        handleUpdateTextObject(selectedTextObject.id, {
+                          verticalWriting: checked,
+                        });
+                      }
+                    : undefined
             }
             isOpen={
               menu.name === "외곽선"
