@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { SwitchAccordion } from "../commons/SwitchAccordion";
 import { ColorPickerPopup } from "../commons/ColorPickerPopup";
 import { ColorPalette } from "../commons/ColorPalette";
+import { useColorHistoryStore } from "../../store/colorHistoryStore";
 import Add from "./../../assets/add.svg";
 import AlignCenter from "./../../assets/format_align_center.svg";
 import Bold from "./../../assets/format_bold.svg";
@@ -53,7 +54,8 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   const [colorPopupMode, setColorPopupMode] = useState<
     "picker" | "palette" | null
   >(null);
-  const [recentTextColors, setRecentTextColors] = useState<string[]>([]);
+  const recentTextColors = useColorHistoryStore((state) => state.recentColors);
+  const addRecentColor = useColorHistoryStore((state) => state.addRecentColor);
 
   const normalizedCurrentColor = useMemo(() => {
     if (!selectedTextObject?.fill) return "#000000";
@@ -62,13 +64,6 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       : `#${selectedTextObject.fill}`.toUpperCase();
   }, [selectedTextObject?.fill]);
 
-  const addRecentColor = (value: string) => {
-    const normalized = value.toUpperCase();
-    setRecentTextColors((prev) => {
-      const next = [normalized, ...prev.filter((c) => c !== normalized)];
-      return next.slice(0, 7);
-    });
-  };
 
   useEffect(() => {
     if (!selectedTextObject) {

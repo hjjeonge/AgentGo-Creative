@@ -2,6 +2,7 @@ import type React from "react";
 import { useMemo, useState } from "react";
 import { ColorPalette } from "../commons/ColorPalette";
 import { ColorPickerPopup } from "../commons/ColorPickerPopup";
+import { useColorHistoryStore } from "../../store/colorHistoryStore";
 
 interface Props {
   shadowColor?: string;
@@ -31,7 +32,8 @@ export const ShadowContent: React.FC<Props> = ({
   const [colorPopupMode, setColorPopupMode] = useState<
     "picker" | "palette" | null
   >(null);
-  const [recentColors, setRecentColors] = useState<string[]>([]);
+  const recentColors = useColorHistoryStore((state) => state.recentColors);
+  const addRecentColor = useColorHistoryStore((state) => state.addRecentColor);
 
   const normalizedCurrent = useMemo(() => {
     if (!shadowColor) return "#000000";
@@ -40,13 +42,6 @@ export const ShadowContent: React.FC<Props> = ({
       : `#${shadowColor}`.toUpperCase();
   }, [shadowColor]);
 
-  const addRecentColor = (value: string) => {
-    const normalized = value.toUpperCase();
-    setRecentColors((prev) => {
-      const next = [normalized, ...prev.filter((c) => c !== normalized)];
-      return next.slice(0, 7);
-    });
-  };
 
   return (
     <div className="flex flex-col p-[7px] border-b border-[#E2E8F0]  text-[16px] leading-[24px] text-[#0F172B]">
