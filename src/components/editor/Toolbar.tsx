@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { getPenColorImg, getPenStrokeWidthImg } from "../../utils/getImage";
 import { ColorPalette } from "../commons/ColorPalette";
+import { ColorPickerPopup } from "../commons/ColorPickerPopup";
+import { useColorHistoryStore } from "../../store/colorHistoryStore";
 import { ClickIcon } from "../icons/ClickIcon";
 import { DiagramIcon } from "../icons/DiagramIcon";
 import { EraserIcon } from "../icons/EraserIcon";
@@ -41,12 +43,16 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   handleUpdateTextObject,
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const [colorPaletteOpen, setColorPaletteOpen] = useState(false);
+  const [colorPopupMode, setColorPopupMode] = useState<
+    "picker" | "palette" | null
+  >(null);
+  const recentColors = useColorHistoryStore((state) => state.recentColors);
+  const addRecentColor = useColorHistoryStore((state) => state.addRecentColor);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (!wrapperRef.current?.contains(e.target as Node)) {
-        setColorPaletteOpen(false);
+        setColorPopupMode(null);
       }
     };
 
@@ -66,7 +72,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
   const onClickColorOption = (value: string) => {
     if (value === "empty") {
-      setColorPaletteOpen(true);
+      setColorPopupMode("picker");
       return;
     }
     handlePenStrokeColor(value);
@@ -121,12 +127,29 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               })}
             </>
           )}
-          {colorPaletteOpen && (
+          {colorPopupMode && (
             <div className="absolute top-[5px] right-[-180px] mt-[20px] z-50">
-              <ColorPalette
-                colorCode={penStrokeColor}
-                handleColorCode={handlePenStrokeColor}
-              />
+              {colorPopupMode === "picker" ? (
+                <ColorPickerPopup
+                  onClose={() => setColorPopupMode(null)}
+                  onOpenPalette={() => setColorPopupMode("palette")}
+                  currentColor={penStrokeColor}
+                  recentlyUseColorList={recentColors}
+                  onSelectColor={(value) => {
+                    handlePenStrokeColor(value);
+                    addRecentColor(value);
+                  }}
+                />
+              ) : (
+                <ColorPalette
+                  colorCode={penStrokeColor}
+                  handleColorCode={(value) => {
+                    handlePenStrokeColor(value);
+                    addRecentColor(value);
+                  }}
+                  onBack={() => setColorPopupMode("picker")}
+                />
+              )}
             </div>
           )}
         </div>
