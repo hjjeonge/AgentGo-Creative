@@ -8,6 +8,7 @@ import {
 } from "./EditorCanvas";
 import { loadGoogleFont } from "../../utils/fontLoader";
 import { Toolbar } from "./Toolbar";
+import { Prompt } from "./Prompt";
 
 export const Canvas: React.FC = () => {
   const [activeTool, setActiveTool] = useState<string>("mouse");
@@ -271,6 +272,8 @@ export const Canvas: React.FC = () => {
           handleUpdateTextObject={handleUpdateTextObject}
         />
       </div>
+
+      <Prompt />
     </section>
   );
 };
