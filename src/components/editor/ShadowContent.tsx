@@ -1,5 +1,5 @@
 import type React from "react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ColorPalette } from "../commons/ColorPalette";
 import { ColorPickerPopup } from "../commons/ColorPickerPopup";
 import { useColorHistoryStore } from "../../store/colorHistoryStore";
@@ -15,6 +15,11 @@ interface Props {
   onChangeShadowOpacity: (value: number) => void;
   onChangeShadowDistance: (value: number) => void;
   onChangeShadowBlur: (value: number) => void;
+  colorPopupMode: "picker" | "palette" | null;
+  onOpenPicker: () => void;
+  onOpenPalette: () => void;
+  onBackToPicker: () => void;
+  onClosePicker: () => void;
 }
 
 export const ShadowContent: React.FC<Props> = ({
@@ -28,10 +33,12 @@ export const ShadowContent: React.FC<Props> = ({
   onChangeShadowOpacity,
   onChangeShadowDistance,
   onChangeShadowBlur,
+  colorPopupMode,
+  onOpenPicker,
+  onOpenPalette,
+  onBackToPicker,
+  onClosePicker,
 }: Props) => {
-  const [colorPopupMode, setColorPopupMode] = useState<
-    "picker" | "palette" | null
-  >(null);
   const recentColors = useColorHistoryStore((state) => state.recentColors);
   const addRecentColor = useColorHistoryStore((state) => state.addRecentColor);
 
@@ -50,9 +57,7 @@ export const ShadowContent: React.FC<Props> = ({
         <div className="relative">
           <button
             className="w-[24px] h-[24px] p-[1px] border border-[#90A1B9] rounded-[4px] box-border"
-            onClick={() =>
-              setColorPopupMode((prev) => (prev === null ? "picker" : null))
-            }
+            onClick={onOpenPicker}
           >
             <div
               className="w-full h-full rounded-[3px]"
@@ -63,8 +68,8 @@ export const ShadowContent: React.FC<Props> = ({
             <div className="absolute left-full top-0 ml-[8px] z-[100]">
               {colorPopupMode === "picker" ? (
                 <ColorPickerPopup
-                  onClose={() => setColorPopupMode(null)}
-                  onOpenPalette={() => setColorPopupMode("palette")}
+                  onClose={onClosePicker}
+                  onOpenPalette={onOpenPalette}
                   currentColor={normalizedCurrent}
                   recentlyUseColorList={recentColors}
                   onSelectColor={(value) => {
@@ -79,7 +84,7 @@ export const ShadowContent: React.FC<Props> = ({
                     onChangeShadowColor(value);
                     addRecentColor(value);
                   }}
-                  onBack={() => setColorPopupMode("picker")}
+                  onBack={onBackToPicker}
                 />
               )}
             </div>

@@ -51,11 +51,9 @@ export const TextEditor: React.FC<TextEditorProps> = ({
 }) => {
   const [strokeOpen, setStrokeOpen] = useState(false);
   const [shadowOpen, setShadowOpen] = useState(false);
-  const [colorPopupMode, setColorPopupMode] = useState<
-    "picker" | "palette" | null
-  >(null);
-  const [highlightPopupMode, setHighlightPopupMode] = useState<
-    "picker" | "palette" | null
+  const [popupMode, setPopupMode] = useState<"picker" | "palette">("picker");
+  const [activePopupTarget, setActivePopupTarget] = useState<
+    "text" | "highlight" | "stroke" | "shadow" | null
   >(null);
   const recentTextColors = useColorHistoryStore((state) => state.recentColors);
   const addRecentColor = useColorHistoryStore((state) => state.addRecentColor);
@@ -74,6 +72,24 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       : `#${selectedTextObject.backgroundColor}`.toUpperCase();
   }, [selectedTextObject?.backgroundColor]);
 
+  const openPicker = (
+    target: "text" | "highlight" | "stroke" | "shadow",
+    keepOpen = false,
+  ) => {
+    setActivePopupTarget((prev) =>
+      keepOpen ? target : prev === target ? null : target,
+    );
+    setPopupMode("picker");
+  };
+
+  const openPalette = (target: "text" | "highlight" | "stroke" | "shadow") => {
+    setActivePopupTarget(target);
+    setPopupMode("palette");
+  };
+
+  const closePopup = () => {
+    setActivePopupTarget(null);
+  };
 
   useEffect(() => {
     if (!selectedTextObject) {
@@ -163,6 +179,13 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         <StrokeContent
           stroke={selectedTextObject?.stroke}
           strokeWidth={selectedTextObject?.strokeWidth}
+          colorPopupMode={
+            activePopupTarget === "stroke" ? popupMode : null
+          }
+          onOpenPicker={() => openPicker("stroke")}
+          onOpenPalette={() => openPalette("stroke")}
+          onBackToPicker={() => openPicker("stroke", true)}
+          onClosePicker={closePopup}
           onChangeStroke={(value) =>
             selectedTextObject &&
             handleUpdateTextObject(selectedTextObject.id, {
@@ -191,6 +214,13 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           shadowOpacity={selectedTextObject?.shadowOpacity}
           shadowDistance={selectedTextObject?.shadowDistance}
           shadowBlur={selectedTextObject?.shadowBlur}
+          colorPopupMode={
+            activePopupTarget === "shadow" ? popupMode : null
+          }
+          onOpenPicker={() => openPicker("shadow")}
+          onOpenPalette={() => openPalette("shadow")}
+          onBackToPicker={() => openPicker("shadow", true)}
+          onClosePicker={closePopup}
           onChangeShadowColor={(value) =>
             selectedTextObject &&
             handleUpdateTextObject(selectedTextObject.id, {
@@ -381,18 +411,14 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                     <ToolbarButton
                       icon={el.img}
                       tooltip={el.tooltip}
-                      onClick={() =>
-                        setColorPopupMode((prev) =>
-                          prev === null ? "picker" : null,
-                        )
-                      }
+                      onClick={() => openPicker("text")}
                     />
-                    {colorPopupMode && (
+                    {activePopupTarget === "text" && (
                       <div className="absolute top-full left-0 mt-[6px] z-[100]">
-                        {colorPopupMode === "picker" ? (
+                        {popupMode === "picker" ? (
                           <ColorPickerPopup
-                            onClose={() => setColorPopupMode(null)}
-                            onOpenPalette={() => setColorPopupMode("palette")}
+                            onClose={closePopup}
+                            onOpenPalette={() => openPalette("text")}
                             currentColor={normalizedCurrentColor}
                             recentlyUseColorList={recentTextColors}
                             onSelectColor={(value) => {
@@ -413,7 +439,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                               });
                               addRecentColor(value);
                             }}
-                            onBack={() => setColorPopupMode("picker")}
+                            onBack={() => openPicker("text", true)}
                           />
                         )}
                       </div>
@@ -428,19 +454,15 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                     <ToolbarButton
                       icon={el.img}
                       tooltip={el.tooltip}
-                      onClick={() =>
-                        setHighlightPopupMode((prev) =>
-                          prev === null ? "picker" : null,
-                        )
-                      }
+                      onClick={() => openPicker("highlight")}
                     />
-                    {highlightPopupMode && (
+                    {activePopupTarget === "highlight" && (
                       <div className="absolute top-full left-0 mt-[6px] z-[100]">
-                        {highlightPopupMode === "picker" ? (
+                        {popupMode === "picker" ? (
                           <ColorPickerPopup
-                            onClose={() => setHighlightPopupMode(null)}
+                            onClose={closePopup}
                             onOpenPalette={() =>
-                              setHighlightPopupMode("palette")
+                              openPalette("highlight")
                             }
                             currentColor={normalizedHighlightColor}
                             recentlyUseColorList={recentTextColors}
@@ -464,7 +486,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                               });
                               addRecentColor(value);
                             }}
-                            onBack={() => setHighlightPopupMode("picker")}
+                            onBack={() => openPicker("highlight", true)}
                           />
                         )}
                       </div>
