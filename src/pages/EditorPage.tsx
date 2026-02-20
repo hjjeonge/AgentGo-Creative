@@ -263,7 +263,7 @@ export const EditorPage: React.FC = () => {
         />
 
         {/* Konva 캔버스 컨테이너 */}
-        <div ref={containerRef} className="flex-1 h-full w-full bg-white">
+        <div ref={containerRef} className="h-[605px] w-[480px] bg-white">
           <EditorCanvas
             stageSize={stageSize}
             handleMouseDown={handleMouseDown}
