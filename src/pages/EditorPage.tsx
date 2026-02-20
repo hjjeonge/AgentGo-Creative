@@ -282,20 +282,12 @@ export const EditorPage: React.FC = () => {
             handleUpdateTextObject={handleUpdateTextObject}
           />
         </div>
-        {/* 접혔을 때 보이는 버튼 */}
-        {!isHistoryOpen && (
-          <button
-            onClick={handleWorkHistory}
-            className="absolute right-0 top-1/2 -translate-y-1/2 
-                       w-[32px] h-[80px] bg-white shadow-md 
-                       rounded-l-md flex items-center justify-center"
-          >
-            &lt;
-          </button>
-        )}
       </section>
 
-      {isHistoryOpen && <HistoryPanel handleWorkHistory={handleWorkHistory} />}
+      <HistoryPanel
+        handleWorkHistory={handleWorkHistory}
+        historyOpen={isHistoryOpen}
+      />
     </div>
   );
 };
