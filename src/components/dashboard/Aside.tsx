@@ -1,6 +1,7 @@
 import type React from "react";
 import { RecentProjectItem } from "./RecentProjectItem";
 import Arrow from "./../../assets/arrow_down.svg";
+import Collapse from "./../../assets/Collapse.svg";
 
 interface Props {
   asideOpen: boolean;
@@ -18,9 +19,9 @@ export const Aside: React.FC<Props> = ({ asideOpen, handleAside }: Props) => {
             </span>
             <button
               onClick={handleAside}
-              className="w-[28px] h-[28px] rounded-[6px] border border-[#569DFF]/20 bg-[#F8FAFF]"
+              className="w-[28px] h-[28px] rounded-[6px] border border-[#569DFF]/20 bg-[#F8FAFF] flex items-center justify-center"
             >
-              <img />
+              <img src={Collapse} />
             </button>
           </div>
           <div className="px-[12px] flex flex-col gap-[8px]">
