@@ -1,6 +1,7 @@
 import type React from "react";
 import { Aside } from "../components/dashboard/Aside";
 import { useState } from "react";
+import { Content } from "../components/dashboard/Content";
 
 export const DashboardPage: React.FC = () => {
   const [asideOpen, setAsideOpen] = useState(true);
@@ -24,7 +25,7 @@ export const DashboardPage: React.FC = () => {
     `,
         }}
       >
-        content
+        <Content />
       </div>
     </div>
   );
