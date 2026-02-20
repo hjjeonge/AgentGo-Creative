@@ -9,6 +9,7 @@ import {
   type TextObject,
 } from "../components/editor/EditorCanvas";
 import { loadGoogleFont } from "../utils/fontLoader";
+import { Aside } from "../components/editor/Aside";
 
 export const EditorPage: React.FC = () => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
@@ -243,8 +244,7 @@ export const EditorPage: React.FC = () => {
 
   return (
     <div className="h-full w-full flex relative">
-      <aside className="w-[85px] bg-amber-100 shrink-0"></aside>
-
+      <Aside />
       {/* 캔버스 영역 */}
       <section className="h-full flex-1 min-w-0 bg-[#E2E8F0] relative flex flex-col items-center">
         {/* 툴바 */}
