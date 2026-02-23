@@ -1,7 +1,8 @@
 import Konva from "konva";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Group,
+  Image as KonvaImage,
   Layer,
   Line,
   Rect,
@@ -75,7 +76,8 @@ interface EditorCanvasProps {
   handleTransformEnd: (e: any) => void;
   editingTextId: string | null;
   setEditingTextId: (id: string | null) => void;
-  handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void; // Changed prop
+  handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void;
+  backgroundImageUrl?: string | null;
 }
 
 export const EditorCanvas: React.FC<EditorCanvasProps> = ({
@@ -93,9 +95,21 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   handleTransformEnd,
   editingTextId,
   setEditingTextId,
-  handleUpdateTextObject, // Changed prop
+  handleUpdateTextObject,
+  backgroundImageUrl,
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [bgImage, setBgImage] = useState<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    if (backgroundImageUrl) {
+      const img = new window.Image();
+      img.src = backgroundImageUrl;
+      img.onload = () => setBgImage(img);
+    } else {
+      setBgImage(null);
+    }
+  }, [backgroundImageUrl]);
 
   useEffect(() => {
     if (editingTextId && textAreaRef.current) {
@@ -103,7 +117,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
     }
   }, [editingTextId]);
 
-  const handleTextDblClick = (e: any, text: TextObject) => {
+  const handleTextDblClick = (_e: any, text: TextObject) => {
     setSelectedId(null);
     setEditingTextId(text.id);
   };
@@ -171,6 +185,16 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
         onMouseUp={handleMouseUp}
       >
         <Layer>
+          {bgImage && (
+            <KonvaImage
+              image={bgImage}
+              x={0}
+              y={0}
+              width={stageSize.width}
+              height={stageSize.height}
+              listening={false}
+            />
+          )}
           {lines.map((line, i) => (
             <Line
               key={i}

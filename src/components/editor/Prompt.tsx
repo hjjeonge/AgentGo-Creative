@@ -2,11 +2,17 @@ import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import Close from "./../../assets/close-line.svg";
 
-export const Prompt: React.FC = () => {
+interface Props {
+  onGenerate?: (prompt: string) => void;
+}
+
+export const Prompt: React.FC<Props> = ({ onGenerate }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [prompt, setPrompt] = useState("");
   const [images, setImages] = useState<{ file: File; url: string }[]>([]);
+
+  const canSend = prompt.trim().length > 0;
 
   const handleOpenFile = () => {
     fileInputRef.current?.click();
@@ -41,6 +47,20 @@ export const Prompt: React.FC = () => {
     });
   };
 
+  const handleSend = () => {
+    if (!canSend) return;
+    onGenerate?.(prompt);
+    setPrompt("");
+    setImages([]);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
   useEffect(() => {
     return () => {
       images.forEach((img) => URL.revokeObjectURL(img.url));
@@ -59,41 +79,52 @@ export const Prompt: React.FC = () => {
 
   return (
     <div className="absolute bottom-[50px] left-1/2 -translate-x-1/2 z-[40] w-[768px] bg-white border border-[#155DFC] rounded-[8px] p-[10px_8px] flex flex-col gap-[12px]">
-      <div className="flex items-center gap-[8px] flex-wrap">
-        {images.map((img, index) => (
-          <div
-            key={`${img.url}-${index}`}
-            className="relative rounded-[8px] overflow-hidden"
-            style={{ width: previewSize, height: previewSize }}
-          >
-            <img src={img.url} className="w-full h-full object-cover" />
-            <button
-              onClick={() => handleRemoveImage(index)}
-              className="absolute top-[5px] right-[3px] w-[12px] h-[12x] bg-black rounded-full text-white text-[12px] leading-[18px] text-center"
+      {images.length > 0 && (
+        <div className="flex items-center gap-[8px] flex-wrap">
+          {images.map((img, index) => (
+            <div
+              key={`${img.url}-${index}`}
+              className="relative rounded-[8px] overflow-hidden"
+              style={{ width: previewSize, height: previewSize }}
             >
-              <img src={Close} />
-            </button>
-          </div>
-        ))}
-      </div>
+              <img src={img.url} className="w-full h-full object-cover" />
+              <button
+                onClick={() => handleRemoveImage(index)}
+                className="absolute top-[4px] right-[4px] w-[16px] h-[16px] bg-black/60 rounded-full flex items-center justify-center"
+              >
+                <img src={Close} className="w-[10px] h-[10px]" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="flex flex-col gap-[26px]">
         <textarea
           ref={textareaRef}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="AgentGo에게 물어보세요."
-          className="w-full rounded-[8px] p-[10px] text-[14px] leading-[20px] max-h-[320px] overflow-y-auto resize-none"
+          className="w-full rounded-[8px] p-[10px] text-[14px] leading-[20px] max-h-[320px] overflow-y-auto resize-none outline-none"
           rows={1}
         />
         <div className="flex items-center justify-between">
           <button
             onClick={handleOpenFile}
-            className="text-[14px] text-[#0F172B] leading-[19.88px] rounded-[4px] border border-[#CAD5E2]"
+            className="text-[14px] text-[#0F172B] leading-[19.88px] rounded-[4px] border border-[#CAD5E2] px-[10px] py-[4px] hover:bg-[#F8FAFF]"
           >
             레퍼런스 첨부
           </button>
-          <button className="w-[32px] h-[32px] rounded-[4px] bg-[#90A1B9]">
-            -
+          <button
+            onClick={handleSend}
+            disabled={!canSend}
+            className={`w-[32px] h-[32px] rounded-[4px] flex items-center justify-center transition-colors ${
+              canSend
+                ? "bg-[#155DFC] hover:bg-[#0044CC]"
+                : "bg-[#90A1B9] cursor-not-allowed"
+            }`}
+          >
+            <span className="text-white text-[16px] leading-none">↑</span>
           </button>
         </div>
         <input

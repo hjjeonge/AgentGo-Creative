@@ -1,5 +1,11 @@
-import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+import { useNavigate } from "react-router-dom";
 import {
   EditorCanvas,
   type DrawLine,
@@ -9,271 +15,350 @@ import {
 import { loadGoogleFont } from "../../utils/fontLoader";
 import { Toolbar } from "./Toolbar";
 import { Prompt } from "./Prompt";
+import type { CanvasHandle, CanvasSnapshot } from "../../types/editor";
 
-export const Canvas: React.FC = () => {
-  const [activeTool, setActiveTool] = useState<string>("mouse");
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
+interface Props {
+  onGenerate?: (prompt: string) => void;
+}
 
-  const [lines, setLines] = useState<DrawLine[]>([]);
-  const [shapes, setShapes] = useState<Shape[]>([]);
-  const [texts, setTexts] = useState<TextObject[]>([]);
-  const [currentLine, setCurrentLine] = useState<DrawLine | null>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [shapeType, setShapeType] = useState("square");
+export const Canvas = forwardRef<CanvasHandle, Props>(
+  ({ onGenerate }, ref) => {
+    const navigate = useNavigate();
+    const [activeTool, setActiveTool] = useState<string>("mouse");
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
 
-  const [penStrokeWidth, setPenStrokeWidth] = useState(2);
-  const [penStrokeColor, setPenStrokeColor] = useState("#E7000B");
+    const [backgroundImage, setBackgroundImageState] = useState<string | null>(null);
+    const [lines, setLines] = useState<DrawLine[]>([]);
+    const [shapes, setShapes] = useState<Shape[]>([]);
+    const [texts, setTexts] = useState<TextObject[]>([]);
+    const [currentLine, setCurrentLine] = useState<DrawLine | null>(null);
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [shapeType, setShapeType] = useState("square");
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [editingTextId, setEditingTextId] = useState<string | null>(null);
-  const objectRefs = useRef<Record<string, any>>({});
-  const trRef = useRef<any>(null);
+    const [penStrokeWidth, setPenStrokeWidth] = useState(2);
+    const [penStrokeColor, setPenStrokeColor] = useState("#E7000B");
 
-  useEffect(() => {
-    if (trRef.current) {
-      if (selectedId && !editingTextId) {
-        const node = objectRefs.current[selectedId];
-        if (node) {
-          trRef.current.nodes([node]);
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [editingTextId, setEditingTextId] = useState<string | null>(null);
+    const objectRefs = useRef<Record<string, any>>({});
+    const trRef = useRef<any>(null);
+
+    // Delete selected object on Delete/Backspace key
+    useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if ((e.key === "Delete" || e.key === "Backspace") && selectedId && !editingTextId) {
+          if (selectedId.startsWith("text_")) {
+            setTexts((prev) => prev.filter((t) => t.id !== selectedId));
+          } else if (selectedId.startsWith("shape_")) {
+            setShapes((prev) => prev.filter((s) => s.id !== selectedId));
+          }
+          setSelectedId(null);
         }
-      } else {
-        trRef.current.nodes([]);
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [selectedId, editingTextId]);
+
+    // Refs for snapshot (always up-to-date)
+    const linesRef = useRef(lines);
+    const shapesRef = useRef(shapes);
+    const textsRef = useRef(texts);
+    const backgroundImageRef = useRef(backgroundImage);
+
+    useEffect(() => { linesRef.current = lines; }, [lines]);
+    useEffect(() => { shapesRef.current = shapes; }, [shapes]);
+    useEffect(() => { textsRef.current = texts; }, [texts]);
+    useEffect(() => { backgroundImageRef.current = backgroundImage; }, [backgroundImage]);
+
+    useImperativeHandle(ref, () => ({
+      setBackgroundImage: (url: string | null) => {
+        setBackgroundImageState(url);
+      },
+      getSnapshot: (): CanvasSnapshot => ({
+        lines: linesRef.current,
+        shapes: shapesRef.current,
+        texts: textsRef.current,
+        backgroundImage: backgroundImageRef.current,
+      }),
+      restoreSnapshot: (snapshot: CanvasSnapshot) => {
+        setLines(snapshot.lines);
+        setShapes(snapshot.shapes);
+        setTexts(snapshot.texts);
+        setBackgroundImageState(snapshot.backgroundImage);
+        setSelectedId(null);
+        setEditingTextId(null);
+      },
+      hasImage: () => backgroundImageRef.current !== null,
+      clearCanvas: () => {
+        setLines([]);
+        setShapes([]);
+        setTexts([]);
+        setBackgroundImageState(null);
+        setSelectedId(null);
+        setEditingTextId(null);
+      },
+    }));
+
+    useEffect(() => {
+      if (trRef.current) {
+        if (selectedId && !editingTextId) {
+          const node = objectRefs.current[selectedId];
+          if (node) {
+            trRef.current.nodes([node]);
+          }
+        } else {
+          trRef.current.nodes([]);
+        }
+        trRef.current.getLayer()?.batchDraw();
       }
-      trRef.current.getLayer()?.batchDraw();
-    }
-  }, [selectedId, shapes, texts, editingTextId]);
+    }, [selectedId, shapes, texts, editingTextId]);
 
-  const handleAddText = () => {
-    const defaultFont = "Noto Sans KR";
-    loadGoogleFont(defaultFont); // Ensure the default font is loaded
+    const handleAddText = () => {
+      const defaultFont = "Noto Sans KR";
+      loadGoogleFont(defaultFont);
 
-    const newText: TextObject = {
-      id: `text_${texts.length}`,
-      text: "텍스트를 입력하세요",
-      x: 150,
-      y: 150,
-      width: 200,
-      fontSize: 24,
-      fill: "#000000",
-      fontFamily: defaultFont,
-      fontStyle: "normal",
-      textDecoration: "",
-      align: "left",
-      verticalAlign: "top",
-      letterSpacing: 0,
-      lineHeight: 1.2,
-      scaleX: 1,
-      listFormat: "none",
-      stroke: "#000000",
-      strokeWidth: 0,
-      strokeEnabled: false,
-      shadowColor: "none",
-      shadowBlur: 0,
-      shadowOpacity: 0,
-      shadowOffsetX: 0,
-      shadowOffsetY: 0,
-      shadowDirection: 0,
-      shadowDistance: 0,
-      shadowEnabled: false,
-      verticalWriting: false,
-      backgroundColor: "#FFFF00",
-      backgroundEnabled: false,
+      const newText: TextObject = {
+        id: `text_${texts.length}`,
+        text: "텍스트를 입력하세요",
+        x: 150,
+        y: 150,
+        width: 200,
+        fontSize: 24,
+        fill: "#000000",
+        fontFamily: defaultFont,
+        fontStyle: "normal",
+        textDecoration: "",
+        align: "left",
+        verticalAlign: "top",
+        letterSpacing: 0,
+        lineHeight: 1.2,
+        scaleX: 1,
+        listFormat: "none",
+        stroke: "#000000",
+        strokeWidth: 0,
+        strokeEnabled: false,
+        shadowColor: "none",
+        shadowBlur: 0,
+        shadowOpacity: 0,
+        shadowOffsetX: 0,
+        shadowOffsetY: 0,
+        shadowDirection: 0,
+        shadowDistance: 0,
+        shadowEnabled: false,
+        verticalWriting: false,
+        backgroundColor: "#FFFF00",
+        backgroundEnabled: false,
+      };
+      setTexts((prev) => [...prev, newText]);
+      setSelectedId(newText.id);
+      setActiveTool("mouse");
     };
-    setTexts((prev) => [...prev, newText]);
-    // Immediately select the newly added text
-    setSelectedId(newText.id);
-    setActiveTool("mouse");
-  };
 
-  const handleToolChange = (tool: string) => {
-    if (tool === "text") {
-      handleAddText();
-      return;
-    }
-    setActiveTool(tool);
-    setSelectedId(null);
-    setEditingTextId(null);
-  };
-
-  const handleUpdateTextObject = (id: string, updates: Partial<TextObject>) => {
-    setTexts((prev) =>
-      prev.map((text) => (text.id === id ? { ...text, ...updates } : text)),
-    );
-  };
-
-  const handlePenStrokeWidth = (value: number) => {
-    setPenStrokeWidth(value);
-  };
-
-  const handlePenStrokeColor = (value: string) => {
-    setPenStrokeColor(value);
-  };
-
-  useEffect(() => {
-    const updateSize = () => {
-      if (containerRef.current) {
-        setStageSize({
-          width: containerRef.current.clientWidth,
-          height: containerRef.current.clientHeight,
-        });
+    const handleToolChange = (tool: string) => {
+      if (tool === "text") {
+        handleAddText();
+        return;
       }
-    };
-
-    updateSize();
-
-    const resizeObserver = new ResizeObserver(updateSize);
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    return () => resizeObserver.disconnect();
-  }, []);
-
-  const handleMouseDown = (e: any) => {
-    const clickedOnEmpty = e.target === e.target.getStage();
-    if (clickedOnEmpty) {
+      setActiveTool(tool);
       setSelectedId(null);
       setEditingTextId(null);
-    }
+    };
 
-    if (activeTool !== "pen" && activeTool !== "eraser") {
-      return;
-    }
+    const handleUpdateTextObject = (id: string, updates: Partial<TextObject>) => {
+      setTexts((prev) =>
+        prev.map((text) => (text.id === id ? { ...text, ...updates } : text)),
+      );
+    };
 
-    setIsDrawing(true);
-    const pos = e.target.getStage().getPointerPosition();
-    setCurrentLine({
-      points: [pos.x, pos.y],
-      tool: activeTool,
-      strokeWidth: penStrokeWidth,
-      stroke: penStrokeColor,
-    });
-  };
+    const handlePenStrokeWidth = (value: number) => {
+      setPenStrokeWidth(value);
+    };
 
-  const handleMouseMove = (e: any) => {
-    if (!isDrawing || (activeTool !== "pen" && activeTool !== "eraser")) return;
+    const handlePenStrokeColor = (value: string) => {
+      setPenStrokeColor(value);
+    };
 
-    const stage = e.target.getStage();
-    const point = stage.getPointerPosition();
-
-    setCurrentLine((prev) =>
-      prev
-        ? {
-            ...prev,
-            points: [...prev.points, point.x, point.y],
-          }
-        : null,
-    );
-  };
-
-  const handleMouseUp = () => {
-    if (!currentLine) return;
-
-    setLines((prev) => [...prev, currentLine]);
-    setCurrentLine(null);
-    setIsDrawing(false);
-  };
-
-  const handleAddShape = (shapeType: string) => {
-    setShapeType(shapeType);
-    if (shapeType === "square") {
-      const newSquare: Shape = {
-        id: `shape_${shapes.length}`,
-        type: "square",
-        x: 100,
-        y: 100,
-        width: 50,
-        height: 50,
-        fill: "red",
+    useEffect(() => {
+      const updateSize = () => {
+        if (containerRef.current) {
+          setStageSize({
+            width: containerRef.current.clientWidth,
+            height: containerRef.current.clientHeight,
+          });
+        }
       };
-      setShapes((prev) => [...prev, newSquare]);
-    }
-  };
 
-  const handleTransformEnd = (e: any) => {
-    const node = e.target;
-    const scaleX = node.scaleX();
-    const scaleY = node.scaleY();
-    const id = node.id();
+      updateSize();
 
-    node.scaleX(1);
-    node.scaleY(1);
+      const resizeObserver = new ResizeObserver(updateSize);
+      if (containerRef.current) {
+        resizeObserver.observe(containerRef.current);
+      }
 
-    setTexts((prev) =>
-      prev.map((text) => {
-        if (text.id !== id) return text;
-        const baseScaleX = text.scaleX ?? 1;
-        const effectiveScaleX = scaleX / baseScaleX;
-        return {
-          ...text,
-          x: node.x(),
-          y: node.y(),
-          width: Math.max(5, (text.width ?? node.width()) * effectiveScaleX),
-          fontSize: Math.max(5, text.fontSize * scaleY),
-        };
-      }),
-    );
+      return () => resizeObserver.disconnect();
+    }, []);
 
-    setShapes((prev) =>
-      prev.map((s) =>
-        s.id === id
+    const handleMouseDown = (e: any) => {
+      const clickedOnEmpty = e.target === e.target.getStage();
+      if (clickedOnEmpty) {
+        setSelectedId(null);
+        setEditingTextId(null);
+      }
+
+      if (activeTool !== "pen" && activeTool !== "eraser") {
+        return;
+      }
+
+      setIsDrawing(true);
+      const pos = e.target.getStage().getPointerPosition();
+      setCurrentLine({
+        points: [pos.x, pos.y],
+        tool: activeTool,
+        strokeWidth: penStrokeWidth,
+        stroke: penStrokeColor,
+      });
+    };
+
+    const handleMouseMove = (e: any) => {
+      if (!isDrawing || (activeTool !== "pen" && activeTool !== "eraser")) return;
+
+      const stage = e.target.getStage();
+      const point = stage.getPointerPosition();
+
+      setCurrentLine((prev) =>
+        prev
           ? {
-              ...s,
-              x: node.x(),
-              y: node.y(),
-              width: Math.max(5, s.width * scaleX),
-              height: Math.max(5, s.height * scaleY),
+              ...prev,
+              points: [...prev.points, point.x, point.y],
             }
-          : s,
-      ),
-    );
-  };
+          : null,
+      );
+    };
 
-  // Determine if a text object is selected to show TextEditor
-  const isTextSelected = selectedId?.startsWith("text_") && !editingTextId;
-  const selectedTextObject = isTextSelected
-    ? texts.find((t) => t.id === selectedId)
-    : undefined;
-  return (
-    <section className="h-full flex-1 min-w-0 bg-[#E2E8F0] relative flex flex-col items-center">
-      {/* 툴바 */}
-      <Toolbar
-        activeTool={activeTool}
-        onToolChange={handleToolChange}
-        penStrokeWidth={penStrokeWidth}
-        handlePenStrokeWidth={handlePenStrokeWidth}
-        penStrokeColor={penStrokeColor}
-        handlePenStrokeColor={handlePenStrokeColor}
-        shapeType={shapeType}
-        setShapeType={handleAddShape}
-        isTextEditorVisible={!!isTextSelected}
-        selectedTextObject={selectedTextObject}
-        handleUpdateTextObject={handleUpdateTextObject}
-      />
+    const handleMouseUp = () => {
+      if (!currentLine) return;
 
-      {/* Konva 캔버스 컨테이너 */}
-      <div ref={containerRef} className="h-[605px] w-[480px] bg-white">
-        <EditorCanvas
-          stageSize={stageSize}
-          handleMouseDown={handleMouseDown}
-          handleMouseMove={handleMouseMove}
-          handleMouseUp={handleMouseUp}
-          lines={lines}
-          currentLine={currentLine}
-          shapes={shapes}
-          texts={texts}
-          setSelectedId={setSelectedId}
-          objectRefs={objectRefs}
-          trRef={trRef}
-          handleTransformEnd={handleTransformEnd}
-          editingTextId={editingTextId}
-          setEditingTextId={setEditingTextId}
+      setLines((prev) => [...prev, currentLine]);
+      setCurrentLine(null);
+      setIsDrawing(false);
+    };
+
+    const handleAddShape = (shapeType: string) => {
+      setShapeType(shapeType);
+      if (shapeType === "square") {
+        const newSquare: Shape = {
+          id: `shape_${shapes.length}`,
+          type: "square",
+          x: 100,
+          y: 100,
+          width: 50,
+          height: 50,
+          fill: "red",
+        };
+        setShapes((prev) => [...prev, newSquare]);
+      }
+    };
+
+    const handleTransformEnd = (e: any) => {
+      const node = e.target;
+      const scaleX = node.scaleX();
+      const scaleY = node.scaleY();
+      const id = node.id();
+
+      node.scaleX(1);
+      node.scaleY(1);
+
+      setTexts((prev) =>
+        prev.map((text) => {
+          if (text.id !== id) return text;
+          const baseScaleX = text.scaleX ?? 1;
+          const effectiveScaleX = scaleX / baseScaleX;
+          return {
+            ...text,
+            x: node.x(),
+            y: node.y(),
+            width: Math.max(5, (text.width ?? node.width()) * effectiveScaleX),
+            fontSize: Math.max(5, text.fontSize * scaleY),
+          };
+        }),
+      );
+
+      setShapes((prev) =>
+        prev.map((s) =>
+          s.id === id
+            ? {
+                ...s,
+                x: node.x(),
+                y: node.y(),
+                width: Math.max(5, s.width * scaleX),
+                height: Math.max(5, s.height * scaleY),
+              }
+            : s,
+        ),
+      );
+    };
+
+    const isTextSelected = selectedId?.startsWith("text_") && !editingTextId;
+    const selectedTextObject = isTextSelected
+      ? texts.find((t) => t.id === selectedId)
+      : undefined;
+
+    return (
+      <section className="h-full flex-1 min-w-0 bg-[#E2E8F0] relative flex flex-col items-center">
+        {/* 브레드크럼 */}
+        <div className="absolute top-[12px] left-[16px] z-[10] flex items-center gap-[6px] text-[13px]">
+          <button
+            onClick={() => navigate("/")}
+            className="text-[#64748B] hover:text-[#155DFC]"
+          >
+            홈
+          </button>
+          <span className="text-[#94A3B8]">&gt;</span>
+          <span className="text-[#0F172B] font-medium">이미지 에디터</span>
+        </div>
+
+        {/* 툴바 */}
+        <Toolbar
+          activeTool={activeTool}
+          onToolChange={handleToolChange}
+          penStrokeWidth={penStrokeWidth}
+          handlePenStrokeWidth={handlePenStrokeWidth}
+          penStrokeColor={penStrokeColor}
+          handlePenStrokeColor={handlePenStrokeColor}
+          shapeType={shapeType}
+          setShapeType={handleAddShape}
+          isTextEditorVisible={!!isTextSelected}
+          selectedTextObject={selectedTextObject}
           handleUpdateTextObject={handleUpdateTextObject}
         />
-      </div>
 
-      <Prompt />
-    </section>
-  );
-};
+        {/* Konva 캔버스 컨테이너 */}
+        <div ref={containerRef} className="h-[605px] w-[480px] bg-white">
+          <EditorCanvas
+            stageSize={stageSize}
+            handleMouseDown={handleMouseDown}
+            handleMouseMove={handleMouseMove}
+            handleMouseUp={handleMouseUp}
+            lines={lines}
+            currentLine={currentLine}
+            shapes={shapes}
+            texts={texts}
+            setSelectedId={setSelectedId}
+            objectRefs={objectRefs}
+            trRef={trRef}
+            handleTransformEnd={handleTransformEnd}
+            editingTextId={editingTextId}
+            setEditingTextId={setEditingTextId}
+            handleUpdateTextObject={handleUpdateTextObject}
+            backgroundImageUrl={backgroundImage}
+          />
+        </div>
+
+        <Prompt onGenerate={onGenerate} />
+      </section>
+    );
+  },
+);
+
+Canvas.displayName = "Canvas";
