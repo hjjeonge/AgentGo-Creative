@@ -59,7 +59,7 @@ export const Content: React.FC = () => {
       <div className="flex flex-col gap-[24px] items-center justify-center">
         <div className="flex flex-col gap-[14px] items-center justify-center">
           <span className="text-[#0F172B] text-[64px] font-medium leading-[85.12px]">
-            <span className="text-[#155DFC] font-bold">#USER_ID</span>님
+            <span className="text-[#155DFC] font-bold">클로잇</span>님
             안녕하세요
           </span>
           <span className="text-[#0F172B] text-[36px] font-bold leading-[47.88px]">
