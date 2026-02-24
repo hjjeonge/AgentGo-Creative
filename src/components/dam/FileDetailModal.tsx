@@ -2,6 +2,7 @@ import type React from "react";
 import { useState } from "react";
 import CloseIcon from "../../assets/close-line.svg";
 import type { DAMFile } from "./DAMData";
+import { FileIcon } from "./DAMFileIcons";
 
 interface Props {
   file: DAMFile;
@@ -45,6 +46,72 @@ const SAMPLE_DETAIL: Record<string, string> = {
 export const FileDetailModal: React.FC<Props> = ({ file, onClose }: Props) => {
   const [editMode, setEditMode] = useState(false);
   const [values, setValues] = useState<Record<string, string>>(SAMPLE_DETAIL);
+  const [savedValues, setSavedValues] = useState<Record<string, string>>(SAMPLE_DETAIL);
+
+  const handleSave = () => {
+    setSavedValues(values);
+    setEditMode(false);
+  };
+
+  const handleCancel = () => {
+    setValues(savedValues);
+    setEditMode(false);
+  };
+
+  const renderPreview = () => {
+    if (file.type === "video") {
+      if (file.url) {
+        return (
+          <video
+            src={file.url}
+            controls
+            className="max-w-full max-h-[280px] rounded-[8px]"
+          />
+        );
+      }
+      return (
+        <div className="w-full h-[280px] bg-[#F1F5F9] rounded-[8px] flex flex-col items-center justify-center gap-[12px]">
+          <FileIcon type="video" size={64} />
+          <span className="text-[13px] text-[#94A3B8]">{file.name}</span>
+        </div>
+      );
+    }
+
+    if (file.type === "pdf") {
+      if (file.url) {
+        return (
+          <iframe
+            src={file.url}
+            title={file.name}
+            className="w-full h-[280px] rounded-[8px] border border-[#E2E8F0]"
+          />
+        );
+      }
+      return (
+        <div className="w-full h-[280px] bg-[#F1F5F9] rounded-[8px] flex flex-col items-center justify-center gap-[12px]">
+          <FileIcon type="pdf" size={64} />
+          <span className="text-[13px] text-[#94A3B8]">{file.name}</span>
+        </div>
+      );
+    }
+
+    if (file.thumbnail) {
+      return (
+        <img
+          src={file.thumbnail}
+          alt={file.name}
+          className="max-w-full max-h-[280px] object-contain rounded-[8px]"
+        />
+      );
+    }
+
+    return (
+      <div className="w-full h-[280px] bg-[#F1F5F9] rounded-[8px] flex flex-col items-center justify-center gap-[12px]">
+        <FileIcon type={file.type} size={64} />
+        <span className="text-[13px] text-[#94A3B8]">{file.name}</span>
+      </div>
+    );
+  };
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40">
@@ -58,28 +125,33 @@ export const FileDetailModal: React.FC<Props> = ({ file, onClose }: Props) => {
 
         {/* 본문 */}
         <div className="flex flex-1 overflow-hidden">
-          {/* 좌측: 이미지 */}
-          <div className="w-[380px] shrink-0 p-[20px] border-r border-[#E2E8F0] flex flex-col justify-between">
-            <div className="flex-1 flex items-center justify-center">
-              {file.thumbnail ? (
-                <img
-                  src={file.thumbnail}
-                  alt={file.name}
-                  className="max-w-full max-h-[320px] object-contain rounded-[8px]"
-                />
-              ) : (
-                <div className="w-full h-[280px] bg-[#F1F5F9] rounded-[8px] flex items-center justify-center">
-                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                    <circle cx="18" cy="20" r="5" stroke="#CBD5E1" strokeWidth="2" />
-                    <path d="M6 38L16 26L22 32L30 22L42 38" stroke="#CBD5E1" strokeWidth="2" strokeLinejoin="round" fill="none" />
-                  </svg>
-                </div>
-              )}
+          {/* 좌측: 미리보기 + 날짜 + 레퍼런스 이미지 */}
+          <div className="w-[380px] shrink-0 p-[20px] border-r border-[#E2E8F0] flex flex-col gap-[16px] overflow-y-auto">
+            <div className="flex items-center justify-center">
+              {renderPreview()}
             </div>
-            <div className="mt-[12px] text-[11px] text-[#94A3B8] flex flex-col gap-[2px]">
+
+            <div className="text-[11px] text-[#94A3B8] flex flex-col gap-[2px]">
               <span>생성일시 | 01/10/2026</span>
               <span>업데이트일시 | 02/05/2026</span>
             </div>
+
+            {/* 레퍼런스 이미지 */}
+            {file.referenceImages && file.referenceImages.length > 0 && (
+              <div>
+                <p className="text-[12px] text-[#475569] font-medium mb-[8px]">레퍼런스 이미지</p>
+                <div className="flex flex-wrap gap-[8px]">
+                  {file.referenceImages.map((src, i) => (
+                    <img
+                      key={i}
+                      src={src}
+                      alt={`reference-${i}`}
+                      className="w-[80px] h-[80px] object-cover rounded-[6px] border border-[#E2E8F0]"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 우측: 상세 정보 */}
@@ -105,18 +177,37 @@ export const FileDetailModal: React.FC<Props> = ({ file, onClose }: Props) => {
 
         {/* 하단 버튼 */}
         <div className="flex justify-center gap-[8px] p-[16px_20px] border-t border-[#E2E8F0]">
-          <button
-            onClick={() => setEditMode((prev) => !prev)}
-            className="px-[32px] py-[10px] border border-[#CBD5E1] text-[#475569] rounded-[8px] text-[14px]"
-          >
-            {editMode ? "취소" : "편집"}
-          </button>
-          <button
-            onClick={onClose}
-            className="px-[32px] py-[10px] bg-[#155DFC] text-white rounded-[8px] text-[14px] font-medium"
-          >
-            확인
-          </button>
+          {editMode ? (
+            <>
+              <button
+                onClick={handleCancel}
+                className="px-[32px] py-[10px] border border-[#CBD5E1] text-[#475569] rounded-[8px] text-[14px]"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleSave}
+                className="px-[32px] py-[10px] bg-[#155DFC] text-white rounded-[8px] text-[14px] font-medium"
+              >
+                저장
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setEditMode(true)}
+                className="px-[32px] py-[10px] border border-[#CBD5E1] text-[#475569] rounded-[8px] text-[14px]"
+              >
+                편집
+              </button>
+              <button
+                onClick={onClose}
+                className="px-[32px] py-[10px] bg-[#155DFC] text-white rounded-[8px] text-[14px] font-medium"
+              >
+                확인
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

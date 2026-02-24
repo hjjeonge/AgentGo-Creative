@@ -8,6 +8,9 @@ export interface DAMFile {
   size: string;
   modifiedAt: string;
   thumbnail?: string;
+  url?: string;
+  folder?: string;
+  referenceImages?: string[];
 }
 
 export const MOCK_FILES: DAMFile[] = [
@@ -34,8 +37,13 @@ export const MOCK_FILES: DAMFile[] = [
     person: "Natalie Clark",
     size: "328.5MB",
     modifiedAt: "2026.01.02 오전 11:30",
+    folder: "2026",
     thumbnail:
       "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&auto=format&fit=crop&q=60",
+    referenceImages: [
+      "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=200&auto=format&fit=crop&q=60",
+      "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&auto=format&fit=crop&q=60",
+    ],
   },
   {
     id: "4",
@@ -44,6 +52,7 @@ export const MOCK_FILES: DAMFile[] = [
     person: "Isabella Anderson",
     size: "196KB",
     modifiedAt: "2026.01.02 오전 11:30",
+    folder: "2026",
     thumbnail:
       "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=400&auto=format&fit=crop&q=60",
   },
@@ -64,6 +73,7 @@ export const MOCK_FILES: DAMFile[] = [
     person: "Isabella Anderson",
     size: "7.2GB",
     modifiedAt: "2026.01.02 오전 11:30",
+    url: "https://www.w3schools.com/html/mov_bbb.mp4",
   },
   {
     id: "7",
@@ -72,6 +82,7 @@ export const MOCK_FILES: DAMFile[] = [
     person: "Isabella Anderson I...",
     size: "196KB",
     modifiedAt: "2026.01.02 오전 11:30",
+    url: "https://www.w3.org/WAI/WCAG21/Techniques/pdf/sample.pdf",
   },
   {
     id: "8",
@@ -80,6 +91,7 @@ export const MOCK_FILES: DAMFile[] = [
     person: "Sophia Hernandez",
     size: "2.5MB",
     modifiedAt: "2026.01.02 오전 11:30",
+    url: "https://www.w3schools.com/html/mov_bbb.mp4",
   },
   {
     id: "9",

@@ -80,6 +80,8 @@ interface ListProps {
   files: DAMFile[];
   onContextMenu: (e: React.MouseEvent, fileId: string) => void;
   onDotsClick: (e: React.MouseEvent, fileId: string) => void;
+  onDownload: (fileId: string) => void;
+  onRename: (fileId: string) => void;
 }
 
 const DownloadIcon: React.FC = () => (
@@ -95,13 +97,13 @@ const RenameIcon: React.FC = () => (
   </svg>
 );
 
-const DAMListView: React.FC<ListProps> = ({ files, onContextMenu, onDotsClick }: ListProps) => {
+const DAMListView: React.FC<ListProps> = ({ files, onContextMenu, onDotsClick, onDownload, onRename }: ListProps) => {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   return (
     <div className="px-[20px]">
       {/* 헤더 */}
-      <div className="grid grid-cols-[40px_1fr_180px_100px_200px_40px] gap-[8px] px-[8px] py-[10px] border-b border-[#E2E8F0] text-[12px] text-[#94A3B8] font-medium">
+      <div className="grid grid-cols-[40px_1fr_180px_100px_200px_64px] gap-[8px] px-[8px] py-[10px] border-b border-[#E2E8F0] text-[12px] text-[#94A3B8] font-medium">
         <span>종류</span>
         <span>이름</span>
         <span>사람</span>
@@ -117,7 +119,7 @@ const DAMListView: React.FC<ListProps> = ({ files, onContextMenu, onDotsClick }:
           onContextMenu={(e) => onContextMenu(e, file.id)}
           onMouseEnter={() => setHoveredId(file.id)}
           onMouseLeave={() => setHoveredId(null)}
-          className={`group grid grid-cols-[40px_1fr_180px_100px_200px_40px] gap-[8px] px-[8px] py-[12px] border-b border-[#F1F5F9] items-center cursor-pointer ${
+          className={`group grid grid-cols-[40px_1fr_180px_100px_200px_64px] gap-[8px] px-[8px] py-[12px] border-b border-[#F1F5F9] items-center cursor-pointer ${
             hoveredId === file.id ? "bg-[#F8FAFC]" : ""
           }`}
         >
@@ -132,7 +134,10 @@ const DAMListView: React.FC<ListProps> = ({ files, onContextMenu, onDotsClick }:
             {hoveredId === file.id ? (
               <>
                 <div className="relative group/dl">
-                  <button className="w-[24px] h-[24px] flex items-center justify-center rounded-[4px] hover:bg-[#E2E8F0]">
+                  <button
+                    onClick={() => onDownload(file.id)}
+                    className="w-[24px] h-[24px] flex items-center justify-center rounded-[4px] hover:bg-[#E2E8F0]"
+                  >
                     <DownloadIcon />
                   </button>
                   <span className="absolute bottom-[calc(100%+4px)] right-0 bg-[#0F172B] text-white text-[11px] px-[6px] py-[3px] rounded-[4px] whitespace-nowrap opacity-0 group-hover/dl:opacity-100 pointer-events-none">
@@ -140,7 +145,10 @@ const DAMListView: React.FC<ListProps> = ({ files, onContextMenu, onDotsClick }:
                   </span>
                 </div>
                 <div className="relative group/rn">
-                  <button className="w-[24px] h-[24px] flex items-center justify-center rounded-[4px] hover:bg-[#E2E8F0]">
+                  <button
+                    onClick={() => onRename(file.id)}
+                    className="w-[24px] h-[24px] flex items-center justify-center rounded-[4px] hover:bg-[#E2E8F0]"
+                  >
                     <RenameIcon />
                   </button>
                   <span className="absolute bottom-[calc(100%+4px)] right-0 bg-[#0F172B] text-white text-[11px] px-[6px] py-[3px] rounded-[4px] whitespace-nowrap opacity-0 group-hover/rn:opacity-100 pointer-events-none">
@@ -163,13 +171,53 @@ const DAMListView: React.FC<ListProps> = ({ files, onContextMenu, onDotsClick }:
   );
 };
 
+/* ─── 이름 변경 모달 ──────────────────────────────────────── */
+const RenameModal: React.FC<{
+  defaultValue: string;
+  onConfirm: (name: string) => void;
+  onCancel: () => void;
+}> = ({ defaultValue, onConfirm, onCancel }) => {
+  const [value, setValue] = useState(defaultValue);
+
+  return (
+    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40">
+      <div className="bg-white rounded-[12px] shadow-xl p-[24px] w-[400px] flex flex-col gap-[16px]">
+        <p className="text-[15px] font-semibold text-[#0F172B]">이름 변경</p>
+        <input
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && value.trim()) onConfirm(value.trim()); }}
+          autoFocus
+          className="border border-[#CBD5E1] rounded-[8px] px-[12px] py-[8px] text-[14px] text-[#0F172B] outline-none focus:border-[#155DFC]"
+        />
+        <div className="flex justify-end gap-[8px]">
+          <button
+            onClick={onCancel}
+            className="px-[16px] py-[8px] border border-[#CBD5E1] text-[#475569] rounded-[8px] text-[13px]"
+          >
+            취소
+          </button>
+          <button
+            onClick={() => { if (value.trim()) onConfirm(value.trim()); }}
+            className="px-[16px] py-[8px] bg-[#155DFC] text-white rounded-[8px] text-[13px] font-medium"
+          >
+            확인
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ─── 메인 DAM 페이지 ─────────────────────────────────────── */
 export const DAMPage: React.FC = () => {
+  const [files, setFiles] = useState<DAMFile[]>(MOCK_FILES);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [activePath, setActivePath] = useState<string>("DAM");
   const [searchText, setSearchText] = useState("");
   const [showNewModal, setShowNewModal] = useState(false);
   const [detailFile, setDetailFile] = useState<DAMFile | null>(null);
+  const [renamingFile, setRenamingFile] = useState<DAMFile | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
     visible: false, x: 0, y: 0, fileId: null,
   });
@@ -187,15 +235,88 @@ export const DAMPage: React.FC = () => {
     setContextMenu({ visible: true, x: e.clientX, y: e.clientY, fileId });
   };
 
-  const handleContextAction = useCallback((action: string, fileId: string) => {
-    if (action === "detail") {
-      const file = MOCK_FILES.find((f) => f.id === fileId) ?? null;
-      setDetailFile(file);
+  const handleDownload = useCallback((fileId: string) => {
+    const file = files.find((f) => f.id === fileId);
+    if (!file) return;
+    const src = file.thumbnail || file.url;
+    if (src) {
+      const a = document.createElement("a");
+      a.href = src;
+      a.download = file.name;
+      a.target = "_blank";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } else {
+      alert("다운로드 기능은 서버 연동 후 사용 가능합니다.");
     }
-  }, []);
+  }, [files]);
+
+  const handleRename = useCallback((fileId: string) => {
+    const file = files.find((f) => f.id === fileId);
+    if (file) setRenamingFile(file);
+  }, [files]);
+
+  const handleRenameConfirm = (newName: string) => {
+    if (!renamingFile) return;
+    setFiles((prev) => prev.map((f) => f.id === renamingFile.id ? { ...f, name: newName } : f));
+    if (detailFile?.id === renamingFile.id) {
+      setDetailFile((prev) => prev ? { ...prev, name: newName } : null);
+    }
+    setRenamingFile(null);
+  };
+
+  const handleContextAction = useCallback((action: string, fileId: string) => {
+    const file = files.find((f) => f.id === fileId);
+    if (!file) return;
+
+    if (action === "detail") {
+      setDetailFile(file);
+    } else if (action === "download") {
+      handleDownload(fileId);
+    } else if (action === "rename") {
+      setRenamingFile(file);
+    } else if (action === "copy") {
+      const copied: DAMFile = {
+        ...file,
+        id: String(Date.now()),
+        name: `${file.name}_복사본`,
+      };
+      setFiles((prev) => {
+        const idx = prev.findIndex((f) => f.id === fileId);
+        const next = [...prev];
+        next.splice(idx + 1, 0, copied);
+        return next;
+      });
+    } else if (action === "delete") {
+      if (window.confirm(`"${file.name}"을(를) 삭제하시겠습니까?`)) {
+        setFiles((prev) => prev.filter((f) => f.id !== fileId));
+        if (detailFile?.id === fileId) setDetailFile(null);
+      }
+    }
+  }, [files, detailFile, handleDownload]);
+
+  const handleSaveNewFile = (metadata: Record<string, string>, uploadedFile: File | null) => {
+    const newFile: DAMFile = {
+      id: String(Date.now()),
+      type: "image",
+      name: metadata["제품명"] || uploadedFile?.name || "새 파일",
+      person: "클로잇",
+      size: uploadedFile ? `${(uploadedFile.size / 1024).toFixed(0)}KB` : "-",
+      modifiedAt: new Date().toLocaleString("ko-KR", {
+        year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", hour12: false,
+      }),
+      thumbnail: uploadedFile ? URL.createObjectURL(uploadedFile) : undefined,
+    };
+    setFiles((prev) => [newFile, ...prev]);
+  };
 
   // 필터 적용
-  const filteredFiles = MOCK_FILES.filter((file) => {
+  const filteredFiles = files.filter((file) => {
+    if (activePath !== "DAM" && activePath !== "최근" && activePath !== "공유") {
+      if (file.folder !== activePath) return false;
+    }
     if (searchText && !file.name.toLowerCase().includes(searchText.toLowerCase())) return false;
     if (filters.fileType && file.type !== filters.fileType) return false;
     if (filters.person && file.person !== filters.person) return false;
@@ -203,9 +324,7 @@ export const DAMPage: React.FC = () => {
   });
 
   // 브레드크럼
-  const breadcrumbs = activePath === "DAM"
-    ? ["DAM"]
-    : ["DAM", activePath];
+  const breadcrumbs = activePath === "DAM" ? ["DAM"] : ["DAM", activePath];
 
   return (
     <div className="h-full flex overflow-hidden bg-white">
@@ -275,7 +394,11 @@ export const DAMPage: React.FC = () => {
 
         {/* 파일 목록 */}
         <div className="flex-1 overflow-y-auto">
-          {viewMode === "grid" ? (
+          {filteredFiles.length === 0 ? (
+            <div className="flex items-center justify-center h-full text-[14px] text-[#94A3B8]">
+              표시할 파일이 없습니다.
+            </div>
+          ) : viewMode === "grid" ? (
             <DAMGridView
               files={filteredFiles}
               onContextMenu={handleContextMenu}
@@ -286,6 +409,8 @@ export const DAMPage: React.FC = () => {
               files={filteredFiles}
               onContextMenu={handleContextMenu}
               onDotsClick={handleDotsClick}
+              onDownload={handleDownload}
+              onRename={handleRename}
             />
           )}
         </div>
@@ -298,12 +423,29 @@ export const DAMPage: React.FC = () => {
         onAction={handleContextAction}
       />
 
+      {/* 이름 변경 모달 */}
+      {renamingFile && (
+        <RenameModal
+          defaultValue={renamingFile.name}
+          onConfirm={handleRenameConfirm}
+          onCancel={() => setRenamingFile(null)}
+        />
+      )}
+
       {/* 새로 만들기 모달 */}
-      {showNewModal && <NewFileModal onClose={() => setShowNewModal(false)} />}
+      {showNewModal && (
+        <NewFileModal
+          onClose={() => setShowNewModal(false)}
+          onSave={handleSaveNewFile}
+        />
+      )}
 
       {/* 파일 상세 모달 */}
       {detailFile && (
-        <FileDetailModal file={detailFile} onClose={() => setDetailFile(null)} />
+        <FileDetailModal
+          file={detailFile}
+          onClose={() => setDetailFile(null)}
+        />
       )}
     </div>
   );
