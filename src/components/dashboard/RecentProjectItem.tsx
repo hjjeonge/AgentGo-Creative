@@ -6,7 +6,7 @@ export interface RecentProject {
   id: string;
   title: string;
   date: string;
-  thumbnail: string;
+  thumbnail?: string | null;
 }
 
 interface Props {
@@ -23,11 +23,17 @@ export const RecentProjectItem: React.FC<Props> = ({ project, onDelete }: Props)
       onClick={() => navigate("/editor")}
     >
       <div className="relative bg-[#F8FAFF] p-[12px] flex items-center gap-[12px] w-full rounded-[9px]">
-        <img
-          className="w-[58px] h-[58px] rounded-[8px] object-cover shrink-0"
-          src={project.thumbnail}
-          alt={project.title}
-        />
+        {project.thumbnail ? (
+          <img
+            className="w-[58px] h-[58px] rounded-[8px] object-cover shrink-0"
+            src={project.thumbnail}
+            alt={project.title}
+          />
+        ) : (
+          <div className="w-[58px] h-[58px] rounded-[8px] bg-[#E2E8F0] flex items-center justify-center text-[10px] text-[#64748B]">
+            No Image
+          </div>
+        )}
         <div className="flex-1 flex flex-col gap-[4px] overflow-hidden">
           <span className="text-[#1E1E1E] text-[14px] leading-[19.88px] truncate">
             {project.title}

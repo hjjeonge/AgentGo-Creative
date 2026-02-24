@@ -1,5 +1,7 @@
 import type React from "react";
 import { useRef, useState } from "react";
+import { generateImage } from "../services/images";
+import { uploadFile } from "../services/files";
 import { useNavigate } from "react-router-dom";
 import UploadIcon from "../assets/upload-cloud-2-line.svg";
 import CloseIcon from "../assets/close-line.svg";
@@ -72,6 +74,7 @@ export const TemplatePage: React.FC = () => {
   const [concept, setConcept] = useState("");
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [referenceFile, setReferenceFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) setImageFile(e.target.files[0]);
@@ -110,6 +113,37 @@ export const TemplatePage: React.FC = () => {
   };
 
   const canGenerate = imageFile !== null && selectedTags.length > 0 && selectedSize !== null;
+
+  const handleGenerate = async () => {
+    if (!canGenerate || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const uploads: string[] = [];
+      if (imageFile) {
+        const uploaded = await uploadFile(imageFile);
+        uploads.push(uploaded.file_url);
+      }
+      if (referenceFile) {
+        const uploaded = await uploadFile(referenceFile);
+        uploads.push(uploaded.file_url);
+      }
+
+      const prompt = selectedTags.join(", ");
+      const res = await generateImage({
+        prompt,
+        concept,
+        size: selectedSize || undefined,
+        targets: selectedTags,
+        reference_urls: uploads,
+      });
+      alert(`??? ???????. Job ID: ${res.job_id}`);
+    } catch (err: any) {
+      alert(err?.message || "??? ?? ??? ??????.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
 
   return (
     <div className="h-full overflow-y-auto bg-[#F1F5F9]">

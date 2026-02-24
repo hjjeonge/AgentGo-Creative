@@ -1,8 +1,9 @@
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CloseIcon from "../../assets/close-line.svg";
 import type { DAMFile } from "./DAMData";
 import { FileIcon } from "./DAMFileIcons";
+import { updateAssetMetadata } from "../../services/dam";
 
 interface Props {
   file: DAMFile;
@@ -10,47 +11,77 @@ interface Props {
 }
 
 const DETAIL_FIELDS = [
-  { key: "productName",  label: "제품명" },
-  { key: "productCode",  label: "상품코드" },
-  { key: "price",        label: "가격" },
-  { key: "category",     label: "카테고리" },
-  { key: "description",  label: "제품 설명" },
-  { key: "pattern",      label: "패턴/무늬" },
-  { key: "material",     label: "소재" },
-  { key: "fit",          label: "핏/스타일" },
-  { key: "mood",         label: "무드" },
-  { key: "purpose",      label: "용도" },
-  { key: "season",       label: "시즌" },
-  { key: "targetGender", label: "타겟 성별" },
-  { key: "targetAge",    label: "타겟 연령" },
-  { key: "hashtag",      label: "해시태그" },
+  { key: "productName", label: "Product Name" },
+  { key: "productCode", label: "Product Code" },
+  { key: "price", label: "Price" },
+  { key: "category", label: "Category" },
+  { key: "description", label: "Description" },
+  { key: "pattern", label: "Pattern" },
+  { key: "material", label: "Material" },
+  { key: "fit", label: "Fit" },
+  { key: "mood", label: "Mood" },
+  { key: "purpose", label: "Purpose" },
+  { key: "season", label: "Season" },
+  { key: "targetGender", label: "Target Gender" },
+  { key: "targetAge", label: "Target Age" },
+  { key: "hashtag", label: "Hashtag" },
 ];
 
 const SAMPLE_DETAIL: Record<string, string> = {
-  productName:  "Christopher White Christopher White",
-  productCode:  "XYZAB6789C",
-  price:        "145,900",
-  category:     "가방",
-  description:  "가격 대비 성능이 훌륭해요. 제가 기대했던 것 이상으로 좋은 제품이었습니다. 가격 대비 성능이 훌륭해요.",
-  pattern:      "가방",
-  material:     "가죽",
-  fit:          "토트백",
-  mood:         "모던",
-  purpose:      "-",
-  season:       "사계절",
-  targetGender: "남녀공용",
-  targetAge:    "20-30",
-  hashtag:      "#모던 #직장인 #데일리백",
+  productName: "Sample Product",
+  productCode: "CODE-1234",
+  price: "0",
+  category: "Sample",
+  description: "",
+  pattern: "",
+  material: "",
+  fit: "",
+  mood: "",
+  purpose: "",
+  season: "",
+  targetGender: "",
+  targetAge: "",
+  hashtag: "",
 };
+
+
+const buildInitialValues = (metadata?: Record<string, string>) => {
+  const values: Record<string, string> = { ...SAMPLE_DETAIL };
+  if (!metadata) return values;
+  DETAIL_FIELDS.forEach((field) => {
+    const key = field.key;
+    const label = field.label;
+    if (metadata[key]) values[key] = metadata[key];
+    else if (metadata[label]) values[key] = metadata[label];
+  });
+  return values;
+};
+
+
 
 export const FileDetailModal: React.FC<Props> = ({ file, onClose }: Props) => {
   const [editMode, setEditMode] = useState(false);
-  const [values, setValues] = useState<Record<string, string>>(SAMPLE_DETAIL);
-  const [savedValues, setSavedValues] = useState<Record<string, string>>(SAMPLE_DETAIL);
+  const [values, setValues] = useState<Record<string, string>>(() => buildInitialValues(file.metadata));
+  const [savedValues, setSavedValues] = useState<Record<string, string>>(() => buildInitialValues(file.metadata));
 
-  const handleSave = () => {
-    setSavedValues(values);
-    setEditMode(false);
+  useEffect(() => {
+    const initial = buildInitialValues(file.metadata);
+    setValues(initial);
+    setSavedValues(initial);
+  }, [file]);
+
+  const handleSave = async () => {
+    const payload: Record<string, string> = {};
+    DETAIL_FIELDS.forEach((field) => {
+      payload[field.label] = values[field.key] ?? "";
+    });
+    try {
+      await updateAssetMetadata(file.id, payload);
+      setSavedValues(values);
+      setEditMode(false);
+    } catch {
+      setEditMode(false);
+    }
   };
 
   const handleCancel = () => {

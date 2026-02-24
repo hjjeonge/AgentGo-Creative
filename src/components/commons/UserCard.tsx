@@ -1,6 +1,7 @@
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { logoutLocal } from "../../services/auth";
 import Dots from "./../../assets/dots.svg";
 
 const MENU_ITEMS = [
@@ -23,7 +24,10 @@ export const UserCard: React.FC = () => {
 
   const handleAction = (action: string) => {
     setMenuOpen(false);
-    if (action === "logout") navigate("/login");
+    if (action === "logout") {
+      logoutLocal();
+      navigate("/login");
+    }
     if (action === "admin")  navigate("/dam");
   };
 

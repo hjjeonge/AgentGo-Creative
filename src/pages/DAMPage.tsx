@@ -1,5 +1,5 @@
 import type React from "react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import DotsIcon from "../assets/dots.svg";
 import { DAMSidebar } from "../components/dam/DAMSidebar";
 import { DAMFilters, type FilterState } from "../components/dam/DAMFilters";
@@ -8,6 +8,18 @@ import { NewFileModal } from "../components/dam/NewFileModal";
 import { DAMContextMenu, type ContextMenuState } from "../components/dam/DAMContextMenu";
 import { FileIcon } from "../components/dam/DAMFileIcons";
 import { MOCK_FILES, type DAMFile } from "../components/dam/DAMData";
+import {
+  copyAsset,
+  deleteAsset,
+  downloadAsset,
+  downloadAssetUrl,
+  getAssetDetail,
+  getFolderTree,
+  listAssets,
+  renameAsset,
+  uploadAsset,
+  type FolderNode,
+} from "../services/dam";
 
 /* ─── 아이콘 ─────────────────────────────────────────────── */
 const GridViewIcon: React.FC<{ active: boolean }> = ({ active }) => (
@@ -26,6 +38,47 @@ const ListViewIcon: React.FC<{ active: boolean }> = ({ active }) => (
     <line x1="1" y1="14" x2="17" y2="14" stroke={active ? "#155DFC" : "#64748B"} strokeWidth="1.5" strokeLinecap="round" />
   </svg>
 );
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+const toFileType = (fileType: string): DAMFile["type"] => {
+  if (fileType === "image") return "image";
+  if (fileType === "video") return "video";
+  if (fileType === "pdf") return "pdf";
+  if (fileType === "zip") return "zip";
+  return "other";
+};
+
+const formatBytes = (value: string) => {
+  const bytes = Number.parseInt(value, 10);
+  if (!Number.isFinite(bytes)) return value;
+  if (bytes < 1024) return `${bytes}B`;
+  const kb = bytes / 1024;
+  if (kb < 1024) return `${kb.toFixed(1)}KB`;
+  const mb = kb / 1024;
+  if (mb < 1024) return `${mb.toFixed(1)}MB`;
+  const gb = mb / 1024;
+  return `${gb.toFixed(1)}GB`;
+};
+
+const toLocalTime = (iso: string) => {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleString("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+};
+
+const resolveUrl = (url?: string | null) => {
+  if (!url) return undefined;
+  if (url.startsWith("http")) return url;
+  return `${API_BASE_URL}${url}`;
+};
 
 const SearchIcon: React.FC = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -212,6 +265,8 @@ const RenameModal: React.FC<{
 /* ─── 메인 DAM 페이지 ─────────────────────────────────────── */
 export const DAMPage: React.FC = () => {
   const [files, setFiles] = useState<DAMFile[]>(MOCK_FILES);
+  const [folders, setFolders] = useState<FolderNode[]>([]);
+  const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [activePath, setActivePath] = useState<string>("DAM");
   const [searchText, setSearchText] = useState("");
@@ -225,6 +280,74 @@ export const DAMPage: React.FC = () => {
     fileType: null, person: null, dateFrom: null, dateTo: null,
   });
 
+  const folderMap = useMemo(() => {
+    const map = new Map<string, string>();
+    const walk = (nodes: FolderNode[]) => {
+      nodes.forEach((node) => {
+        map.set(node.id, node.name);
+        if (node.children && node.children.length > 0) walk(node.children);
+      });
+    };
+    walk(folders);
+    return map;
+  }, [folders]);
+
+
+  useEffect(() => {
+  let alive = true;
+  getFolderTree()
+    .then((data) => {
+      if (!alive) return;
+      setFolders(data);
+    })
+    .catch(() => {
+      // keep fallback
+    });
+  return () => {
+    alive = false;
+  };
+}, []);
+
+  useEffect(() => {
+  let alive = true;
+  setLoading(true);
+  const folderId = folderMap.has(activePath) ? activePath : undefined;
+  listAssets({
+    keyword: searchText || undefined,
+    file_type: filters.fileType || undefined,
+    user_name: filters.person || undefined,
+    date_from: filters.dateFrom || undefined,
+    date_to: filters.dateTo || undefined,
+    folder_id: folderId,
+  })
+    .then((response) => {
+      if (!alive) return;
+      const items = response.items.map((asset) => ({
+        id: asset.id,
+        type: toFileType(asset.file_type),
+        name: asset.name,
+        person: asset.uploaded_by,
+        size: formatBytes(asset.file_size),
+        modifiedAt: toLocalTime(asset.updated_at),
+        thumbnail: resolveUrl(asset.thumbnail_url || undefined),
+        url: resolveUrl(asset.thumbnail_url || undefined),
+        folder: folderId,
+        metadata: asset.metadata ? (asset.metadata as Record<string, string>) : undefined,
+      }));
+      setFiles(items.length > 0 ? items : []);
+    })
+    .catch(() => {
+      // fallback to mock data on failure
+    })
+    .finally(() => {
+      if (alive) setLoading(false);
+    });
+
+  return () => {
+    alive = false;
+  };
+}, [activePath, searchText, filters.fileType, filters.person, filters.dateFrom, filters.dateTo, folderMap]);
+
   const handleContextMenu = (e: React.MouseEvent, fileId: string) => {
     e.preventDefault();
     setContextMenu({ visible: true, x: e.clientX, y: e.clientY, fileId });
@@ -235,20 +358,30 @@ export const DAMPage: React.FC = () => {
     setContextMenu({ visible: true, x: e.clientX, y: e.clientY, fileId });
   };
 
-  const handleDownload = useCallback((fileId: string) => {
+  const handleDownload = useCallback(async (fileId: string) => {
     const file = files.find((f) => f.id === fileId);
     if (!file) return;
-    const src = file.thumbnail || file.url;
-    if (src) {
+    try {
+      const blob = await downloadAsset(fileId);
+      const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = src;
+      a.href = url;
       a.download = file.name;
-      a.target = "_blank";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-    } else {
-      alert("다운로드 기능은 서버 연동 후 사용 가능합니다.");
+      URL.revokeObjectURL(url);
+    } catch {
+      const src = resolveUrl(downloadAssetUrl(fileId)) || file.thumbnail || file.url;
+      if (src) {
+        const a = document.createElement("a");
+        a.href = src;
+        a.download = file.name;
+        a.target = "_blank";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
     }
   }, [files]);
 
@@ -257,58 +390,107 @@ export const DAMPage: React.FC = () => {
     if (file) setRenamingFile(file);
   }, [files]);
 
-  const handleRenameConfirm = (newName: string) => {
+  const handleRenameConfirm = async (newName: string) => {
     if (!renamingFile) return;
-    setFiles((prev) => prev.map((f) => f.id === renamingFile.id ? { ...f, name: newName } : f));
-    if (detailFile?.id === renamingFile.id) {
-      setDetailFile((prev) => prev ? { ...prev, name: newName } : null);
+    try {
+      await renameAsset(renamingFile.id, newName);
+      setFiles((prev) => prev.map((f) => f.id === renamingFile.id ? { ...f, name: newName } : f));
+      if (detailFile?.id === renamingFile.id) {
+        setDetailFile((prev) => prev ? { ...prev, name: newName } : null);
+      }
+    } catch {
+      // ignore and keep UI state
+    } finally {
+      setRenamingFile(null);
     }
-    setRenamingFile(null);
   };
 
-  const handleContextAction = useCallback((action: string, fileId: string) => {
+  const handleContextAction = useCallback(async (action: string, fileId: string) => {
     const file = files.find((f) => f.id === fileId);
     if (!file) return;
 
     if (action === "detail") {
-      setDetailFile(file);
+      try {
+        const detail = await getAssetDetail(fileId);
+        setDetailFile({
+          id: detail.id,
+          type: toFileType(detail.file_type),
+          name: detail.name,
+          person: detail.uploaded_by,
+          size: formatBytes(detail.file_size),
+          modifiedAt: toLocalTime(detail.updated_at),
+          thumbnail: resolveUrl(detail.file_url),
+          url: resolveUrl(detail.file_url),
+          metadata: detail.metadata ? (detail.metadata as Record<string, string>) : undefined,
+        });
+      } catch {
+        setDetailFile(file);
+      }
     } else if (action === "download") {
       handleDownload(fileId);
     } else if (action === "rename") {
       setRenamingFile(file);
     } else if (action === "copy") {
-      const copied: DAMFile = {
-        ...file,
-        id: String(Date.now()),
-        name: `${file.name}_복사본`,
-      };
-      setFiles((prev) => {
-        const idx = prev.findIndex((f) => f.id === fileId);
-        const next = [...prev];
-        next.splice(idx + 1, 0, copied);
-        return next;
-      });
+      try {
+        const copied = await copyAsset(fileId);
+        const mapped: DAMFile = {
+          id: copied.id,
+          type: toFileType(copied.file_type),
+          name: copied.name,
+          person: copied.uploaded_by,
+          size: formatBytes(copied.file_size),
+          modifiedAt: toLocalTime(copied.updated_at),
+          thumbnail: resolveUrl(copied.file_url),
+          url: resolveUrl(copied.file_url),
+        };
+        setFiles((prev) => {
+          const idx = prev.findIndex((f) => f.id === fileId);
+          const next = [...prev];
+          next.splice(idx + 1, 0, mapped);
+          return next;
+        });
+      } catch {
+        // ignore
+      }
     } else if (action === "delete") {
-      if (window.confirm(`"${file.name}"을(를) 삭제하시겠습니까?`)) {
-        setFiles((prev) => prev.filter((f) => f.id !== fileId));
-        if (detailFile?.id === fileId) setDetailFile(null);
+      if (window.confirm(`"${file.name}"? ?????????`)) {
+        try {
+          await deleteAsset(fileId);
+          setFiles((prev) => prev.filter((f) => f.id !== fileId));
+          if (detailFile?.id === fileId) setDetailFile(null);
+        } catch {
+          // ignore
+        }
       }
     }
   }, [files, detailFile, handleDownload]);
 
-  const handleSaveNewFile = (metadata: Record<string, string>, uploadedFile: File | null) => {
-    const newFile: DAMFile = {
-      id: String(Date.now()),
-      type: "image",
-      name: metadata["제품명"] || uploadedFile?.name || "새 파일",
-      person: "클로잇",
-      size: uploadedFile ? `${(uploadedFile.size / 1024).toFixed(0)}KB` : "-",
-      modifiedAt: new Date().toLocaleString("ko-KR", {
-        year: "numeric", month: "2-digit", day: "2-digit",
-        hour: "2-digit", minute: "2-digit", hour12: false,
-      }),
-      thumbnail: uploadedFile ? URL.createObjectURL(uploadedFile) : undefined,
-    };
+  const handleSaveNewFile = async (metadata: Record<string, string>, uploadedFile: File | null) => {
+    if (!uploadedFile) return;
+    const folderId = folderMap.has(activePath) ? activePath : undefined;
+    const assetName = uploadedFile.name;
+    try {
+      const asset = await uploadAsset(uploadedFile, assetName, metadata, folderId);
+      const mapped: DAMFile = {
+        id: asset.id,
+        type: toFileType(asset.file_type),
+        name: asset.name,
+        person: asset.uploaded_by,
+        size: formatBytes(asset.file_size),
+        modifiedAt: toLocalTime(asset.updated_at),
+        thumbnail: resolveUrl(asset.file_url),
+        url: resolveUrl(asset.file_url),
+      };
+      setFiles((prev) => [mapped, ...prev]);
+    } catch {
+      // ignore
+    }
+  };
+      setFiles((prev) => [mapped, ...prev]);
+    } catch {
+      // ignore
+    }
+  };
     setFiles((prev) => [newFile, ...prev]);
   };
 
@@ -324,12 +506,12 @@ export const DAMPage: React.FC = () => {
   });
 
   // 브레드크럼
-  const breadcrumbs = activePath === "DAM" ? ["DAM"] : ["DAM", activePath];
+  const breadcrumbs = activePath === "DAM" ? ["DAM"] : ["DAM", folderMap.get(activePath) || activePath];
 
   return (
     <div className="h-full flex overflow-hidden bg-white">
       {/* 사이드바 */}
-      <DAMSidebar activePath={activePath} onNavigate={setActivePath} />
+      <DAMSidebar activePath={activePath} onNavigate={setActivePath} folders={folders} />
 
       {/* 메인 */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -353,7 +535,7 @@ export const DAMPage: React.FC = () => {
             <input
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              placeholder="드라이브에서 검색"
+              placeholder="Search assets"
               className="flex-1 bg-transparent text-[14px] text-[#0F172B] placeholder:text-[#94A3B8] outline-none"
             />
           </div>
@@ -394,7 +576,11 @@ export const DAMPage: React.FC = () => {
 
         {/* 파일 목록 */}
         <div className="flex-1 overflow-y-auto">
-          {filteredFiles.length === 0 ? (
+          {loading ? (
+            <div className="flex items-center justify-center h-full text-[14px] text-[#94A3B8]">
+              ???? ?...
+            </div>
+          ) : filteredFiles.length === 0 ? (
             <div className="flex items-center justify-center h-full text-[14px] text-[#94A3B8]">
               표시할 파일이 없습니다.
             </div>

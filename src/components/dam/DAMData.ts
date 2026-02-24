@@ -11,6 +11,7 @@ export interface DAMFile {
   url?: string;
   folder?: string;
   referenceImages?: string[];
+  metadata?: Record<string, string>;
 }
 
 export const MOCK_FILES: DAMFile[] = [

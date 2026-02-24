@@ -1,9 +1,10 @@
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Arrow from "./../../assets/arrow_down.svg";
 import Collapse from "./../../assets/Collapse.svg";
 import { RecentProjectItem, type RecentProject } from "./RecentProjectItem";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
+import { getRecentProjects } from "../../services/projects";
 
 const MOCK_PROJECTS: RecentProject[] = [
   {
@@ -52,6 +53,22 @@ interface Props {
 export const Aside: React.FC<Props> = ({ asideOpen, handleAside }: Props) => {
   const [projects, setProjects] = useState<RecentProject[]>(MOCK_PROJECTS);
   const [deleteTarget, setDeleteTarget] = useState<RecentProject | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    getRecentProjects()
+      .then((items) => {
+        if (!alive || items.length == 0) return;
+        setProjects(items);
+      })
+      .catch(() => {
+        // keep mock data
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
 
   const handleDeleteRequest = (id: string) => {
     const target = projects.find((p) => p.id === id) ?? null;

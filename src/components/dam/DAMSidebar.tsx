@@ -1,5 +1,6 @@
 import type React from "react";
 import { useState } from "react";
+import type { FolderNode } from "../../services/dam";
 import ArrowDown from "../../assets/arrow_down.svg";
 
 const FOLDER_YEARS = [
@@ -26,9 +27,10 @@ const PROJECT_CATEGORIES = [
 interface Props {
   activePath: string;
   onNavigate: (path: string) => void;
+  folders?: FolderNode[];
 }
 
-export const DAMSidebar: React.FC<Props> = ({ activePath, onNavigate }: Props) => {
+export const DAMSidebar: React.FC<Props> = ({ activePath, onNavigate, folders }: Props) => {
   const [allFilesOpen, setAllFilesOpen] = useState(true);
   const [expandedYears, setExpandedYears] = useState<string[]>(["2026"]);
 
@@ -36,6 +38,52 @@ export const DAMSidebar: React.FC<Props> = ({ activePath, onNavigate }: Props) =
     setExpandedYears((prev) =>
       prev.includes(year) ? prev.filter((y) => y !== year) : [...prev, year]
     );
+  };
+
+
+  const renderFolders = (nodes: FolderNode[], depth: number = 0) => {
+    return nodes.map((node) => {
+      const hasChildren = (node.children || []).length > 0;
+      const isExpanded = expandedYears.includes(node.id);
+      return (
+        <div key={node.id}>
+          <button
+            onClick={() => {
+              if (hasChildren) {
+                toggleYear(node.id);
+              }
+              onNavigate(node.id);
+            }}
+            className={`w-full flex items-center gap-[6px] px-[16px] py-[6px] text-[13px] truncate ${
+              activePath === node.id
+                ? "text-[#155DFC] bg-[#EFF6FF]"
+                : "text-[#475569] hover:bg-[#F1F5F9]"
+            }`}
+            style={{ paddingLeft: `${16 + depth * 10}px` }}
+          >
+            {hasChildren && (
+              <img
+                src={ArrowDown}
+                className={`w-[10px] h-[10px] transition-transform ${
+                  isExpanded ? "" : "-rotate-90"
+                }`}
+              />
+            )}
+            {!hasChildren && <span className="w-[10px]" />}
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path
+                d="M1.5 3.5C1.5 2.95 1.95 2.5 2.5 2.5H5.5L6.5 3.5H11.5C12.05 3.5 12.5 3.95 12.5 4.5V10.5C12.5 11.05 12.05 11.5 11.5 11.5H2.5C1.95 11.5 1.5 11.05 1.5 10.5V3.5Z"
+                fill="#3B82F6"
+              />
+            </svg>
+            {node.name}
+          </button>
+          {hasChildren && isExpanded && (
+            <div>{renderFolders(node.children || [], depth + 1)}</div>
+          )}
+        </div>
+      );
+    });
   };
 
   return (
@@ -54,7 +102,7 @@ export const DAMSidebar: React.FC<Props> = ({ activePath, onNavigate }: Props) =
         </button>
         {allFilesOpen && (
           <div className="pl-[8px]">
-            {FOLDER_YEARS.map((folder) => (
+            {folders && folders.length > 0 ? renderFolders(folders) : FOLDER_YEARS.map((folder) => (
               <div key={folder.year}>
                 <button
                   onClick={() => {
