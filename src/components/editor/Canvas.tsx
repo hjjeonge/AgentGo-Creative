@@ -17,6 +17,35 @@ import { Toolbar } from "./Toolbar";
 import { Prompt } from "./Prompt";
 import type { CanvasHandle, CanvasSnapshot } from "../../types/editor";
 
+interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+const rectsOverlap = (r1: Rect, r2: Rect) =>
+  r1.x < r2.x + r2.width &&
+  r1.x + r1.width > r2.x &&
+  r1.y < r2.y + r2.height &&
+  r1.y + r1.height > r2.y;
+
+// 점이 폴리곤(flat [x1,y1,x2,y2,...]) 안에 있는지 ray-casting 알고리즘으로 판별
+const isPointInPolygon = (px: number, py: number, polygon: number[]) => {
+  let inside = false;
+  const n = polygon.length / 2;
+  let j = n - 1;
+  for (let i = 0; i < n; i++) {
+    const xi = polygon[i * 2], yi = polygon[i * 2 + 1];
+    const xj = polygon[j * 2], yj = polygon[j * 2 + 1];
+    if ((yi > py) !== (yj > py) && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) {
+      inside = !inside;
+    }
+    j = i;
+  }
+  return inside;
+};
+
 interface Props {
   onGenerate?: (prompt: string) => void;
 }
@@ -36,29 +65,77 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     const [isDrawing, setIsDrawing] = useState(false);
     const [shapeType, setShapeType] = useState("square");
 
+
     const [penStrokeWidth, setPenStrokeWidth] = useState(2);
     const [penStrokeColor, setPenStrokeColor] = useState("#E7000B");
 
     const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [editingTextId, setEditingTextId] = useState<string | null>(null);
+    const [selectionRect, setSelectionRect] = useState<Rect | null>(null);
+    const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
+    const [shapeSelectMode, setShapeSelectMode] = useState<"rect" | "lasso">("rect");
+    const [lassoPath, setLassoPath] = useState<number[]>([]);
+    const [isLassoing, setIsLassoing] = useState(false);
     const objectRefs = useRef<Record<string, any>>({});
     const trRef = useRef<any>(null);
 
-    // Delete selected object on Delete/Backspace key
+    // 단일 선택 시 selectedIds 초기화
+    const selectSingleId = (id: string | null) => {
+      setSelectedId(id);
+      setSelectedIds([]);
+    };
+
+    // Delete / Undo / Redo 키 핸들러
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
-        if ((e.key === "Delete" || e.key === "Backspace") && selectedId && !editingTextId) {
-          if (selectedId.startsWith("text_")) {
-            setTexts((prev) => prev.filter((t) => t.id !== selectedId));
-          } else if (selectedId.startsWith("shape_")) {
-            setShapes((prev) => prev.filter((s) => s.id !== selectedId));
-          }
+        // Ctrl+Z: Undo
+        if (e.key === "z" && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
+          e.preventDefault();
+          const prev = undoStack.current.pop();
+          if (!prev) return;
+          redoStack.current.push({
+            lines: linesRef.current,
+            shapes: shapesRef.current,
+            texts: textsRef.current,
+            backgroundImage: backgroundImageRef.current,
+          });
+          applyHistory(prev);
+          return;
+        }
+        // Ctrl+Y or Ctrl+Shift+Z: Redo
+        if ((e.key === "y" && (e.ctrlKey || e.metaKey)) || (e.key === "z" && (e.ctrlKey || e.metaKey) && e.shiftKey)) {
+          e.preventDefault();
+          const next = redoStack.current.pop();
+          if (!next) return;
+          undoStack.current.push({
+            lines: linesRef.current,
+            shapes: shapesRef.current,
+            texts: textsRef.current,
+            backgroundImage: backgroundImageRef.current,
+          });
+          applyHistory(next);
+          return;
+        }
+        // Delete/Backspace: 선택 객체 삭제
+        if ((e.key === "Delete" || e.key === "Backspace") && !editingTextId) {
+          const toDelete = selectedIds.length > 0 ? selectedIds : selectedId ? [selectedId] : [];
+          if (toDelete.length === 0) return;
+          pushUndo();
+          toDelete.forEach((id) => {
+            if (id.startsWith("text_")) {
+              setTexts((prev) => prev.filter((t) => t.id !== id));
+            } else if (id.startsWith("shape_")) {
+              setShapes((prev) => prev.filter((s) => s.id !== id));
+            }
+          });
           setSelectedId(null);
+          setSelectedIds([]);
         }
       };
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [selectedId, editingTextId]);
+    }, [selectedId, selectedIds, editingTextId]);
 
     // Refs for snapshot (always up-to-date)
     const linesRef = useRef(lines);
@@ -70,6 +147,31 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     useEffect(() => { shapesRef.current = shapes; }, [shapes]);
     useEffect(() => { textsRef.current = texts; }, [texts]);
     useEffect(() => { backgroundImageRef.current = backgroundImage; }, [backgroundImage]);
+
+    // Undo / Redo 스택
+    type HistoryState = { lines: DrawLine[]; shapes: Shape[]; texts: TextObject[]; backgroundImage: string | null };
+    const undoStack = useRef<HistoryState[]>([]);
+    const redoStack = useRef<HistoryState[]>([]);
+
+    const pushUndo = () => {
+      undoStack.current.push({
+        lines: linesRef.current,
+        shapes: shapesRef.current,
+        texts: textsRef.current,
+        backgroundImage: backgroundImageRef.current,
+      });
+      redoStack.current = [];
+    };
+
+    const applyHistory = (state: HistoryState) => {
+      setLines(state.lines);
+      setShapes(state.shapes);
+      setTexts(state.texts);
+      setBackgroundImageState(state.backgroundImage);
+      setSelectedId(null);
+      setSelectedIds([]);
+      setEditingTextId(null);
+    };
 
     useImperativeHandle(ref, () => ({
       setBackgroundImage: (url: string | null) => {
@@ -87,6 +189,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         setTexts(snapshot.texts);
         setBackgroundImageState(snapshot.backgroundImage);
         setSelectedId(null);
+        setSelectedIds([]);
         setEditingTextId(null);
       },
       hasImage: () => backgroundImageRef.current !== null,
@@ -96,25 +199,32 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         setTexts([]);
         setBackgroundImageState(null);
         setSelectedId(null);
+        setSelectedIds([]);
         setEditingTextId(null);
       },
     }));
 
     useEffect(() => {
       if (trRef.current) {
-        if (selectedId && !editingTextId) {
-          const node = objectRefs.current[selectedId];
-          if (node) {
-            trRef.current.nodes([node]);
+        if (!editingTextId) {
+          if (selectedIds.length > 1) {
+            const nodes = selectedIds.map((id) => objectRefs.current[id]).filter(Boolean);
+            trRef.current.nodes(nodes);
+          } else if (selectedId) {
+            const node = objectRefs.current[selectedId];
+            if (node) trRef.current.nodes([node]);
+          } else {
+            trRef.current.nodes([]);
           }
         } else {
           trRef.current.nodes([]);
         }
         trRef.current.getLayer()?.batchDraw();
       }
-    }, [selectedId, shapes, texts, editingTextId]);
+    }, [selectedId, selectedIds, shapes, texts, editingTextId]);
 
     const handleAddText = () => {
+      pushUndo();
       const defaultFont = "Noto Sans KR";
       loadGoogleFont(defaultFont);
 
@@ -162,7 +272,12 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       }
       setActiveTool(tool);
       setSelectedId(null);
+      setSelectedIds([]);
       setEditingTextId(null);
+      selectionStartRef.current = null;
+      setSelectionRect(null);
+      setLassoPath([]);
+      setIsLassoing(false);
     };
 
     const handleUpdateTextObject = (id: string, updates: Partial<TextObject>) => {
@@ -179,31 +294,44 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       setPenStrokeColor(value);
     };
 
+    // 이미지 로드 시 비율에 맞게 Stage 크기 계산
     useEffect(() => {
-      const updateSize = () => {
-        if (containerRef.current) {
-          setStageSize({
-            width: containerRef.current.clientWidth,
-            height: containerRef.current.clientHeight,
-          });
-        }
-      };
-
-      updateSize();
-
-      const resizeObserver = new ResizeObserver(updateSize);
-      if (containerRef.current) {
-        resizeObserver.observe(containerRef.current);
+      if (!backgroundImage) {
+        setStageSize({ width: 0, height: 0 });
+        return;
       }
-
-      return () => resizeObserver.disconnect();
-    }, []);
+      const img = new window.Image();
+      img.onload = () => {
+        const container = containerRef.current;
+        const maxWidth = container ? Math.floor(container.clientWidth * 0.95) : 900;
+        const maxHeight = container ? Math.floor(container.clientHeight * 0.95) : 650;
+        const scale = Math.min(maxWidth / img.naturalWidth, maxHeight / img.naturalHeight, 1);
+        setStageSize({
+          width: Math.round(img.naturalWidth * scale),
+          height: Math.round(img.naturalHeight * scale),
+        });
+      };
+      img.src = backgroundImage;
+    }, [backgroundImage]);
 
     const handleMouseDown = (e: any) => {
       const clickedOnEmpty = e.target === e.target.getStage();
       if (clickedOnEmpty) {
         setSelectedId(null);
+        setSelectedIds([]);
         setEditingTextId(null);
+
+        if (activeTool === "shape") {
+          const pos = e.target.getStage().getRelativePointerPosition();
+          if (shapeSelectMode === "rect") {
+            selectionStartRef.current = { x: pos.x, y: pos.y };
+            setSelectionRect({ x: pos.x, y: pos.y, width: 0, height: 0 });
+          } else {
+            setLassoPath([pos.x, pos.y]);
+            setIsLassoing(true);
+          }
+          return;
+        }
       }
 
       if (activeTool !== "pen" && activeTool !== "eraser") {
@@ -211,7 +339,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       }
 
       setIsDrawing(true);
-      const pos = e.target.getStage().getPointerPosition();
+      const pos = e.target.getStage().getRelativePointerPosition();
       setCurrentLine({
         points: [pos.x, pos.y],
         tool: activeTool,
@@ -221,10 +349,28 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     };
 
     const handleMouseMove = (e: any) => {
+      if (activeTool === "shape") {
+        const pos = e.target.getStage().getRelativePointerPosition();
+        if (shapeSelectMode === "rect" && selectionStartRef.current) {
+          const start = selectionStartRef.current;
+          setSelectionRect({
+            x: Math.min(pos.x, start.x),
+            y: Math.min(pos.y, start.y),
+            width: Math.abs(pos.x - start.x),
+            height: Math.abs(pos.y - start.y),
+          });
+          return;
+        }
+        if (shapeSelectMode === "lasso" && isLassoing) {
+          setLassoPath((prev) => [...prev, pos.x, pos.y]);
+          return;
+        }
+      }
+
       if (!isDrawing || (activeTool !== "pen" && activeTool !== "eraser")) return;
 
       const stage = e.target.getStage();
-      const point = stage.getPointerPosition();
+      const point = stage.getRelativePointerPosition();
 
       setCurrentLine((prev) =>
         prev
@@ -236,9 +382,68 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       );
     };
 
+    const finishSelection = (ids: string[]) => {
+      if (ids.length === 1) {
+        setSelectedId(ids[0]);
+        setSelectedIds([]);
+      } else if (ids.length > 1) {
+        setSelectedId(null);
+        setSelectedIds(ids);
+      }
+    };
+
     const handleMouseUp = () => {
+      if (activeTool === "shape") {
+        if (shapeSelectMode === "rect" && selectionStartRef.current) {
+          selectionStartRef.current = null;
+          if (selectionRect && selectionRect.width > 2 && selectionRect.height > 2) {
+            const ids: string[] = [];
+            shapes.forEach((shape) => {
+              if (rectsOverlap(selectionRect, { x: shape.x, y: shape.y, width: shape.width, height: shape.height })) {
+                ids.push(shape.id);
+              }
+            });
+            texts.forEach((text) => {
+              const node = objectRefs.current[text.id];
+              if (node) {
+                const rect = node.getClientRect();
+                if (rectsOverlap(selectionRect, rect)) ids.push(text.id);
+              }
+            });
+            finishSelection(ids);
+          }
+          setSelectionRect(null);
+          return;
+        }
+
+        if (shapeSelectMode === "lasso" && isLassoing) {
+          setIsLassoing(false);
+          if (lassoPath.length >= 6) {
+            const ids: string[] = [];
+            shapes.forEach((shape) => {
+              const cx = shape.x + shape.width / 2;
+              const cy = shape.y + shape.height / 2;
+              if (isPointInPolygon(cx, cy, lassoPath)) ids.push(shape.id);
+            });
+            texts.forEach((text) => {
+              const node = objectRefs.current[text.id];
+              if (node) {
+                const rect = node.getClientRect();
+                const cx = rect.x + rect.width / 2;
+                const cy = rect.y + rect.height / 2;
+                if (isPointInPolygon(cx, cy, lassoPath)) ids.push(text.id);
+              }
+            });
+            finishSelection(ids);
+          }
+          setLassoPath([]);
+          return;
+        }
+      }
+
       if (!currentLine) return;
 
+      pushUndo();
       setLines((prev) => [...prev, currentLine]);
       setCurrentLine(null);
       setIsDrawing(false);
@@ -247,6 +452,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     const handleAddShape = (shapeType: string) => {
       setShapeType(shapeType);
       if (shapeType === "square") {
+        pushUndo();
         const newSquare: Shape = {
           id: `shape_${shapes.length}`,
           type: "square",
@@ -261,6 +467,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     };
 
     const handleTransformEnd = (e: any) => {
+      pushUndo();
       const node = e.target;
       const scaleX = node.scaleX();
       const scaleY = node.scaleY();
@@ -328,31 +535,47 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           handlePenStrokeColor={handlePenStrokeColor}
           shapeType={shapeType}
           setShapeType={handleAddShape}
+          shapeSelectMode={shapeSelectMode}
+          setShapeSelectMode={setShapeSelectMode}
           isTextEditorVisible={!!isTextSelected}
           selectedTextObject={selectedTextObject}
           handleUpdateTextObject={handleUpdateTextObject}
         />
 
         {/* Konva 캔버스 컨테이너 */}
-        <div ref={containerRef} className="h-[605px] w-[480px] bg-white">
-          <EditorCanvas
-            stageSize={stageSize}
-            handleMouseDown={handleMouseDown}
-            handleMouseMove={handleMouseMove}
-            handleMouseUp={handleMouseUp}
-            lines={lines}
-            currentLine={currentLine}
-            shapes={shapes}
-            texts={texts}
-            setSelectedId={setSelectedId}
-            objectRefs={objectRefs}
-            trRef={trRef}
-            handleTransformEnd={handleTransformEnd}
-            editingTextId={editingTextId}
-            setEditingTextId={setEditingTextId}
-            handleUpdateTextObject={handleUpdateTextObject}
-            backgroundImageUrl={backgroundImage}
-          />
+        <div ref={containerRef} className="flex-1 w-full flex items-center justify-center overflow-hidden">
+          {stageSize.width > 0 && stageSize.height > 0 ? (
+            <EditorCanvas
+              stageSize={stageSize}
+              activeTool={activeTool}
+              handleMouseDown={handleMouseDown}
+              handleMouseMove={handleMouseMove}
+              handleMouseUp={handleMouseUp}
+              lines={lines}
+              currentLine={currentLine}
+              shapes={shapes}
+              texts={texts}
+              setSelectedId={selectSingleId}
+              objectRefs={objectRefs}
+              trRef={trRef}
+              handleTransformEnd={handleTransformEnd}
+              editingTextId={editingTextId}
+              setEditingTextId={setEditingTextId}
+              handleUpdateTextObject={handleUpdateTextObject}
+              backgroundImageUrl={backgroundImage}
+              selectionRect={selectionRect}
+              lassoPath={lassoPath}
+              selectedIds={selectedIds}
+            />
+          ) : (
+            <div className="flex flex-col items-center gap-[8px] text-[#94A3B8] select-none">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 9h18M9 21V9"/>
+              </svg>
+              <span className="text-[14px]">사이드바에서 이미지를 업로드해주세요</span>
+            </div>
+          )}
         </div>
 
         <Prompt onGenerate={onGenerate} />

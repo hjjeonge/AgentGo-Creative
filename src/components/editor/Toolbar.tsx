@@ -14,6 +14,7 @@ import { TextEditor } from "./TextEditor";
 import { ToolButton } from "./ToolButton";
 import { ToolbarButton } from "./ToolbarButton";
 import type { TextObject } from "./EditorCanvas";
+import { LassoIcon } from "../icons/LassoIcon";
 
 interface ToolbarProps {
   activeTool: string;
@@ -24,9 +25,11 @@ interface ToolbarProps {
   handlePenStrokeColor: (value: string) => void;
   shapeType: string;
   setShapeType: (value: string) => void;
-  isTextEditorVisible: boolean; // New prop
-  selectedTextObject?: TextObject; // New prop
-  handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void; // Updated prop
+  shapeSelectMode: "rect" | "lasso";
+  setShapeSelectMode: (mode: "rect" | "lasso") => void;
+  isTextEditorVisible: boolean;
+  selectedTextObject?: TextObject;
+  handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -38,6 +41,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   handlePenStrokeColor,
   shapeType,
   setShapeType,
+  shapeSelectMode,
+  setShapeSelectMode,
   isTextEditorVisible,
   selectedTextObject,
   handleUpdateTextObject,
@@ -95,7 +100,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       {(activeTool === "pen" || activeTool === "eraser") && (
         <div
           ref={wrapperRef}
-          className={`absolute z-[50] top-[140px] ${activeTool === "pen" && "left-[415px]"} ${activeTool === "eraser" && "right-[455px]"} border flex items-center gap-[12px] border-[#90A1B9] p-[8px_10px] rounded-[6px] bg-[#F1F5F9]`}
+          className="border flex items-center gap-[12px] border-[#90A1B9] p-[8px_10px] rounded-[6px] bg-[#F1F5F9]"
         >
           {penStrokeWidths.map((el) => (
             <ToolbarButton
@@ -128,7 +133,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             </>
           )}
           {colorPopupMode && (
-            <div className="absolute top-[5px] right-[-180px] mt-[20px] z-50">
+            <div className="absolute top-full right-0 mt-[6px] z-50">
               {colorPopupMode === "picker" ? (
                 <ColorPickerPopup
                   onClose={() => setColorPopupMode(null)}
@@ -156,6 +161,32 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       )}
       {activeTool === "diagram" && (
         <DiagramPopup shapeType={shapeType} setShapeType={setShapeType} />
+      )}
+      {activeTool === "shape" && (
+        <div className="flex items-center gap-[6px] border border-[#90A1B9] p-[6px_10px] rounded-[6px] bg-[#F1F5F9]">
+          <button
+            onClick={() => setShapeSelectMode("rect")}
+            className={`flex items-center gap-[4px] px-[8px] py-[4px] rounded-[4px] text-[13px] transition-colors ${
+              shapeSelectMode === "rect"
+                ? "bg-[#1447E6] text-white"
+                : "text-[#45556C] hover:bg-[#E2E8F0]"
+            }`}
+          >
+            <ShapeIcon />
+            정사형
+          </button>
+          <button
+            onClick={() => setShapeSelectMode("lasso")}
+            className={`flex items-center gap-[4px] px-[8px] py-[4px] rounded-[4px] text-[13px] transition-colors ${
+              shapeSelectMode === "lasso"
+                ? "bg-[#1447E6] text-white"
+                : "text-[#45556C] hover:bg-[#E2E8F0]"
+            }`}
+          >
+            <LassoIcon />
+            자유형
+          </button>
+        </div>
       )}
       {isTextEditorVisible && selectedTextObject && (
         <TextEditor

@@ -13,6 +13,7 @@ export const Prompt: React.FC<Props> = ({ onGenerate }) => {
   const [images, setImages] = useState<{ file: File; url: string }[]>([]);
 
   const canSend = prompt.trim().length > 0;
+  const isMaxImages = images.length >= 10;
 
   const handleOpenFile = () => {
     fileInputRef.current?.click();
@@ -109,12 +110,28 @@ export const Prompt: React.FC<Props> = ({ onGenerate }) => {
           rows={1}
         />
         <div className="flex items-center justify-between">
-          <button
-            onClick={handleOpenFile}
-            className="text-[14px] text-[#0F172B] leading-[19.88px] rounded-[4px] border border-[#CAD5E2] px-[10px] py-[4px] hover:bg-[#F8FAFF]"
-          >
-            레퍼런스 첨부
-          </button>
+          <div className="flex items-center gap-[6px]">
+            <button
+              onClick={handleOpenFile}
+              disabled={isMaxImages}
+              className={`text-[14px] leading-[19.88px] rounded-[4px] border px-[10px] py-[4px] transition-colors ${
+                isMaxImages
+                  ? "text-[#90A1B9] border-[#CAD5E2] cursor-not-allowed"
+                  : "text-[#0F172B] border-[#CAD5E2] hover:bg-[#F8FAFF]"
+              }`}
+            >
+              레퍼런스 첨부
+            </button>
+            {images.length > 0 && (
+              <span
+                className={`text-[12px] ${
+                  isMaxImages ? "text-[#E7000B] font-medium" : "text-[#64748B]"
+                }`}
+              >
+                {images.length}/10
+              </span>
+            )}
+          </div>
           <button
             onClick={handleSend}
             disabled={!canSend}

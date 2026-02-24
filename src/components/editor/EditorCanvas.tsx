@@ -63,6 +63,7 @@ export interface TextObject {
 
 interface EditorCanvasProps {
   stageSize: { width: number; height: number };
+  activeTool: string;
   handleMouseDown: (e: any) => void;
   handleMouseMove: (e: any) => void;
   handleMouseUp: (e: any) => void;
@@ -78,10 +79,14 @@ interface EditorCanvasProps {
   setEditingTextId: (id: string | null) => void;
   handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void;
   backgroundImageUrl?: string | null;
+  selectionRect?: { x: number; y: number; width: number; height: number } | null;
+  lassoPath?: number[];
+  selectedIds?: string[];
 }
 
 export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   stageSize,
+  activeTool,
   handleMouseDown,
   handleMouseMove,
   handleMouseUp,
@@ -97,9 +102,25 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   setEditingTextId,
   handleUpdateTextObject,
   backgroundImageUrl,
+  selectionRect,
+  lassoPath = [],
+  selectedIds = [],
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [bgImage, setBgImage] = useState<HTMLImageElement | null>(null);
+  const [isStageDragging, setIsStageDragging] = useState(false);
+
+  const handleStageDragStart = (e: any) => {
+    if (e.target === stageRef.current) {
+      setIsStageDragging(true);
+    }
+  };
+
+  const handleStageDragEnd = (e: any) => {
+    if (e.target === stageRef.current) {
+      setIsStageDragging(false);
+    }
+  };
 
   useEffect(() => {
     if (backgroundImageUrl) {
@@ -174,12 +195,22 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
     return { width: rect.width, height: rect.height };
   };
 
+  const stageCursor =
+    activeTool === "mouse"
+      ? isStageDragging
+        ? "grabbing"
+        : "grab"
+      : "default";
+
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative", cursor: stageCursor }}>
       <Stage
         ref={stageRef}
         width={stageSize.width}
         height={stageSize.height}
+        draggable={activeTool === "mouse"}
+        onDragStart={handleStageDragStart}
+        onDragEnd={handleStageDragEnd}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -364,6 +395,55 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
                 }}
                 onTransformEnd={handleTransformEnd}
                 {...commonTextProps}
+              />
+            );
+          })}
+          {/* 라소 선택 경로 */}
+          {lassoPath.length >= 4 && (
+            <Line
+              points={lassoPath}
+              stroke="#1447E6"
+              strokeWidth={1.5}
+              dash={[4, 4]}
+              closed={false}
+              fill="rgba(20, 71, 230, 0.08)"
+              listening={false}
+            />
+          )}
+          {/* 사각형 선택 영역 */}
+          {selectionRect && (
+            <Rect
+              x={selectionRect.x}
+              y={selectionRect.y}
+              width={selectionRect.width}
+              height={selectionRect.height}
+              fill="rgba(20, 71, 230, 0.08)"
+              stroke="#1447E6"
+              strokeWidth={1}
+              dash={[4, 4]}
+              listening={false}
+            />
+          )}
+          {/* 다중 선택 시 각 객체 개별 바운딩 박스 */}
+          {selectedIds.length > 1 && selectedIds.map((id) => {
+            const node = objectRefs.current[id];
+            if (!node) return null;
+            const rect = node.getClientRect({ skipTransform: false, skipShadow: true, skipStroke: false });
+            const stage = node.getStage();
+            const stageX = stage ? stage.x() : 0;
+            const stageY = stage ? stage.y() : 0;
+            return (
+              <Rect
+                key={`sel-${id}`}
+                x={rect.x - stageX}
+                y={rect.y - stageY}
+                width={rect.width}
+                height={rect.height}
+                fill="transparent"
+                stroke="#1447E6"
+                strokeWidth={1.5}
+                dash={[4, 4]}
+                listening={false}
               />
             );
           })}
