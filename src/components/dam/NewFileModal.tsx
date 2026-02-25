@@ -1,7 +1,6 @@
 import type React from "react";
 import { useRef, useState } from "react";
 import CloseIcon from "../../assets/close-line.svg";
-import type { DAMFile } from "./DAMData";
 
 interface Props {
   onClose: () => void;
