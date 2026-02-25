@@ -8,6 +8,7 @@ export interface LoginRequest {
 export interface TokenResponse {
   access_token: string;
   refresh_token: string;
+  token_type?: string;
 }
 
 export async function login(body: LoginRequest): Promise<TokenResponse> {
@@ -17,6 +18,14 @@ export async function login(body: LoginRequest): Promise<TokenResponse> {
   return data;
 }
 
-export function logoutLocal(): void {
+export async function logout(): Promise<void> {
+  const refreshToken = authStorage.getRefreshToken();
+  if (refreshToken) {
+    try {
+      await post<void>("/api/auth/logout", { refresh_token: refreshToken });
+    } catch {
+      // 토큰이 만료되었어도 로컬 스토리지는 정리
+    }
+  }
   authStorage.clear();
 }
