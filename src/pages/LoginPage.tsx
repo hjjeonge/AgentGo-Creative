@@ -11,7 +11,7 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
 
@@ -21,15 +21,15 @@ export const LoginPage: React.FC = () => {
     }
 
     setLoading(true);
-    // 목업 로그인 처리
-    setTimeout(() => {
-      if (email === "cloit.genai@itcen.com" && password === "password") {
-        navigate("/");
-      } else {
-        setError("이메일 또는 비밀번호가 올바르지 않습니다.");
-      }
+    try {
+      await login({ email, password });
+      navigate("/");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "이메일 또는 비밀번호가 올바르지 않습니다.";
+      setError(message);
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   return (
@@ -37,7 +37,7 @@ export const LoginPage: React.FC = () => {
       <div className="w-[400px] bg-white rounded-[16px] shadow-sm border border-[#E2E8F0] p-[40px]">
         {/* 로고 */}
         <div className="flex justify-center mb-[32px]">
-          <img src={Logo} className="h-[32px]" />
+          <img src={Logo} alt="AgentGo Creative" className="h-[32px]" />
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-[16px]">

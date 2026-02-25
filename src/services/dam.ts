@@ -1,4 +1,4 @@
-import { del, get, patch, post, upload } from "./apiClient";
+import { del, download, get, patch, post, upload } from "./apiClient";
 
 export interface FolderNode {
   id: string;

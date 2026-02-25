@@ -332,7 +332,6 @@ export const DAMPage: React.FC = () => {
         thumbnail: resolveUrl(asset.thumbnail_url || undefined),
         url: resolveUrl(asset.thumbnail_url || undefined),
         folder: folderId,
-        metadata: asset.metadata ? (asset.metadata as Record<string, string>) : undefined,
       }));
       setFiles(items.length > 0 ? items : []);
     })
@@ -453,7 +452,7 @@ export const DAMPage: React.FC = () => {
         // ignore
       }
     } else if (action === "delete") {
-      if (window.confirm(`"${file.name}"? ?????????`)) {
+      if (window.confirm(`"${file.name}"을 삭제하시겠습니까?`)) {
         try {
           await deleteAsset(fileId);
           setFiles((prev) => prev.filter((f) => f.id !== fileId));
@@ -485,13 +484,6 @@ export const DAMPage: React.FC = () => {
     } catch {
       // ignore
     }
-  };
-      setFiles((prev) => [mapped, ...prev]);
-    } catch {
-      // ignore
-    }
-  };
-    setFiles((prev) => [newFile, ...prev]);
   };
 
   // 필터 적용
@@ -578,7 +570,7 @@ export const DAMPage: React.FC = () => {
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center h-full text-[14px] text-[#94A3B8]">
-              ???? ?...
+              에셋 불러오는 중...
             </div>
           ) : filteredFiles.length === 0 ? (
             <div className="flex items-center justify-center h-full text-[14px] text-[#94A3B8]">

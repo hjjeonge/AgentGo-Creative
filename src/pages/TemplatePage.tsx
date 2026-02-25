@@ -136,9 +136,10 @@ export const TemplatePage: React.FC = () => {
         targets: selectedTags,
         reference_urls: uploads,
       });
-      alert(`??? ???????. Job ID: ${res.job_id}`);
-    } catch (err: any) {
-      alert(err?.message || "??? ?? ??? ??????.");
+      alert(`이미지 생성이 요청되었습니다. Job ID: ${res.job_id}`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "이미지 생성 요청에 실패했습니다.";
+      alert(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -335,14 +336,15 @@ export const TemplatePage: React.FC = () => {
           {/* 이미지 생성 */}
           <div className="flex justify-center mt-[8px]">
             <button
-              disabled={!canGenerate}
+              onClick={handleGenerate}
+              disabled={!canGenerate || isSubmitting}
               className={`px-[40px] py-[12px] rounded-[8px] text-[15px] font-medium ${
                 canGenerate
                   ? "bg-[#155DFC] text-white"
                   : "bg-[#CBD5E1] text-[#94A3B8] cursor-not-allowed"
               }`}
             >
-              이미지 생성
+              {isSubmitting ? "생성 중..." : "이미지 생성"}
             </button>
           </div>
 
