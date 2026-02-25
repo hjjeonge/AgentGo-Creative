@@ -1,7 +1,8 @@
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { logoutLocal } from "../../services/auth";
+import { logout } from "../../services/auth";
+import { getMyProfile } from "../../services/users";
 import Dots from "./../../assets/dots.svg";
 
 const MENU_ITEMS = [
@@ -12,7 +13,20 @@ const MENU_ITEMS = [
 export const UserCard: React.FC = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [name, setName] = useState("...");
+  const [email, setEmail] = useState("");
   const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    getMyProfile()
+      .then((profile) => {
+        setName(profile.name);
+        setEmail(profile.email);
+      })
+      .catch(() => {
+        // 조회 실패 시 기본값 유지
+      });
+  }, []);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -22,10 +36,10 @@ export const UserCard: React.FC = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const handleAction = (action: string) => {
+  const handleAction = async (action: string) => {
     setMenuOpen(false);
     if (action === "logout") {
-      logoutLocal();
+      await logout();
       navigate("/login");
     }
     if (action === "admin")  navigate("/dam");
@@ -35,12 +49,12 @@ export const UserCard: React.FC = () => {
     <div ref={wrapRef} className="relative">
       <div className="w-[270px] h-[42px] p-[14px] rounded-[8px] border border-[#569DFF]/20 bg-[#F8FAFF] flex items-center justify-between">
         <div className="w-[28px] h-[28px] bg-[linear-gradient(135deg,#0055E9_0%,#6A14D9_100%)] flex items-center justify-center rounded-full text-[12px] text-white leading-[18px] font-bold shrink-0">
-          클
+          {name.charAt(0)}
         </div>
         <div className="flex items-center gap-[2px]">
-          <span className="text-[#1E1E1E] text-[14px] font-semibold">클로잇</span>
+          <span className="text-[#1E1E1E] text-[14px] font-semibold">{name}</span>
           <span className="text-[#9CA3AF] text-[12px]">
-            cloit.genai@itcen.com
+            {email}
           </span>
         </div>
         <button onClick={() => setMenuOpen((prev) => !prev)}>
