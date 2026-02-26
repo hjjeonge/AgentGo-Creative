@@ -1,5 +1,6 @@
 import type React from "react";
-import { useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import { HistoryPanel } from "../components/editor/HistoryPanel";
 import { Aside } from "../components/editor/Aside";
 import { Canvas } from "../components/editor/Canvas";
@@ -8,10 +9,15 @@ import type { CanvasHandle, HistoryEntry } from "../types/editor";
 const MAX_HISTORY = 20;
 
 export const EditorPage: React.FC = () => {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const breadcrumbLabel = params.get("templateName");
+  const breadcrumbPath = params.get("templatePath");
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [hasCanvasImage, setHasCanvasImage] = useState(false);
   const canvasRef = useRef<CanvasHandle>(null);
+  const lastImageRef = useRef<string | null>(null);
 
   const handleWorkHistory = () => {
     setIsHistoryOpen((prev) => !prev);
@@ -31,10 +37,11 @@ export const EditorPage: React.FC = () => {
     setHasCanvasImage(false);
   };
 
-  const handleGenerate = (prompt: string) => {
+  const addHistoryEntry = (prompt: string) => {
     if (history.length >= MAX_HISTORY) {
       alert(
-        `작업이력이 최대 ${MAX_HISTORY}개에 도달했습니다.\n기존 이력을 삭제 후 다시 시도해 주세요.`,
+        `??? ${MAX_HISTORY}?? ???..
+?? ??? ?? ???.?`,
       );
       return;
     }
@@ -55,13 +62,29 @@ export const EditorPage: React.FC = () => {
 
     const newEntry: HistoryEntry = {
       id: `history_${Date.now()}`,
-      title: prompt.length > 20 ? prompt.slice(0, 20) + "…" : prompt,
+      title: prompt.length > 20 ? prompt.slice(0, 20) + "?" : prompt,
       timestamp,
       snapshot,
     };
 
     setHistory((prev) => [newEntry, ...prev]);
   };
+
+  const handleGenerate = (prompt: string) => {
+    addHistoryEntry(prompt);
+  };
+
+  useEffect(() => {
+    const imageUrl = params.get("image");
+    const prompt = params.get("prompt") || "?? ?";
+    if (imageUrl && imageUrl !== lastImageRef.current) {
+      lastImageRef.current = imageUrl;
+      canvasRef.current?.setBackgroundImage(imageUrl);
+      setHasCanvasImage(true);
+      addHistoryEntry(prompt);
+    }
+  }, [location.search]);
+
 
   const handleRestore = (entry: HistoryEntry) => {
     const confirmed = window.confirm(
@@ -79,7 +102,12 @@ export const EditorPage: React.FC = () => {
         onUpload={handleUpload}
         onNewProject={handleNewProject}
       />
-      <Canvas ref={canvasRef} onGenerate={handleGenerate} />
+      <Canvas
+        ref={canvasRef}
+        onGenerate={handleGenerate}
+        breadcrumbLabel={breadcrumbLabel}
+        breadcrumbPath={breadcrumbPath}
+      />
       <HistoryPanel
         handleWorkHistory={handleWorkHistory}
         historyOpen={isHistoryOpen}
