@@ -1,6 +1,6 @@
 import type React from "react";
 import { useRef, useState } from "react";
-import { generateImage } from "../services/images";
+import { generateImage, getImageJob } from "../services/images";
 import { uploadFile } from "../services/files";
 import { useNavigate } from "react-router-dom";
 import UploadIcon from "../assets/upload-cloud-2-line.svg";
@@ -13,12 +13,22 @@ const TARGET_KEYWORDS = [
   "재테크", "1인가구", "반려동물", "집밥", "자기계발", "가성비",
 ];
 
+const TEMPLATE_NAME = "SNS/마케팅 광고소재";
+
 const SIZE_OPTIONS = [
   { label: "1:1", value: "1:1" },
   { label: "4:5", value: "4:5" },
   { label: "16:9", value: "16:9" },
   { label: "9:16", value: "9:16" },
 ];
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+const resolveImageUrl = (url: string | null | undefined) => {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${API_BASE_URL}${url}`;
+};
 
 interface FormRowProps {
   label: string;
@@ -136,7 +146,30 @@ export const TemplatePage: React.FC = () => {
         targets: selectedTags,
         reference_urls: uploads,
       });
-      alert(`이미지 생성이 요청되었습니다. Job ID: ${res.job_id}`);
+      let job = res;
+      if (job.status !== "completed") {
+        const maxAttempts = 30;
+        for (let i = 0; i < maxAttempts; i++) {
+          await new Promise((r) => setTimeout(r, 2000));
+          job = await getImageJob(res.job_id);
+          if (job.status === "completed" || job.status === "failed") break;
+        }
+      }
+
+      if (job.status === "completed" && job.result_url) {
+        const imageUrl = resolveImageUrl(job.result_url);
+        if (imageUrl) {
+          navigate(`/editor?image=${encodeURIComponent(imageUrl)}&prompt=${encodeURIComponent(prompt)}&templateName=${encodeURIComponent(TEMPLATE_NAME)}&templatePath=${encodeURIComponent("/template")}`);
+          return;
+        }
+      }
+
+      if (job.status === "failed") {
+        alert("????? ??????????????.");
+        return;
+      }
+
+      alert("????? ???????? ??..? ?????????????????? ??? ?? ????????");
     } catch (err) {
       const message = err instanceof Error ? err.message : "이미지 생성 요청에 실패했습니다.";
       alert(message);

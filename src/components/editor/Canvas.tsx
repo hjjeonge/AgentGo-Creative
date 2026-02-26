@@ -48,14 +48,32 @@ const isPointInPolygon = (px: number, py: number, polygon: number[]) => {
 
 interface Props {
   onGenerate?: (prompt: string) => void;
+  breadcrumbLabel?: string | null;
+  breadcrumbPath?: string | null;
 }
 
 export const Canvas = forwardRef<CanvasHandle, Props>(
-  ({ onGenerate }, ref) => {
+  ({ onGenerate, breadcrumbLabel, breadcrumbPath }, ref) => {
     const navigate = useNavigate();
     const [activeTool, setActiveTool] = useState<string>("mouse");
     const containerRef = useRef<HTMLDivElement>(null);
     const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
+
+    useEffect(() => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const handlePointerMove = (e: MouseEvent) => {
+        const rect = container.getBoundingClientRect();
+        lastPointerRef.current = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        };
+      };
+
+      container.addEventListener("mousemove", handlePointerMove);
+      return () => container.removeEventListener("mousemove", handlePointerMove);
+    }, []);
 
     const [backgroundImage, setBackgroundImageState] = useState<string | null>(null);
     const [lines, setLines] = useState<DrawLine[]>([]);
@@ -67,6 +85,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 
 
     const [penStrokeWidth, setPenStrokeWidth] = useState(2);
+    const [brushPreview, setBrushPreview] = useState({ x: 0, y: 0, size: 2, visible: false });
+    const lastPointerRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+    const previewTimeoutRef = useRef<number | null>(null);
     const [penStrokeColor, setPenStrokeColor] = useState("#E7000B");
 
     const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -117,6 +138,17 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           applyHistory(next);
           return;
         }
+        // Brush size ([ / ])
+        if ((e.key === "[" || e.key === "]") && !editingTextId) {
+          e.preventDefault();
+          const delta = e.shiftKey ? 5 : 1;
+          const next = e.key === "]" ? penStrokeWidth + delta : penStrokeWidth - delta;
+          const clamped = Math.max(1, Math.min(200, next));
+          setPenStrokeWidth(clamped);
+          showBrushPreview(clamped);
+          return;
+        }
+
         // Delete/Backspace: 선택 객체 삭제
         if ((e.key === "Delete" || e.key === "Backspace") && !editingTextId) {
           const toDelete = selectedIds.length > 0 ? selectedIds : selectedId ? [selectedId] : [];
@@ -135,7 +167,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       };
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [selectedId, selectedIds, editingTextId]);
+    }, [selectedId, selectedIds, editingTextId, penStrokeWidth]);
 
     // Refs for snapshot (always up-to-date)
     const linesRef = useRef(lines);
@@ -175,6 +207,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 
     useImperativeHandle(ref, () => ({
       setBackgroundImage: (url: string | null) => {
+        backgroundImageRef.current = url;
         setBackgroundImageState(url);
       },
       getSnapshot: (): CanvasSnapshot => ({
@@ -286,6 +319,25 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       );
     };
 
+    const showBrushPreview = (size: number) => {
+      if (previewTimeoutRef.current) {
+        window.clearTimeout(previewTimeoutRef.current);
+      }
+      const { x, y } = lastPointerRef.current;
+      setBrushPreview({ x, y, size, visible: true });
+      previewTimeoutRef.current = window.setTimeout(() => {
+        setBrushPreview((prev) => ({ ...prev, visible: false }));
+      }, 800);
+    };
+
+    useEffect(() => {
+      return () => {
+        if (previewTimeoutRef.current) {
+          window.clearTimeout(previewTimeoutRef.current);
+        }
+      };
+    }, []);
+
     const handlePenStrokeWidth = (value: number) => {
       setPenStrokeWidth(value);
     };
@@ -294,25 +346,23 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       setPenStrokeColor(value);
     };
 
-    // 이미지 로드 시 비율에 맞게 Stage 크기 계산
+    // Canvas should fill the available area regardless of image size.
     useEffect(() => {
-      if (!backgroundImage) {
-        setStageSize({ width: 0, height: 0 });
-        return;
-      }
-      const img = new window.Image();
-      img.onload = () => {
-        const container = containerRef.current;
-        const maxWidth = container ? Math.floor(container.clientWidth * 0.95) : 900;
-        const maxHeight = container ? Math.floor(container.clientHeight * 0.95) : 650;
-        const scale = Math.min(maxWidth / img.naturalWidth, maxHeight / img.naturalHeight, 1);
+      const container = containerRef.current;
+      if (!container) return;
+
+      const updateSize = () => {
         setStageSize({
-          width: Math.round(img.naturalWidth * scale),
-          height: Math.round(img.naturalHeight * scale),
+          width: Math.max(0, Math.floor(container.clientWidth)),
+          height: Math.max(0, Math.floor(container.clientHeight)),
         });
       };
-      img.src = backgroundImage;
-    }, [backgroundImage]);
+
+      updateSize();
+      const observer = new ResizeObserver(updateSize);
+      observer.observe(container);
+      return () => observer.disconnect();
+    }, []);
 
     const handleMouseDown = (e: any) => {
       const clickedOnEmpty = e.target === e.target.getStage();
@@ -521,6 +571,17 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           >
             홈
           </button>
+          {breadcrumbLabel && breadcrumbPath ? (
+            <>
+              <span className="text-[#94A3B8]">&gt;</span>
+              <button
+                onClick={() => navigate(breadcrumbPath)}
+                className="text-[#64748B] hover:text-[#155DFC]"
+              >
+                {breadcrumbLabel}
+              </button>
+            </>
+          ) : null}
           <span className="text-[#94A3B8]">&gt;</span>
           <span className="text-[#0F172B] font-medium">이미지 에디터</span>
         </div>
@@ -543,7 +604,24 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         />
 
         {/* Konva 캔버스 컨테이너 */}
-        <div ref={containerRef} className="flex-1 w-full flex items-center justify-center overflow-hidden">
+        <div ref={containerRef} className="relative flex-1 w-full flex items-center justify-center overflow-hidden">
+          {brushPreview.visible && (
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                left: brushPreview.x - brushPreview.size / 2,
+                top: brushPreview.y - brushPreview.size / 2,
+                width: brushPreview.size,
+                height: brushPreview.size,
+                borderRadius: "50%",
+                border: "1.5px solid rgba(21,93,252,0.9)",
+                boxShadow: "0 0 0 1px rgba(255,255,255,0.8)",
+                pointerEvents: "none",
+                zIndex: 5,
+              }}
+            />
+          )}
           {stageSize.width > 0 && stageSize.height > 0 ? (
             <EditorCanvas
               stageSize={stageSize}
