@@ -108,6 +108,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [bgImage, setBgImage] = useState<HTMLImageElement | null>(null);
+  const [bgImagePos, setBgImagePos] = useState<{ x: number; y: number } | null>(null);
   const [isStageDragging, setIsStageDragging] = useState(false);
 
   const handleStageDragStart = (e: any) => {
@@ -126,9 +127,17 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
     if (backgroundImageUrl) {
       const img = new window.Image();
       img.src = backgroundImageUrl;
-      img.onload = () => setBgImage(img);
+      img.onload = () => {
+        setBgImage(img);
+        // Fix position at load time to avoid shifting on resize/zoom
+        setBgImagePos({
+          x: Math.round((stageSize.width - img.width) / 2),
+          y: Math.round((stageSize.height - img.height) / 2),
+        });
+      };
     } else {
       setBgImage(null);
+      setBgImagePos(null);
     }
   }, [backgroundImageUrl]);
 
@@ -219,13 +228,15 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
           {bgImage && (
             <KonvaImage
               image={bgImage}
-              x={0}
-              y={0}
-              width={stageSize.width}
-              height={stageSize.height}
+              x={bgImagePos?.x ?? 0}
+              y={bgImagePos?.y ?? 0}
+              width={bgImage.width}
+              height={bgImage.height}
               listening={false}
             />
           )}
+        </Layer>
+        <Layer>
           {lines.map((line, i) => (
             <Line
               key={i}
