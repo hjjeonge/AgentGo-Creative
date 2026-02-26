@@ -2,29 +2,31 @@ import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../services/auth";
+import { authStorage } from "../../services/apiClient";
 import { getMyProfile } from "../../services/users";
 import Dots from "./../../assets/dots.svg";
-
-const MENU_ITEMS = [
-  { label: "관리자",  action: "admin" },
-  { label: "로그아웃", action: "logout" },
-];
 
 export const UserCard: React.FC = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [name, setName] = useState("User");
   const [email, setEmail] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(!!authStorage.getAccessToken());
   const wrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!authStorage.getAccessToken()) return;
     getMyProfile()
       .then((profile) => {
         setName(profile.name);
         setEmail(profile.email);
+        setIsAdmin(!!profile.is_admin);
       })
       .catch(() => {
-        // 조회 실패 시 기본값 유지
+        authStorage.clear();
+        setIsAuthed(false);
+        navigate("/login");
       });
   }, []);
 
@@ -40,10 +42,27 @@ export const UserCard: React.FC = () => {
     setMenuOpen(false);
     if (action === "logout") {
       await logout();
+      setIsAuthed(false);
       navigate("/login");
     }
-    if (action === "admin")  navigate("/dam");
+    if (action === "admin") navigate("/dam");
   };
+
+  if (!isAuthed) {
+    return (
+      <button
+        onClick={() => navigate("/login")}
+        className="h-[42px] px-[16px] rounded-[8px] border border-[#569DFF]/20 bg-[#F8FAFF] text-[13px] font-semibold text-[#0F172B]"
+      >
+        로그인
+      </button>
+    );
+  }
+
+  const menuItems = [
+    ...(isAdmin ? [{ label: "관리자", action: "admin" }] : []),
+    { label: "로그아웃", action: "logout" },
+  ];
 
   return (
     <div ref={wrapRef} className="relative">
@@ -62,7 +81,7 @@ export const UserCard: React.FC = () => {
 
       {menuOpen && (
         <div className="absolute top-[calc(100%+4px)] right-0 z-[100] bg-white border border-[#E2E8F0] rounded-[8px] shadow-lg py-[4px] min-w-[120px]">
-          {MENU_ITEMS.map((item) => (
+          {menuItems.map((item) => (
             <button
               key={item.action}
               onClick={() => handleAction(item.action)}
