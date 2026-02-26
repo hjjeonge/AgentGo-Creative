@@ -13,7 +13,7 @@ const MENU_ITEMS = [
 export const UserCard: React.FC = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [name, setName] = useState("...");
+  const [name, setName] = useState("User");
   const [email, setEmail] = useState("");
   const wrapRef = useRef<HTMLDivElement>(null);
 
@@ -51,11 +51,9 @@ export const UserCard: React.FC = () => {
         <div className="w-[28px] h-[28px] bg-[linear-gradient(135deg,#0055E9_0%,#6A14D9_100%)] flex items-center justify-center rounded-full text-[12px] text-white leading-[18px] font-bold shrink-0">
           {name.charAt(0)}
         </div>
-        <div className="flex items-center gap-[2px]">
-          <span className="text-[#1E1E1E] text-[14px] font-semibold">{name}</span>
-          <span className="text-[#9CA3AF] text-[12px]">
-            {email}
-          </span>
+        <div className="flex flex-col items-start min-w-0">
+          <span className="text-[#1E1E1E] text-[13px] font-semibold leading-tight truncate w-full">{name}</span>
+          <span className="text-[#9CA3AF] text-[11px] leading-tight truncate w-full">{email}</span>
         </div>
         <button onClick={() => setMenuOpen((prev) => !prev)}>
           <img src={Dots} />
