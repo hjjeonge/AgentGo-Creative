@@ -84,7 +84,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-[7px] items-center mt-[40px] mb-[40px]">
+    <div className="relative mt-[40px] mb-[40px] flex flex-col items-center">
       <div className="flex justify-around w-[584px] p-[14px_18px] bg-white rounded-[24px] border border-[#90A1B9] shadow-md">
         {tools.map((el) => (
           <ToolButton
@@ -97,10 +97,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           />
         ))}
       </div>
+
+      {/* 하단 서브 바 - absolute 로 캔버스 영역에 영향 없이 표시 */}
       {(activeTool === "pen" || activeTool === "eraser") && (
         <div
           ref={wrapperRef}
-          className="border flex items-center gap-[12px] border-[#90A1B9] p-[8px_10px] rounded-[6px] bg-[#F1F5F9]"
+          className="absolute top-full mt-[7px] border flex items-center gap-[12px] border-[#90A1B9] p-[8px_10px] rounded-[6px] bg-[#F1F5F9] z-20"
         >
           {penStrokeWidths.map((el) => (
             <ToolbarButton
@@ -160,10 +162,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </div>
       )}
       {activeTool === "diagram" && (
-        <DiagramPopup shapeType={shapeType} setShapeType={setShapeType} />
+        <div className="absolute top-full mt-[7px] z-20">
+          <DiagramPopup shapeType={shapeType} setShapeType={setShapeType} />
+        </div>
       )}
       {activeTool === "shape" && (
-        <div className="flex items-center gap-[6px] border border-[#90A1B9] p-[6px_10px] rounded-[6px] bg-[#F1F5F9]">
+        <div className="absolute top-full mt-[7px] z-20 flex items-center gap-[6px] border border-[#90A1B9] p-[6px_10px] rounded-[6px] bg-[#F1F5F9]">
           <button
             onClick={() => setShapeSelectMode("rect")}
             className={`flex items-center gap-[4px] px-[8px] py-[4px] rounded-[4px] text-[13px] transition-colors ${
@@ -189,10 +193,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </div>
       )}
       {isTextEditorVisible && selectedTextObject && (
-        <TextEditor
-          selectedTextObject={selectedTextObject}
-          handleUpdateTextObject={handleUpdateTextObject}
-        />
+        <div className="absolute top-full mt-[7px] z-20">
+          <TextEditor
+            selectedTextObject={selectedTextObject}
+            handleUpdateTextObject={handleUpdateTextObject}
+          />
+        </div>
       )}
     </div>
   );
