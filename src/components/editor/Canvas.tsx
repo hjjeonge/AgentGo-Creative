@@ -1,7 +1,8 @@
-import {
+﻿import {
   forwardRef,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -58,6 +59,10 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     const [activeTool, setActiveTool] = useState<string>("mouse");
     const containerRef = useRef<HTMLDivElement>(null);
     const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
+    type ViewMode = "fit" | "actual" | "fill" | "custom";
+    const [viewMode, setViewMode] = useState<ViewMode>("fit");
+    const [viewScale, setViewScale] = useState(1);
+    const [imageNaturalSize, setImageNaturalSize] = useState<{ width: number; height: number } | null>(null);
 
     useEffect(() => {
       const container = containerRef.current;
@@ -101,13 +106,13 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     const objectRefs = useRef<Record<string, any>>({});
     const trRef = useRef<any>(null);
 
-    // 단일 선택 시 selectedIds 초기화
+    // 단일 선택 후 selectedIds 초기화
     const selectSingleId = (id: string | null) => {
       setSelectedId(id);
       setSelectedIds([]);
     };
 
-    // Delete / Undo / Redo 키 핸들러
+    // Delete / Undo / Redo 핸들러
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
         // Ctrl+Z: Undo
@@ -209,6 +214,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       setBackgroundImage: (url: string | null) => {
         backgroundImageRef.current = url;
         setBackgroundImageState(url);
+        setViewMode("fit");
       },
       getSnapshot: (): CanvasSnapshot => ({
         lines: linesRef.current,
@@ -221,6 +227,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         setShapes(snapshot.shapes);
         setTexts(snapshot.texts);
         setBackgroundImageState(snapshot.backgroundImage);
+        setViewMode("fit");
         setSelectedId(null);
         setSelectedIds([]);
         setEditingTextId(null);
@@ -231,6 +238,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         setShapes([]);
         setTexts([]);
         setBackgroundImageState(null);
+        setImageNaturalSize(null);
+        setViewMode("fit");
+        setViewScale(1);
         setSelectedId(null);
         setSelectedIds([]);
         setEditingTextId(null);
@@ -341,9 +351,76 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     const handlePenStrokeWidth = (value: number) => {
       setPenStrokeWidth(value);
     };
-
     const handlePenStrokeColor = (value: string) => {
       setPenStrokeColor(value);
+    };
+
+    const fitScale = useMemo(() => {
+      if (!imageNaturalSize || stageSize.width <= 0 || stageSize.height <= 0) return 1;
+      const sx = stageSize.width / imageNaturalSize.width;
+      const sy = stageSize.height / imageNaturalSize.height;
+      return Math.min(1, Math.min(sx, sy));
+    }, [imageNaturalSize, stageSize.width, stageSize.height]);
+
+    const fillScale = useMemo(() => {
+      if (!imageNaturalSize || stageSize.width <= 0 || stageSize.height <= 0) return 1;
+      const sx = stageSize.width / imageNaturalSize.width;
+      const sy = stageSize.height / imageNaturalSize.height;
+      return Math.max(sx, sy);
+    }, [imageNaturalSize, stageSize.width, stageSize.height]);
+
+    useEffect(() => {
+      if (!backgroundImage) {
+        setImageNaturalSize(null);
+        setViewMode("fit");
+        setViewScale(1);
+        return;
+      }
+
+      const img = new window.Image();
+      img.onload = () => {
+        setImageNaturalSize({
+          width: Math.max(1, img.naturalWidth || img.width),
+          height: Math.max(1, img.naturalHeight || img.height),
+        });
+      };
+      img.src = backgroundImage;
+    }, [backgroundImage]);
+
+    useEffect(() => {
+      if (!backgroundImage) return;
+      if (viewMode === "fit") {
+        setViewScale(fitScale);
+      } else if (viewMode === "actual") {
+        setViewScale(1);
+      } else if (viewMode === "fill") {
+        setViewScale(fillScale);
+      }
+    }, [backgroundImage, viewMode, fitScale, fillScale]);
+
+    const handleSetFit = () => {
+      setViewMode("fit");
+      setViewScale(fitScale);
+    };
+
+    const handleSetActual = () => {
+      setViewMode("actual");
+      setViewScale(1);
+    };
+
+    const handleSetFill = () => {
+      setViewMode("fill");
+      setViewScale(fillScale);
+    };
+
+    const handleCanvasWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+      if (!backgroundImage) return;
+      e.preventDefault();
+      const zoomFactor = e.deltaY > 0 ? 0.95 : 1.05;
+      const minScale = Math.min(fitScale, 1);
+      const nextScale = Math.max(minScale, Math.min(6, viewScale * zoomFactor));
+      setViewMode("custom");
+      setViewScale(nextScale);
     };
 
     // Canvas should fill the available area regardless of image size.
@@ -603,8 +680,39 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           handleUpdateTextObject={handleUpdateTextObject}
         />
 
-        {/* Konva 캔버스 컨테이너 */}
-        <div ref={containerRef} className="relative flex-1 w-full flex items-center justify-center overflow-hidden">
+        {/* Konva canvas container */}
+        <div
+          ref={containerRef}
+          onWheel={handleCanvasWheel}
+          className="relative flex-1 w-full flex items-center justify-center overflow-hidden"
+        >
+          {backgroundImage && (
+            <div className="absolute right-[16px] top-[12px] z-[12] flex items-center gap-[6px] rounded-[8px] border border-[#CBD5E1] bg-white/95 p-[4px] shadow-sm">
+              <button
+                type="button"
+                onClick={handleSetFit}
+                className={`rounded-[6px] px-[10px] py-[4px] text-[12px] ${viewMode === "fit" ? "bg-[#1447E6] text-white" : "text-[#334155] hover:bg-[#F1F5F9]"}`}
+              >
+                Fit
+              </button>
+              <button
+                type="button"
+                onClick={handleSetActual}
+                className={`rounded-[6px] px-[10px] py-[4px] text-[12px] ${viewMode === "actual" ? "bg-[#1447E6] text-white" : "text-[#334155] hover:bg-[#F1F5F9]"}`}
+              >
+                100%
+              </button>
+              <button
+                type="button"
+                onClick={handleSetFill}
+                className={`rounded-[6px] px-[10px] py-[4px] text-[12px] ${viewMode === "fill" ? "bg-[#1447E6] text-white" : "text-[#334155] hover:bg-[#F1F5F9]"}`}
+              >
+                Fill
+              </button>
+              <span className="ml-[4px] text-[12px] text-[#64748B]">{Math.round(viewScale * 100)}%</span>
+            </div>
+          )}
+
           {brushPreview.visible && (
             <div
               aria-hidden="true"
@@ -622,36 +730,45 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
               }}
             />
           )}
+
           {stageSize.width > 0 && stageSize.height > 0 ? (
-            <EditorCanvas
-              stageSize={stageSize}
-              activeTool={activeTool}
-              handleMouseDown={handleMouseDown}
-              handleMouseMove={handleMouseMove}
-              handleMouseUp={handleMouseUp}
-              lines={lines}
-              currentLine={currentLine}
-              shapes={shapes}
-              texts={texts}
-              setSelectedId={selectSingleId}
-              objectRefs={objectRefs}
-              trRef={trRef}
-              handleTransformEnd={handleTransformEnd}
-              editingTextId={editingTextId}
-              setEditingTextId={setEditingTextId}
-              handleUpdateTextObject={handleUpdateTextObject}
-              backgroundImageUrl={backgroundImage}
-              selectionRect={selectionRect}
-              lassoPath={lassoPath}
-              selectedIds={selectedIds}
-            />
+            <div
+              style={{
+                transform: `scale(${viewScale})`,
+                transformOrigin: "center center",
+                transition: "transform 120ms ease-out",
+              }}
+            >
+              <EditorCanvas
+                stageSize={stageSize}
+                activeTool={activeTool}
+                handleMouseDown={handleMouseDown}
+                handleMouseMove={handleMouseMove}
+                handleMouseUp={handleMouseUp}
+                lines={lines}
+                currentLine={currentLine}
+                shapes={shapes}
+                texts={texts}
+                setSelectedId={selectSingleId}
+                objectRefs={objectRefs}
+                trRef={trRef}
+                handleTransformEnd={handleTransformEnd}
+                editingTextId={editingTextId}
+                setEditingTextId={setEditingTextId}
+                handleUpdateTextObject={handleUpdateTextObject}
+                backgroundImageUrl={backgroundImage}
+                selectionRect={selectionRect}
+                lassoPath={lassoPath}
+                selectedIds={selectedIds}
+              />
+            </div>
           ) : (
             <div className="flex flex-col items-center gap-[8px] text-[#94A3B8] select-none">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <rect x="3" y="3" width="18" height="18" rx="2"/>
                 <path d="M3 9h18M9 21V9"/>
               </svg>
-              <span className="text-[14px]">사이드바에서 이미지를 업로드해주세요</span>
+              <span className="text-[14px]">사이드바에서 이미지를 업로드해 주세요</span>
             </div>
           )}
         </div>
@@ -663,3 +780,14 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 );
 
 Canvas.displayName = "Canvas";
+
+
+
+
+
+
+
+
+
+
+

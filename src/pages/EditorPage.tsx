@@ -78,12 +78,12 @@ export const EditorPage: React.FC = () => {
     const prompt = params.get("prompt") || "생성 중";
     if (imageUrl && imageUrl !== lastImageRef.current) {
       lastImageRef.current = imageUrl;
+      canvasRef.current?.clearCanvas();
       canvasRef.current?.setBackgroundImage(imageUrl);
       setHasCanvasImage(true);
       addHistoryEntry(prompt);
     }
   }, [location.search]);
-
 
   const handleRestore = (entry: HistoryEntry) => {
     const confirmed = window.confirm(
