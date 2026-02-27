@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import { getPenColorImg, getPenStrokeWidthImg } from "../../utils/getImage";
 import { ColorPalette } from "../commons/ColorPalette";
 import { ColorPickerPopup } from "../commons/ColorPickerPopup";
@@ -16,7 +17,7 @@ import { ToolbarButton } from "./ToolbarButton";
 import type { TextObject } from "./EditorCanvas";
 import { LassoIcon } from "../icons/LassoIcon";
 
-interface ToolbarProps {
+interface Props {
   activeTool: string;
   onToolChange: (tool: string) => void;
   penStrokeWidth: number;
@@ -32,7 +33,7 @@ interface ToolbarProps {
   handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({
+export const Toolbar: React.FC<Props> = ({
   activeTool,
   onToolChange,
   penStrokeWidth,

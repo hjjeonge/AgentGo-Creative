@@ -1,3 +1,4 @@
+import type React from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { DashboardPage } from "./pages/DashboardPage";
 import { EditorPage } from "./pages/EditorPage";
@@ -7,12 +8,12 @@ import { LoginPage } from "./pages/LoginPage";
 import { Layout } from "./components/commons/Layout";
 import { authStorage } from "./services/apiClient";
 
-function PrivateRoute() {
+const PrivateRoute: React.FC = () => {
   const token = authStorage.getAccessToken();
   return token ? <Outlet /> : <Navigate to="/login" replace />;
-}
+};
 
-function App() {
+export const App: React.FC = () => {
   return (
     <>
       <Routes>
@@ -29,6 +30,4 @@ function App() {
       </Routes>
     </>
   );
-}
-
-export default App;
+};

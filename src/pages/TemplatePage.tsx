@@ -1,11 +1,13 @@
 import type React from "react";
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { generateImage, getImageJob } from "../services/images";
 import { uploadFile } from "../services/files";
-import { useNavigate } from "react-router-dom";
 import UploadIcon from "../assets/upload-cloud-2-line.svg";
 import CloseIcon from "../assets/close-line.svg";
 import AddIcon from "../assets/add.svg";
+import { FormRow } from "../components/template/FormRow";
+import { SizePreviewIcon } from "../components/template/SizePreviewIcon";
 
 const TARGET_KEYWORDS = [
   "10대", "20대", "30대", "40대", "50대", "자기관리", "메이크업",
@@ -28,49 +30,6 @@ const resolveImageUrl = (url: string | null | undefined) => {
   if (!url) return null;
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
   return `${API_BASE_URL}${url}`;
-};
-
-interface FormRowProps {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}
-
-const FormRow: React.FC<FormRowProps> = ({ label, required, children }) => (
-  <div className="flex gap-[24px]">
-    <div className="w-[80px] shrink-0 pt-[10px] text-right">
-      <span className="text-[14px] text-[#475569]">
-        {required && <span className="text-[#E11D48]">*</span>}
-        {label}
-      </span>
-    </div>
-    <div className="flex-1">{children}</div>
-  </div>
-);
-
-const SizePreviewIcon: React.FC<{ ratio: string; active: boolean }> = ({ ratio, active }) => {
-  const dims: Record<string, { w: number; h: number }> = {
-    "1:1":  { w: 28, h: 28 },
-    "4:5":  { w: 22, h: 28 },
-    "16:9": { w: 36, h: 20 },
-    "9:16": { w: 20, h: 36 },
-  };
-  const d = dims[ratio] ?? { w: 28, h: 28 };
-  const color = active ? "#155DFC" : "#94A3B8";
-  return (
-    <svg width={d.w} height={d.h} viewBox={`0 0 ${d.w} ${d.h}`} fill="none">
-      <rect
-        x="1" y="1" width={d.w - 2} height={d.h - 2}
-        rx="2" ry="2"
-        stroke={color} strokeWidth="1.5" strokeDasharray="3 2"
-      />
-      <circle cx={d.w * 0.33} cy={d.h * 0.35} r="2" fill={color} />
-      <path
-        d={`M3 ${d.h - 3} L${d.w * 0.28} ${d.h * 0.55} L${d.w * 0.5} ${d.h * 0.72} L${d.w * 0.68} ${d.h * 0.55} L${d.w - 3} ${d.h - 3}`}
-        stroke={color} strokeWidth="1.2" strokeLinejoin="round"
-      />
-    </svg>
-  );
 };
 
 export const TemplatePage: React.FC = () => {
@@ -165,11 +124,11 @@ export const TemplatePage: React.FC = () => {
       }
 
       if (job.status === "failed") {
-        alert("????? ??????????????.");
+        alert("이미지 생성에 실패했습니다.");
         return;
       }
 
-      alert("????? ???????? ??..? ?????????????????? ??? ?? ????????");
+      alert("이미지 생성 시간이 초과되었습니다. 잠시 후 다시 시도해 주세요.");
     } catch (err) {
       const message = err instanceof Error ? err.message : "이미지 생성 요청에 실패했습니다.";
       alert(message);

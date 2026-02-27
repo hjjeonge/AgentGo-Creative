@@ -40,8 +40,7 @@ export const EditorPage: React.FC = () => {
   const addHistoryEntry = (prompt: string) => {
     if (history.length >= MAX_HISTORY) {
       alert(
-        `??? ${MAX_HISTORY}?? ???..
-?? ??? ?? ???.?`,
+        `작업이력이 최대 ${MAX_HISTORY}개에 도달했습니다.\n기존 이력을 삭제 후 다시 시도해 주세요.`,
       );
       return;
     }
@@ -62,7 +61,7 @@ export const EditorPage: React.FC = () => {
 
     const newEntry: HistoryEntry = {
       id: `history_${Date.now()}`,
-      title: prompt.length > 20 ? prompt.slice(0, 20) + "?" : prompt,
+      title: prompt.length > 20 ? prompt.slice(0, 20) + "…" : prompt,
       timestamp,
       snapshot,
     };
@@ -76,7 +75,7 @@ export const EditorPage: React.FC = () => {
 
   useEffect(() => {
     const imageUrl = params.get("image");
-    const prompt = params.get("prompt") || "?? ?";
+    const prompt = params.get("prompt") || "생성 중";
     if (imageUrl && imageUrl !== lastImageRef.current) {
       lastImageRef.current = imageUrl;
       canvasRef.current?.setBackgroundImage(imageUrl);
