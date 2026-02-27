@@ -1,8 +1,8 @@
-﻿import {
+﻿import type React from "react";
+import {
   forwardRef,
   useEffect,
   useImperativeHandle,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -59,7 +59,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     const [activeTool, setActiveTool] = useState<string>("mouse");
     const containerRef = useRef<HTMLDivElement>(null);
     const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
-    type ViewMode = "fit" | "actual" | "fill" | "custom";
+    type ViewMode = "fit" | "custom";
     const [viewMode, setViewMode] = useState<ViewMode>("fit");
     const [viewScale, setViewScale] = useState(1);
     const [imageNaturalSize, setImageNaturalSize] = useState<{ width: number; height: number } | null>(null);
@@ -355,19 +355,13 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       setPenStrokeColor(value);
     };
 
-    const fitScale = useMemo(() => {
+    const fitScale = (() => {
       if (!imageNaturalSize || stageSize.width <= 0 || stageSize.height <= 0) return 1;
       const sx = stageSize.width / imageNaturalSize.width;
       const sy = stageSize.height / imageNaturalSize.height;
       return Math.min(1, Math.min(sx, sy));
-    }, [imageNaturalSize, stageSize.width, stageSize.height]);
+    })();
 
-    const fillScale = useMemo(() => {
-      if (!imageNaturalSize || stageSize.width <= 0 || stageSize.height <= 0) return 1;
-      const sx = stageSize.width / imageNaturalSize.width;
-      const sy = stageSize.height / imageNaturalSize.height;
-      return Math.max(sx, sy);
-    }, [imageNaturalSize, stageSize.width, stageSize.height]);
 
     useEffect(() => {
       if (!backgroundImage) {
@@ -391,27 +385,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       if (!backgroundImage) return;
       if (viewMode === "fit") {
         setViewScale(fitScale);
-      } else if (viewMode === "actual") {
-        setViewScale(1);
-      } else if (viewMode === "fill") {
-        setViewScale(fillScale);
       }
-    }, [backgroundImage, viewMode, fitScale, fillScale]);
+    }, [backgroundImage, viewMode, fitScale]);
 
-    const handleSetFit = () => {
-      setViewMode("fit");
-      setViewScale(fitScale);
-    };
-
-    const handleSetActual = () => {
-      setViewMode("actual");
-      setViewScale(1);
-    };
-
-    const handleSetFill = () => {
-      setViewMode("fill");
-      setViewScale(fillScale);
-    };
 
     const handleCanvasWheel = (e: React.WheelEvent<HTMLDivElement>) => {
       if (!backgroundImage) return;
@@ -686,32 +662,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           onWheel={handleCanvasWheel}
           className="relative flex-1 w-full flex items-center justify-center overflow-hidden"
         >
-          {backgroundImage && (
-            <div className="absolute right-[16px] top-[12px] z-[12] flex items-center gap-[6px] rounded-[8px] border border-[#CBD5E1] bg-white/95 p-[4px] shadow-sm">
-              <button
-                type="button"
-                onClick={handleSetFit}
-                className={`rounded-[6px] px-[10px] py-[4px] text-[12px] ${viewMode === "fit" ? "bg-[#1447E6] text-white" : "text-[#334155] hover:bg-[#F1F5F9]"}`}
-              >
-                Fit
-              </button>
-              <button
-                type="button"
-                onClick={handleSetActual}
-                className={`rounded-[6px] px-[10px] py-[4px] text-[12px] ${viewMode === "actual" ? "bg-[#1447E6] text-white" : "text-[#334155] hover:bg-[#F1F5F9]"}`}
-              >
-                100%
-              </button>
-              <button
-                type="button"
-                onClick={handleSetFill}
-                className={`rounded-[6px] px-[10px] py-[4px] text-[12px] ${viewMode === "fill" ? "bg-[#1447E6] text-white" : "text-[#334155] hover:bg-[#F1F5F9]"}`}
-              >
-                Fill
-              </button>
-              <span className="ml-[4px] text-[12px] text-[#64748B]">{Math.round(viewScale * 100)}%</span>
-            </div>
-          )}
 
           {brushPreview.visible && (
             <div
@@ -780,6 +730,11 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 );
 
 Canvas.displayName = "Canvas";
+
+
+
+
+
 
 
 
