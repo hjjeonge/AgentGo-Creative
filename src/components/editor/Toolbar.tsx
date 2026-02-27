@@ -163,9 +163,7 @@ export const Toolbar: React.FC<Props> = ({
         </div>
       )}
       {activeTool === "diagram" && (
-        <div className="absolute top-full mt-[7px] z-20">
-          <DiagramPopup shapeType={shapeType} setShapeType={setShapeType} />
-        </div>
+        <DiagramPopup shapeType={shapeType} setShapeType={setShapeType} />
       )}
       {activeTool === "shape" && (
         <div className="absolute top-full mt-[7px] z-20 flex items-center gap-[6px] border border-[#90A1B9] p-[6px_10px] rounded-[6px] bg-[#F1F5F9]">
@@ -194,12 +192,10 @@ export const Toolbar: React.FC<Props> = ({
         </div>
       )}
       {isTextEditorVisible && selectedTextObject && (
-        <div className="absolute top-full mt-[7px] z-20">
-          <TextEditor
-            selectedTextObject={selectedTextObject}
-            handleUpdateTextObject={handleUpdateTextObject}
-          />
-        </div>
+        <TextEditor
+          selectedTextObject={selectedTextObject}
+          handleUpdateTextObject={handleUpdateTextObject}
+        />
       )}
     </div>
   );

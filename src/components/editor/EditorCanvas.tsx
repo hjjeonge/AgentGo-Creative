@@ -1,4 +1,4 @@
-import Konva from "konva";
+﻿import Konva from "konva";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Group,
@@ -86,7 +86,6 @@ interface EditorCanvasProps {
 
 export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   stageSize,
-  activeTool,
   handleMouseDown,
   handleMouseMove,
   handleMouseUp,
@@ -109,19 +108,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [bgImage, setBgImage] = useState<HTMLImageElement | null>(null);
   const [bgImagePos, setBgImagePos] = useState<{ x: number; y: number } | null>(null);
-  const [isStageDragging, setIsStageDragging] = useState(false);
 
-  const handleStageDragStart = (e: any) => {
-    if (e.target === stageRef.current) {
-      setIsStageDragging(true);
-    }
-  };
-
-  const handleStageDragEnd = (e: any) => {
-    if (e.target === stageRef.current) {
-      setIsStageDragging(false);
-    }
-  };
 
   useEffect(() => {
     if (backgroundImageUrl) {
@@ -204,22 +191,14 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
     return { width: rect.width, height: rect.height };
   };
 
-  const stageCursor =
-    activeTool === "mouse"
-      ? isStageDragging
-        ? "grabbing"
-        : "grab"
-      : "default";
 
   return (
-    <div style={{ position: "relative", cursor: stageCursor }}>
+    <div style={{ position: "relative", cursor: "default" }}>
       <Stage
         ref={stageRef}
         width={stageSize.width}
         height={stageSize.height}
-        draggable={activeTool === "mouse"}
-        onDragStart={handleStageDragStart}
-        onDragEnd={handleStageDragEnd}
+        draggable={false}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -421,7 +400,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               listening={false}
             />
           )}
-          {/* 사각형 선택 영역 */}
+          {/* 사각형 선택 범위 */}
           {selectionRect && (
             <Rect
               x={selectionRect.x}
@@ -435,7 +414,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               listening={false}
             />
           )}
-          {/* 다중 선택 시 각 객체 개별 바운딩 박스 */}
+          {/* 다중 선택 시 각 객체 테두리 점선 표시 */}
           {selectedIds.length > 1 && selectedIds.map((id) => {
             const node = objectRefs.current[id];
             if (!node) return null;
@@ -512,3 +491,8 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
     </div>
   );
 };
+
+
+
+
+
