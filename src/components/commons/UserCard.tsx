@@ -17,6 +17,13 @@ export const UserCard: React.FC = () => {
 
   useEffect(() => {
     if (!authStorage.getAccessToken()) return;
+
+    if (import.meta.env.DEV && authStorage.getAccessToken() === "dev-token") {
+      setName("테스트");
+      setEmail("test@itcen.com");
+      return;
+    }
+
     getMyProfile()
       .then((profile) => {
         setName(profile.name);
