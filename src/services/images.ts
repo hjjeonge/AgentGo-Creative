@@ -1,13 +1,15 @@
 import { get, post } from "./apiClient";
 
 export interface ImageGenerateRequest {
+  brand_guideline_id?: string;
   prompt?: string;
   concept?: string;
   size?: string;
   targets?: string[];
   reference_urls?: string[];
-  prompt_id?: string;
-  prompt_params?: Record<string, string>;
+  template_key?: string;
+  template_name?: string;
+  template_inputs?: Record<string, string | string[]>;
 }
 
 export interface ImageGenerateResponse {
