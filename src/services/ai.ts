@@ -142,3 +142,7 @@ export function base64ToBlobUrl(base64: string, mimeType = "image/png"): string 
   const blob = new Blob([ab], { type: mimeType });
   return URL.createObjectURL(blob);
 }
+
+export function revokeBlobUrl(url: string): void {
+  URL.revokeObjectURL(url);
+}
