@@ -1,5 +1,11 @@
 import { del, download, get, patch, post, upload } from "./apiClient";
 
+export interface UploaderInfo {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export interface FolderNode {
   id: string;
   name: string;
@@ -94,4 +100,8 @@ export async function uploadAsset(file: File, name: string, metadata?: Record<st
 
 export async function updateAssetMetadata(assetId: string, metadata: Record<string, unknown>): Promise<AssetDetail> {
   return patch<AssetDetail>(`/api/dam/assets/${assetId}/metadata`, { metadata });
+}
+
+export async function listUploaders(): Promise<UploaderInfo[]> {
+  return get<UploaderInfo[]>("/api/dam/assets/uploaders");
 }

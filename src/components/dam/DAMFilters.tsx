@@ -1,6 +1,7 @@
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import ArrowDown from "../../assets/arrow_down.svg";
+import { listUploaders, type UploaderInfo } from "../../services/dam";
 
 export interface FilterState {
   fileType: string | null;
@@ -60,14 +61,6 @@ const FILE_TYPE_ICONS: Record<string, React.ReactNode> = {
     </svg>
   ),
 };
-
-const PEOPLE = [
-  { name: "Christopher White", email: "ethan.brown@example.com" },
-  { name: "Mia Taylor",        email: "alexander.thompson@example.com" },
-  { name: "Joseph Martinez",   email: "bob.johnson@example.com" },
-  { name: "Isabella Anderson", email: "noah.thompson@example.com" },
-  { name: "Mia Taylor",        email: "michael.kim@example.com" },
-];
 
 const DATE_PRESETS = ["오늘", "지난 7일", "지난 30일", "올해 (2026)", "지난해 (2025)"];
 
@@ -169,6 +162,13 @@ type DropdownType = "fileType" | "person" | "date" | null;
 export const DAMFilters: React.FC<Props> = ({ filters, onFiltersChange }: Props) => {
   const [open, setOpen] = useState<DropdownType>(null);
   const [dateCalendarMode, setDateCalendarMode] = useState<"from" | "to" | null>(null);
+  const [uploaders, setUploaders] = useState<UploaderInfo[]>([]);
+
+  useEffect(() => {
+    listUploaders()
+      .then(setUploaders)
+      .catch(() => {});
+  }, []);
   const wrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -239,29 +239,33 @@ export const DAMFilters: React.FC<Props> = ({ filters, onFiltersChange }: Props)
         </button>
         {open === "person" && (
           <div className="absolute top-[calc(100%+4px)] left-0 z-[50] bg-white border border-[#E2E8F0] rounded-[8px] shadow-lg py-[4px] min-w-[220px]">
-            {PEOPLE.map((person, i) => (
-              <button
-                key={i}
-                onClick={() => {
-                  onFiltersChange({ ...filters, person: filters.person === person.name ? null : person.name });
-                  setOpen(null);
-                }}
-                className={`w-full flex items-center gap-[10px] px-[14px] py-[8px] text-left hover:bg-[#F1F5F9] ${
-                  filters.person === person.name ? "bg-[#EFF6FF]" : ""
-                }`}
-              >
-                <div
-                  className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-white text-[12px] font-medium shrink-0"
-                  style={{ backgroundColor: getAvatarColor(person.name) }}
+            {uploaders.length === 0 ? (
+              <div className="px-[14px] py-[10px] text-[13px] text-[#94A3B8]">업로더 없음</div>
+            ) : (
+              uploaders.map((person) => (
+                <button
+                  key={person.id}
+                  onClick={() => {
+                    onFiltersChange({ ...filters, person: filters.person === person.name ? null : person.name });
+                    setOpen(null);
+                  }}
+                  className={`w-full flex items-center gap-[10px] px-[14px] py-[8px] text-left hover:bg-[#F1F5F9] ${
+                    filters.person === person.name ? "bg-[#EFF6FF]" : ""
+                  }`}
                 >
-                  {getInitials(person.name)}
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[13px] text-[#0F172B]">{person.name}</span>
-                  <span className="text-[11px] text-[#94A3B8]">{person.email}</span>
-                </div>
-              </button>
-            ))}
+                  <div
+                    className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-white text-[12px] font-medium shrink-0"
+                    style={{ backgroundColor: getAvatarColor(person.name) }}
+                  >
+                    {getInitials(person.name)}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[13px] text-[#0F172B]">{person.name}</span>
+                    <span className="text-[11px] text-[#94A3B8]">{person.email}</span>
+                  </div>
+                </button>
+              ))
+            )}
           </div>
         )}
       </div>
