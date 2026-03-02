@@ -23,6 +23,12 @@ export const authStorage = {
 };
 
 async function handleResponse<T>(res: Response): Promise<T> {
+  if (res.status === 401) {
+    authStorage.clear();
+    window.location.href = "/login";
+    throw new ApiError("Unauthorized", 401);
+  }
+
   let data: unknown = null;
   const contentType = res.headers.get("content-type") || "";
   if (contentType.includes("application/json")) {
