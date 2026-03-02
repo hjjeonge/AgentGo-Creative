@@ -5,7 +5,7 @@ import { DAMFilters, type FilterState } from "../components/dam/DAMFilters";
 import { FileDetailModal } from "../components/dam/FileDetailModal";
 import { NewFileModal } from "../components/dam/NewFileModal";
 import { DAMContextMenu, type ContextMenuState } from "../components/dam/DAMContextMenu";
-import { MOCK_FILES, type DAMFile } from "../components/dam/DAMData";
+import { type DAMFile } from "../components/dam/DAMData";
 import { DAMGridView } from "../components/dam/DAMGridView";
 import { DAMListView } from "../components/dam/DAMListView";
 import { RenameModal } from "../components/dam/RenameModal";
@@ -45,7 +45,7 @@ const formatBytes = (value: string) => {
   return `${gb.toFixed(1)}GB`;
 };
 
-const toLocalTime = (iso: string) => {
+const toLocalTime = (iso: string | Date) => {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   return date.toLocaleString("ko-KR", {
@@ -78,7 +78,7 @@ const buildFolderMap = (nodes: FolderNode[]): Map<string, string> => {
 
 /* ─── 메인 DAM 페이지 ─────────────────────────────────────── */
 export const DAMPage: React.FC = () => {
-  const [files, setFiles] = useState<DAMFile[]>(MOCK_FILES);
+  const [files, setFiles] = useState<DAMFile[]>([]);
   const [folders, setFolders] = useState<FolderNode[]>([]);
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -106,7 +106,15 @@ export const DAMPage: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    const folderId = buildFolderMap(folders).has(activePath) ? activePath : undefined;
+    const folderMap = buildFolderMap(folders);
+    const SPECIAL_PATHS = ["DAM", "최근", "공유"];
+    const PROJECT_CATEGORIES = [
+      "SNS/마케팅 광고소재", "상세페이지/카탈로그 생성", "스튜디오 촬영 이미지 생성",
+      "다국어 변환 이미지 생성", "인포그래픽 이미지 생성", "삽화 이미지 생성", "일러스트 이미지 완성",
+    ];
+    const isSpecial = SPECIAL_PATHS.includes(activePath) || PROJECT_CATEGORIES.includes(activePath);
+    const folderId = !isSpecial && folderMap.has(activePath) ? activePath : undefined;
+
     listAssets({
       keyword: searchText || undefined,
       file_type: filters.fileType || undefined,
@@ -127,10 +135,10 @@ export const DAMPage: React.FC = () => {
           url: resolveUrl(asset.thumbnail_url || undefined),
           folder: folderId,
         }));
-        setFiles(items.length > 0 ? items : []);
+        setFiles(items);
       })
       .catch(() => {
-        // fallback to mock data on failure
+        setFiles([]);
       })
       .finally(() => {
         setLoading(false);
@@ -207,6 +215,7 @@ export const DAMPage: React.FC = () => {
           name: detail.name,
           person: detail.uploaded_by,
           size: formatBytes(detail.file_size),
+          createdAt: toLocalTime(detail.created_at),
           modifiedAt: toLocalTime(detail.updated_at),
           thumbnail: resolveUrl(detail.file_url),
           url: resolveUrl(detail.file_url),
@@ -276,16 +285,8 @@ export const DAMPage: React.FC = () => {
     }
   };
 
-  // 필터 적용
-  const filteredFiles = files.filter((file) => {
-    if (activePath !== "DAM" && activePath !== "최근" && activePath !== "공유") {
-      if (file.folder !== activePath) return false;
-    }
-    if (searchText && !file.name.toLowerCase().includes(searchText.toLowerCase())) return false;
-    if (filters.fileType && file.type !== filters.fileType) return false;
-    if (filters.person && file.person !== filters.person) return false;
-    return true;
-  });
+  // 백엔드에서 이미 필터링된 결과 사용 (클라이언트 이중 필터 제거)
+  const filteredFiles = files;
 
   // 브레드크럼
   const folderMap = buildFolderMap(folders);
