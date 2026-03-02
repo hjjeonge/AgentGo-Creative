@@ -296,7 +296,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   ];
 
   return (
-    <div className="absolute z-[50] top-[140px] right-[195px] rounded-[6px] bg-[#F1F5F9] border border-[#90A1B9] p-[24px] flex flex-col gap-[7px]">
+    <div className="absolute z-[50] top-[140px] left-1/2 ml-[112px] rounded-[6px] border border-[#90A1B9] bg-[#F1F5F9] p-[24px] flex flex-col gap-[7px] shadow-md">
       <div className="flex flex-col gap-[14px]">
         <FontFamilySelect
           selectedTextObject={selectedTextObject}

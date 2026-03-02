@@ -53,6 +53,8 @@ interface Props {
   breadcrumbPath?: string | null;
 }
 
+const DEFAULT_PLACEHOLDER_TEXT = "텍스트를 입력하세요";
+
 export const Canvas = forwardRef<CanvasHandle, Props>(
   ({ onGenerate, breadcrumbLabel, breadcrumbPath }, ref) => {
     const navigate = useNavigate();
@@ -273,7 +275,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 
       const newText: TextObject = {
         id: `text_${texts.length}`,
-        text: "텍스트를 입력하세요",
+        text: DEFAULT_PLACEHOLDER_TEXT,
         x: 150,
         y: 150,
         width: 200,
@@ -308,11 +310,32 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       setActiveTool("mouse");
     };
 
+    const removeUneditedPlaceholderTexts = (candidateIds: string[]) => {
+      const targetIds = candidateIds.filter((id) => id.startsWith("text_"));
+      if (targetIds.length === 0) return;
+
+      const removableIds = targetIds.filter((id) => {
+        const textObj = textsRef.current.find((item) => item.id === id);
+        return !!textObj && textObj.text.trim() === DEFAULT_PLACEHOLDER_TEXT;
+      });
+
+      if (removableIds.length === 0) return;
+
+      pushUndo();
+      setTexts((prev) => prev.filter((item) => !removableIds.includes(item.id)));
+    };
+
     const handleToolChange = (tool: string) => {
       if (tool === "text") {
         handleAddText();
         return;
       }
+
+      removeUneditedPlaceholderTexts([
+        ...(selectedId ? [selectedId] : []),
+        ...selectedIds,
+      ]);
+
       setActiveTool(tool);
       setSelectedId(null);
       setSelectedIds([]);
@@ -780,7 +803,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 );
 
 Canvas.displayName = "Canvas";
-
 
 
 

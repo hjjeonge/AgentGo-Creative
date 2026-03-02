@@ -86,7 +86,7 @@ export const Toolbar: React.FC<Props> = ({
 
   return (
     <div className="relative mt-[40px] mb-[40px] flex flex-col items-center">
-      <div className="flex justify-around w-[584px] p-[14px_18px] bg-white rounded-[24px] border border-[#90A1B9] shadow-md">
+      <div className="flex items-center justify-center gap-[8px] w-[584px] p-[14px_18px] bg-white rounded-[24px] border border-[#90A1B9] shadow-md">
         {tools.map((el) => (
           <ToolButton
             key={el.tool}
@@ -162,9 +162,6 @@ export const Toolbar: React.FC<Props> = ({
           )}
         </div>
       )}
-      {activeTool === "diagram" && (
-        <DiagramPopup shapeType={shapeType} setShapeType={setShapeType} />
-      )}
       {activeTool === "shape" && (
         <div className="absolute top-full mt-[7px] z-20 flex items-center gap-[6px] border border-[#90A1B9] p-[6px_10px] rounded-[6px] bg-[#F1F5F9]">
           <button
@@ -190,6 +187,9 @@ export const Toolbar: React.FC<Props> = ({
             자유형
           </button>
         </div>
+      )}
+      {activeTool === "diagram" && (
+        <DiagramPopup shapeType={shapeType} setShapeType={setShapeType} />
       )}
       {isTextEditorVisible && selectedTextObject && (
         <TextEditor

@@ -45,7 +45,7 @@ export const DiagramPopup: React.FC<Props> = ({
   setShapeType,
 }: Props) => {
   return (
-    <div className="absolute z-[50] top-[140px] right-[290px] rounded-[6px] bg-[#F1F5F9] border border-[#90A1B9] p-[24px] grid grid-cols-4">
+    <div className="absolute top-full left-1/2 z-[50] mt-[7px] -translate-x-1/2 rounded-[6px] border border-[#90A1B9] bg-[#F1F5F9] p-[24px] grid grid-cols-4 shadow-md">
       {diagramList.map((el) => (
         <button
           key={el.name}
