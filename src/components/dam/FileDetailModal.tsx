@@ -11,53 +11,29 @@ interface Props {
 }
 
 const DETAIL_FIELDS = [
-  { key: "productName", label: "Product Name" },
-  { key: "productCode", label: "Product Code" },
-  { key: "price", label: "Price" },
-  { key: "category", label: "Category" },
-  { key: "description", label: "Description" },
-  { key: "pattern", label: "Pattern" },
-  { key: "material", label: "Material" },
-  { key: "fit", label: "Fit" },
-  { key: "mood", label: "Mood" },
-  { key: "purpose", label: "Purpose" },
-  { key: "season", label: "Season" },
-  { key: "targetGender", label: "Target Gender" },
-  { key: "targetAge", label: "Target Age" },
-  { key: "hashtag", label: "Hashtag" },
+  "제품명",
+  "상품코드",
+  "가격",
+  "카테고리",
+  "제품 설명",
+  "패턴/무늬",
+  "소재",
+  "핏/스타일",
+  "무드",
+  "용도",
+  "시즌",
+  "타겟 성별",
+  "타겟 연령",
+  "해시태그",
 ];
 
-const SAMPLE_DETAIL: Record<string, string> = {
-  productName: "Sample Product",
-  productCode: "CODE-1234",
-  price: "0",
-  category: "Sample",
-  description: "",
-  pattern: "",
-  material: "",
-  fit: "",
-  mood: "",
-  purpose: "",
-  season: "",
-  targetGender: "",
-  targetAge: "",
-  hashtag: "",
-};
-
-
-const buildInitialValues = (metadata?: Record<string, string>) => {
-  const values: Record<string, string> = { ...SAMPLE_DETAIL };
-  if (!metadata) return values;
+const buildInitialValues = (metadata?: Record<string, string>): Record<string, string> => {
+  const values: Record<string, string> = {};
   DETAIL_FIELDS.forEach((field) => {
-    const key = field.key;
-    const label = field.label;
-    if (metadata[key]) values[key] = metadata[key];
-    else if (metadata[label]) values[key] = metadata[label];
+    values[field] = metadata?.[field] ?? "";
   });
   return values;
 };
-
-
 
 export const FileDetailModal: React.FC<Props> = ({ file, onClose }: Props) => {
   const [editMode, setEditMode] = useState(false);
@@ -71,12 +47,8 @@ export const FileDetailModal: React.FC<Props> = ({ file, onClose }: Props) => {
   }, [file]);
 
   const handleSave = async () => {
-    const payload: Record<string, string> = {};
-    DETAIL_FIELDS.forEach((field) => {
-      payload[field.label] = values[field.key] ?? "";
-    });
     try {
-      await updateAssetMetadata(file.id, payload);
+      await updateAssetMetadata(file.id, values);
       setSavedValues(values);
       setEditMode(false);
     } catch {
@@ -156,18 +128,17 @@ export const FileDetailModal: React.FC<Props> = ({ file, onClose }: Props) => {
 
         {/* 본문 */}
         <div className="flex flex-1 overflow-hidden">
-          {/* 좌측: 미리보기 + 날짜 + 레퍼런스 이미지 */}
+          {/* 좌측: 미리보기 + 날짜 */}
           <div className="w-[380px] shrink-0 p-[20px] border-r border-[#E2E8F0] flex flex-col gap-[16px] overflow-y-auto">
             <div className="flex items-center justify-center">
               {renderPreview()}
             </div>
 
             <div className="text-[11px] text-[#94A3B8] flex flex-col gap-[2px]">
-              <span>생성일시 | 01/10/2026</span>
-              <span>업데이트일시 | 02/05/2026</span>
+              <span>등록일시 | {file.createdAt ?? "-"}</span>
+              <span>업데이트일시 | {file.modifiedAt ?? "-"}</span>
             </div>
 
-            {/* 레퍼런스 이미지 */}
             {file.referenceImages && file.referenceImages.length > 0 && (
               <div>
                 <p className="text-[12px] text-[#475569] font-medium mb-[8px]">레퍼런스 이미지</p>
@@ -188,17 +159,17 @@ export const FileDetailModal: React.FC<Props> = ({ file, onClose }: Props) => {
           {/* 우측: 상세 정보 */}
           <div className="flex-1 overflow-y-auto p-[20px]">
             {DETAIL_FIELDS.map((field) => (
-              <div key={field.key} className="flex border-b border-[#F1F5F9]">
-                <div className="w-[80px] shrink-0 py-[10px] text-[13px] text-[#475569]">{field.label}</div>
+              <div key={field} className="flex border-b border-[#F1F5F9]">
+                <div className="w-[80px] shrink-0 py-[10px] text-[13px] text-[#475569]">{field}</div>
                 {editMode ? (
                   <input
-                    value={values[field.key] ?? ""}
-                    onChange={(e) => setValues((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                    value={values[field] ?? ""}
+                    onChange={(e) => setValues((prev) => ({ ...prev, [field]: e.target.value }))}
                     className="flex-1 py-[10px] px-[8px] text-[13px] text-[#0F172B] outline-none bg-transparent"
                   />
                 ) : (
                   <div className="flex-1 py-[10px] px-[8px] text-[13px] text-[#0F172B]">
-                    {values[field.key] ?? "-"}
+                    {values[field] || "-"}
                   </div>
                 )}
               </div>

@@ -7,6 +7,7 @@ export interface DAMFile {
   person: string;
   size: string;
   modifiedAt: string;
+  createdAt?: string;
   thumbnail?: string;
   url?: string;
   folder?: string;
