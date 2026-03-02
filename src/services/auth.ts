@@ -12,17 +12,6 @@ export interface TokenResponse {
 }
 
 export async function login(body: LoginRequest): Promise<TokenResponse> {
-  if (
-    import.meta.env.DEV &&
-    body.email === "test@itcen.com" &&
-    body.password === "1234"
-  ) {
-    const mock: TokenResponse = { access_token: "dev-token", refresh_token: "dev-refresh" };
-    authStorage.setAccessToken(mock.access_token);
-    authStorage.setRefreshToken(mock.refresh_token);
-    return mock;
-  }
-
   const data = await post<TokenResponse>("/api/auth/login", body);
   authStorage.setAccessToken(data.access_token);
   authStorage.setRefreshToken(data.refresh_token);
