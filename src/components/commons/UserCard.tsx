@@ -21,6 +21,7 @@ export const UserCard: React.FC = () => {
     if (import.meta.env.DEV && authStorage.getAccessToken() === "dev-token") {
       setName("테스트");
       setEmail("test@itcen.com");
+      setIsAdmin(true);
       return;
     }
 
