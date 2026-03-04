@@ -14,7 +14,11 @@ interface Props {
   onNewProject: () => void;
 }
 
-export const Aside: React.FC<Props> = ({ hasImage, onUpload, onNewProject }) => {
+export const Aside: React.FC<Props> = ({
+  hasImage,
+  onUpload,
+  onNewProject,
+}) => {
   const navigate = useNavigate();
   const [aiClick, setAiClick] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -43,8 +47,8 @@ export const Aside: React.FC<Props> = ({ hasImage, onUpload, onNewProject }) => 
             onClick={onNewProject}
             className="flex flex-col gap-[4px] items-center hover:opacity-70"
           >
-            <img src={New} />
-            <span className="text-[#0F172B] text-[14px] leading-[19.88px]">
+            <img src={New} className="w-[30px] h-[30px]" />
+            <span className="text-[#0F172B] text-[13px] leading-[19.88px]">
               새프로젝트
             </span>
           </button>
@@ -52,8 +56,8 @@ export const Aside: React.FC<Props> = ({ hasImage, onUpload, onNewProject }) => 
             onClick={handleUploadClick}
             className="flex flex-col gap-[4px] items-center hover:opacity-70"
           >
-            <img src={Upload} />
-            <span className="text-[#0F172B] text-[14px] leading-[19.88px]">
+            <img src={Upload} className="w-[30px] h-[30px]" />
+            <span className="text-[#0F172B] text-[13px] leading-[19.88px]">
               업로드
             </span>
           </button>
@@ -61,8 +65,8 @@ export const Aside: React.FC<Props> = ({ hasImage, onUpload, onNewProject }) => 
             className="flex flex-col gap-[4px] items-center hover:opacity-70"
             onClick={handleAiTool}
           >
-            <img src={AI} />
-            <span className="text-[#0F172B] text-[14px] leading-[19.88px]">
+            <img src={AI} className="w-[30px] h-[30px]" />
+            <span className="text-[#0F172B] text-[13px] leading-[19.88px]">
               AI 도구
             </span>
           </button>
@@ -71,8 +75,8 @@ export const Aside: React.FC<Props> = ({ hasImage, onUpload, onNewProject }) => 
           onClick={() => navigate("/")}
           className="flex flex-col gap-[4px] items-center hover:opacity-70"
         >
-          <img src={Home} />
-          <span className="text-[#0F172B] text-[14px] leading-[19.88px]">
+          <img src={Home} className="w-[30px] h-[30px]" />
+          <span className="text-[#0F172B] text-[13px] leading-[19.88px]">
             홈으로
           </span>
         </button>

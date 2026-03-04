@@ -27,8 +27,8 @@ export const AiToolPanel: React.FC<Props> = ({ hasImage }) => {
           className={`flex flex-col gap-[7px] items-center ${!hasImage ? "opacity-40 cursor-not-allowed" : "hover:opacity-80"}`}
           title={!hasImage ? "캔버스에 이미지를 업로드해 주세요." : el}
         >
-          <div className="w-[170px] h-[170px] border border-[#45556C] border-[2px] bg-[#F8FAFC] rounded-[10px] border-dashed"></div>
-          <span className="text-[#0F172B] text-[16px] leading-[32px] text-center">
+          <div className="w-[150px] h-[150px] border border-[#45556C] border-[2px] bg-[#F8FAFC] rounded-[10px] border-dashed"></div>
+          <span className="text-[#0F172B] text-[14px] leading-[32px] text-center">
             {el}
           </span>
         </button>
