@@ -85,8 +85,8 @@ export const Toolbar: React.FC<Props> = ({
   };
 
   return (
-    <div className="relative mt-[40px] mb-[40px] flex flex-col items-center">
-      <div className="flex items-center justify-center gap-[8px] w-[584px] p-[14px_18px] bg-white rounded-[24px] border border-[#90A1B9] shadow-md">
+    <div className="relative mt-[20px] flex flex-col items-center">
+      <div className="flex items-center justify-center gap-[8px] w-[584px] p-[8px] bg-white rounded-[24px] border border-[#90A1B9] shadow-md">
         {tools.map((el) => (
           <ToolButton
             key={el.tool}

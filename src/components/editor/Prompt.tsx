@@ -99,14 +99,14 @@ export const Prompt: React.FC<Props> = ({ onGenerate }) => {
           ))}
         </div>
       )}
-      <div className="flex flex-col gap-[26px]">
+      <div className="flex flex-col gap-[16px]">
         <textarea
           ref={textareaRef}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="AgentGo에게 물어보세요."
-          className="w-full rounded-[8px] p-[10px] text-[14px] leading-[20px] max-h-[320px] overflow-y-auto resize-none outline-none"
+          className="w-full rounded-[8px] p-[10px] text-[14px] leading-[20px] max-h-[150px] overflow-y-auto resize-none outline-none"
           rows={1}
         />
         <div className="flex items-center justify-between">
@@ -114,7 +114,7 @@ export const Prompt: React.FC<Props> = ({ onGenerate }) => {
             <button
               onClick={handleOpenFile}
               disabled={isMaxImages}
-              className={`text-[14px] leading-[19.88px] rounded-[4px] border px-[10px] py-[4px] transition-colors ${
+              className={`text-[12px] leading-[19.88px] rounded-[4px] border px-[10px] py-[4px] transition-colors ${
                 isMaxImages
                   ? "text-[#90A1B9] border-[#CAD5E2] cursor-not-allowed"
                   : "text-[#0F172B] border-[#CAD5E2] hover:bg-[#F8FAFF]"

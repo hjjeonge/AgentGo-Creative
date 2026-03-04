@@ -37,9 +37,11 @@ const isPointInPolygon = (px: number, py: number, polygon: number[]) => {
   const n = polygon.length / 2;
   let j = n - 1;
   for (let i = 0; i < n; i++) {
-    const xi = polygon[i * 2], yi = polygon[i * 2 + 1];
-    const xj = polygon[j * 2], yj = polygon[j * 2 + 1];
-    if ((yi > py) !== (yj > py) && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) {
+    const xi = polygon[i * 2],
+      yi = polygon[i * 2 + 1];
+    const xj = polygon[j * 2],
+      yj = polygon[j * 2 + 1];
+    if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) {
       inside = !inside;
     }
     j = i;
@@ -64,7 +66,10 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     type ViewMode = "fit" | "actual" | "fill" | "custom";
     const [viewMode, setViewMode] = useState<ViewMode>("fit");
     const [viewScale, setViewScale] = useState(1);
-    const [imageNaturalSize, setImageNaturalSize] = useState<{ width: number; height: number } | null>(null);
+    const [imageNaturalSize, setImageNaturalSize] = useState<{
+      width: number;
+      height: number;
+    } | null>(null);
 
     useEffect(() => {
       const container = containerRef.current;
@@ -79,10 +84,13 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       };
 
       container.addEventListener("mousemove", handlePointerMove);
-      return () => container.removeEventListener("mousemove", handlePointerMove);
+      return () =>
+        container.removeEventListener("mousemove", handlePointerMove);
     }, []);
 
-    const [backgroundImage, setBackgroundImageState] = useState<string | null>(null);
+    const [backgroundImage, setBackgroundImageState] = useState<string | null>(
+      null,
+    );
     const [lines, setLines] = useState<DrawLine[]>([]);
     const [shapes, setShapes] = useState<Shape[]>([]);
     const [texts, setTexts] = useState<TextObject[]>([]);
@@ -90,9 +98,13 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     const [isDrawing, setIsDrawing] = useState(false);
     const [shapeType, setShapeType] = useState("square");
 
-
     const [penStrokeWidth, setPenStrokeWidth] = useState(2);
-    const [brushPreview, setBrushPreview] = useState({ x: 0, y: 0, size: 2, visible: false });
+    const [brushPreview, setBrushPreview] = useState({
+      x: 0,
+      y: 0,
+      size: 2,
+      visible: false,
+    });
     const lastPointerRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
     const previewTimeoutRef = useRef<number | null>(null);
     const [penStrokeColor, setPenStrokeColor] = useState("#E7000B");
@@ -102,7 +114,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     const [editingTextId, setEditingTextId] = useState<string | null>(null);
     const [selectionRect, setSelectionRect] = useState<Rect | null>(null);
     const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
-    const [shapeSelectMode, setShapeSelectMode] = useState<"rect" | "lasso">("rect");
+    const [shapeSelectMode, setShapeSelectMode] = useState<"rect" | "lasso">(
+      "rect",
+    );
     const [lassoPath, setLassoPath] = useState<number[]>([]);
     const [isLassoing, setIsLassoing] = useState(false);
     const objectRefs = useRef<Record<string, any>>({});
@@ -132,7 +146,10 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           return;
         }
         // Ctrl+Y or Ctrl+Shift+Z: Redo
-        if ((e.key === "y" && (e.ctrlKey || e.metaKey)) || (e.key === "z" && (e.ctrlKey || e.metaKey) && e.shiftKey)) {
+        if (
+          (e.key === "y" && (e.ctrlKey || e.metaKey)) ||
+          (e.key === "z" && (e.ctrlKey || e.metaKey) && e.shiftKey)
+        ) {
           e.preventDefault();
           const next = redoStack.current.pop();
           if (!next) return;
@@ -149,7 +166,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         if ((e.key === "[" || e.key === "]") && !editingTextId) {
           e.preventDefault();
           const delta = e.shiftKey ? 5 : 1;
-          const next = e.key === "]" ? penStrokeWidth + delta : penStrokeWidth - delta;
+          const next =
+            e.key === "]" ? penStrokeWidth + delta : penStrokeWidth - delta;
           const clamped = Math.max(1, Math.min(200, next));
           setPenStrokeWidth(clamped);
           showBrushPreview(clamped);
@@ -158,7 +176,12 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 
         // Delete/Backspace: 선택 객체 삭제
         if ((e.key === "Delete" || e.key === "Backspace") && !editingTextId) {
-          const toDelete = selectedIds.length > 0 ? selectedIds : selectedId ? [selectedId] : [];
+          const toDelete =
+            selectedIds.length > 0
+              ? selectedIds
+              : selectedId
+                ? [selectedId]
+                : [];
           if (toDelete.length === 0) return;
           pushUndo();
           toDelete.forEach((id) => {
@@ -182,13 +205,26 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     const textsRef = useRef(texts);
     const backgroundImageRef = useRef(backgroundImage);
 
-    useEffect(() => { linesRef.current = lines; }, [lines]);
-    useEffect(() => { shapesRef.current = shapes; }, [shapes]);
-    useEffect(() => { textsRef.current = texts; }, [texts]);
-    useEffect(() => { backgroundImageRef.current = backgroundImage; }, [backgroundImage]);
+    useEffect(() => {
+      linesRef.current = lines;
+    }, [lines]);
+    useEffect(() => {
+      shapesRef.current = shapes;
+    }, [shapes]);
+    useEffect(() => {
+      textsRef.current = texts;
+    }, [texts]);
+    useEffect(() => {
+      backgroundImageRef.current = backgroundImage;
+    }, [backgroundImage]);
 
     // Undo / Redo 스택
-    type HistoryState = { lines: DrawLine[]; shapes: Shape[]; texts: TextObject[]; backgroundImage: string | null };
+    type HistoryState = {
+      lines: DrawLine[];
+      shapes: Shape[];
+      texts: TextObject[];
+      backgroundImage: string | null;
+    };
     const undoStack = useRef<HistoryState[]>([]);
     const redoStack = useRef<HistoryState[]>([]);
 
@@ -253,7 +289,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       if (trRef.current) {
         if (!editingTextId) {
           if (selectedIds.length > 1) {
-            const nodes = selectedIds.map((id) => objectRefs.current[id]).filter(Boolean);
+            const nodes = selectedIds
+              .map((id) => objectRefs.current[id])
+              .filter(Boolean);
             trRef.current.nodes(nodes);
           } else if (selectedId) {
             const node = objectRefs.current[selectedId];
@@ -322,7 +360,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       if (removableIds.length === 0) return;
 
       pushUndo();
-      setTexts((prev) => prev.filter((item) => !removableIds.includes(item.id)));
+      setTexts((prev) =>
+        prev.filter((item) => !removableIds.includes(item.id)),
+      );
     };
 
     const handleToolChange = (tool: string) => {
@@ -346,7 +386,10 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       setIsLassoing(false);
     };
 
-    const handleUpdateTextObject = (id: string, updates: Partial<TextObject>) => {
+    const handleUpdateTextObject = (
+      id: string,
+      updates: Partial<TextObject>,
+    ) => {
       setTexts((prev) =>
         prev.map((text) => (text.id === id ? { ...text, ...updates } : text)),
       );
@@ -379,14 +422,16 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     };
 
     const fitScale = (() => {
-      if (!imageNaturalSize || stageSize.width <= 0 || stageSize.height <= 0) return 1;
+      if (!imageNaturalSize || stageSize.width <= 0 || stageSize.height <= 0)
+        return 1;
       const sx = stageSize.width / imageNaturalSize.width;
       const sy = stageSize.height / imageNaturalSize.height;
       return Math.min(1, Math.min(sx, sy));
     })();
 
     const fillScale = (() => {
-      if (!imageNaturalSize || stageSize.width <= 0 || stageSize.height <= 0) return 1;
+      if (!imageNaturalSize || stageSize.width <= 0 || stageSize.height <= 0)
+        return 1;
       const sx = stageSize.width / imageNaturalSize.width;
       const sy = stageSize.height / imageNaturalSize.height;
       return Math.max(sx, sy);
@@ -517,7 +562,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         }
       }
 
-      if (!isDrawing || (activeTool !== "pen" && activeTool !== "eraser")) return;
+      if (!isDrawing || (activeTool !== "pen" && activeTool !== "eraser"))
+        return;
 
       const stage = e.target.getStage();
       const point = stage.getRelativePointerPosition();
@@ -546,10 +592,21 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       if (activeTool === "shape") {
         if (shapeSelectMode === "rect" && selectionStartRef.current) {
           selectionStartRef.current = null;
-          if (selectionRect && selectionRect.width > 2 && selectionRect.height > 2) {
+          if (
+            selectionRect &&
+            selectionRect.width > 2 &&
+            selectionRect.height > 2
+          ) {
             const ids: string[] = [];
             shapes.forEach((shape) => {
-              if (rectsOverlap(selectionRect, { x: shape.x, y: shape.y, width: shape.width, height: shape.height })) {
+              if (
+                rectsOverlap(selectionRect, {
+                  x: shape.x,
+                  y: shape.y,
+                  width: shape.width,
+                  height: shape.height,
+                })
+              ) {
                 ids.push(shape.id);
               }
             });
@@ -664,7 +721,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     return (
       <section className="h-full flex-1 min-w-0 bg-[#E2E8F0] relative flex flex-col items-center">
         {/* 브레드크럼 */}
-        <div className="absolute top-[12px] left-[16px] z-[10] flex items-center gap-[6px] text-[13px]">
+        <div className="flex items-center gap-[6px] text-[13px] mt-[10px]">
           <button
             onClick={() => navigate("/")}
             className="text-[#64748B] hover:text-[#155DFC]"
@@ -732,7 +789,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
               >
                 Fill
               </button>
-              <span className="ml-[4px] text-[12px] text-[#64748B]">{Math.round(viewScale * 100)}%</span>
+              <span className="ml-[4px] text-[12px] text-[#64748B]">
+                {Math.round(viewScale * 100)}%
+              </span>
             </div>
           )}
 
@@ -787,11 +846,20 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
             </div>
           ) : (
             <div className="flex flex-col items-center gap-[8px] text-[#94A3B8] select-none">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <path d="M3 9h18M9 21V9"/>
+              <svg
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M3 9h18M9 21V9" />
               </svg>
-              <span className="text-[14px]">사이드바에서 이미지를 업로드해 주세요</span>
+              <span className="text-[14px]">
+                사이드바에서 이미지를 업로드해 주세요
+              </span>
             </div>
           )}
         </div>
@@ -803,18 +871,3 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 );
 
 Canvas.displayName = "Canvas";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

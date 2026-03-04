@@ -200,9 +200,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         <StrokeContent
           stroke={selectedTextObject?.stroke}
           strokeWidth={selectedTextObject?.strokeWidth}
-          colorPopupMode={
-            activePopupTarget === "stroke" ? popupMode : null
-          }
+          colorPopupMode={activePopupTarget === "stroke" ? popupMode : null}
           onOpenPicker={() => openPicker("stroke")}
           onOpenPalette={() => openPalette("stroke")}
           onBackToPicker={() => openPicker("stroke", true)}
@@ -235,9 +233,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           shadowOpacity={selectedTextObject?.shadowOpacity}
           shadowDistance={selectedTextObject?.shadowDistance}
           shadowBlur={selectedTextObject?.shadowBlur}
-          colorPopupMode={
-            activePopupTarget === "shadow" ? popupMode : null
-          }
+          colorPopupMode={activePopupTarget === "shadow" ? popupMode : null}
           onOpenPicker={() => openPicker("shadow")}
           onOpenPalette={() => openPalette("shadow")}
           onBackToPicker={() => openPicker("shadow", true)}
@@ -296,7 +292,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   ];
 
   return (
-    <div className="absolute z-[50] top-[140px] left-1/2 ml-[112px] rounded-[6px] border border-[#90A1B9] bg-[#F1F5F9] p-[24px] flex flex-col gap-[7px] shadow-md">
+    <div className="absolute z-[50] top-full mt-[8px] rounded-[6px] border border-[#90A1B9] bg-[#F1F5F9] p-[24px] flex flex-col gap-[7px] shadow-md">
       <div className="flex flex-col gap-[14px]">
         <FontFamilySelect
           selectedTextObject={selectedTextObject}
@@ -482,9 +478,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                         {popupMode === "picker" ? (
                           <ColorPickerPopup
                             onClose={closePopup}
-                            onOpenPalette={() =>
-                              openPalette("highlight")
-                            }
+                            onOpenPalette={() => openPalette("highlight")}
                             currentColor={normalizedHighlightColor}
                             recentlyUseColorList={recentTextColors}
                             onSelectColor={(value) => {
