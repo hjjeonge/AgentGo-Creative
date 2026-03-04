@@ -78,9 +78,13 @@ export const UserCard: React.FC = () => {
         <div className="w-[28px] h-[28px] bg-[linear-gradient(135deg,#0055E9_0%,#6A14D9_100%)] flex items-center justify-center rounded-full text-[12px] text-white leading-[18px] font-bold shrink-0">
           {name.charAt(0)}
         </div>
-        <div className="flex flex-col items-start min-w-0">
-          <span className="text-[#1E1E1E] text-[13px] font-semibold leading-tight truncate w-full">{name}</span>
-          <span className="text-[#9CA3AF] text-[11px] leading-tight truncate w-full">{email}</span>
+        <div className="flex-1 flex items-center gap-[3px] justify-center">
+          <span className="text-[#1E1E1E] text-[13px] font-semibold leading-tight truncate">
+            {name}
+          </span>
+          <span className="text-[#9CA3AF] text-[11px] leading-tight truncate">
+            {email}
+          </span>
         </div>
         <button onClick={() => setMenuOpen((prev) => !prev)}>
           <img src={Dots} />
