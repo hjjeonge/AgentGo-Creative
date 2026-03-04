@@ -79,7 +79,7 @@ export const Prompt: React.FC<Props> = ({ onGenerate }) => {
   const previewSize = images.length <= 1 ? 100 : 55;
 
   return (
-    <div className="absolute bottom-[50px] left-1/2 -translate-x-1/2 z-[40] w-[768px] bg-white border border-[#155DFC] rounded-[8px] p-[10px_8px] flex flex-col gap-[12px]">
+    <div className="z-[40] w-full max-w-[768px] bg-white border border-[#155DFC] rounded-[8px] p-[10px_8px] flex flex-col gap-[12px]">
       {images.length > 0 && (
         <div className="flex items-center gap-[8px] flex-wrap">
           {images.map((img, index) => (

@@ -764,7 +764,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         <div
           ref={containerRef}
           onWheel={handleCanvasWheel}
-          className="relative flex-1 w-full flex items-center justify-center overflow-hidden"
+          className="relative flex-1 w-full flex items-center justify-center overflow-hidden bg-white"
         >
           {backgroundImage && (
             <div className="absolute right-[16px] top-[12px] z-[12] flex items-center gap-[6px] rounded-[8px] border border-[#CBD5E1] bg-white/95 p-[4px] shadow-sm">

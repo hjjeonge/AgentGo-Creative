@@ -48,7 +48,9 @@ export const Toolbar: React.FC<Props> = ({
   selectedTextObject,
   handleUpdateTextObject,
 }) => {
+  const toolbarRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const [isToolPopupOpen, setIsToolPopupOpen] = useState(false);
   const [colorPopupMode, setColorPopupMode] = useState<
     "picker" | "palette" | null
   >(null);
@@ -57,7 +59,8 @@ export const Toolbar: React.FC<Props> = ({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (!wrapperRef.current?.contains(e.target as Node)) {
+      if (!toolbarRef.current?.contains(e.target as Node)) {
+        setIsToolPopupOpen(false);
         setColorPopupMode(null);
       }
     };
@@ -65,6 +68,20 @@ export const Toolbar: React.FC<Props> = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    const hasToolPopup =
+      activeTool === "pen" ||
+      activeTool === "eraser" ||
+      activeTool === "shape" ||
+      activeTool === "diagram";
+
+    setIsToolPopupOpen(hasToolPopup);
+    if (activeTool !== "pen") {
+      setColorPopupMode(null);
+    }
+  }, [activeTool]);
+
   const tools = [
     { tool: "mouse", icon: <ClickIcon /> },
     { tool: "pen", icon: <PencilIcon /> },
@@ -84,8 +101,20 @@ export const Toolbar: React.FC<Props> = ({
     handlePenStrokeColor(value);
   };
 
+  const handleToolClick = (tool: string) => {
+    const hasPopup =
+      tool === "pen" || tool === "eraser" || tool === "shape" || tool === "diagram";
+
+    if (tool === activeTool) {
+      if (hasPopup) setIsToolPopupOpen(true);
+      return;
+    }
+
+    onToolChange(tool);
+  };
+
   return (
-    <div className="relative mt-[20px] flex flex-col items-center">
+    <div ref={toolbarRef} className="relative mt-[20px] flex flex-col items-center">
       <div className="flex items-center justify-center gap-[8px] w-[584px] p-[8px] bg-white rounded-[24px] border border-[#90A1B9] shadow-md">
         {tools.map((el) => (
           <ToolButton
@@ -95,12 +124,13 @@ export const Toolbar: React.FC<Props> = ({
             icon={el.icon}
             label={el.tool}
             onToolChange={onToolChange}
+            onClick={() => handleToolClick(el.tool)}
           />
         ))}
       </div>
 
       {/* 하단 서브 바 - absolute 로 캔버스 영역에 영향 없이 표시 */}
-      {(activeTool === "pen" || activeTool === "eraser") && (
+      {isToolPopupOpen && (activeTool === "pen" || activeTool === "eraser") && (
         <div
           ref={wrapperRef}
           className="absolute top-full mt-[7px] border flex items-center gap-[12px] border-[#90A1B9] p-[8px_10px] rounded-[6px] bg-[#F1F5F9] z-20"
@@ -162,7 +192,7 @@ export const Toolbar: React.FC<Props> = ({
           )}
         </div>
       )}
-      {activeTool === "shape" && (
+      {isToolPopupOpen && activeTool === "shape" && (
         <div className="absolute top-full mt-[7px] z-20 flex items-center gap-[6px] border border-[#90A1B9] p-[6px_10px] rounded-[6px] bg-[#F1F5F9]">
           <button
             onClick={() => setShapeSelectMode("rect")}
@@ -188,7 +218,7 @@ export const Toolbar: React.FC<Props> = ({
           </button>
         </div>
       )}
-      {activeTool === "diagram" && (
+      {isToolPopupOpen && activeTool === "diagram" && (
         <DiagramPopup shapeType={shapeType} setShapeType={setShapeType} />
       )}
       {isTextEditorVisible && selectedTextObject && (
