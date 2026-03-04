@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import { getPenColorImg, getPenStrokeWidthImg } from "../../utils/getImage";
 import { ColorPalette } from "../commons/ColorPalette";
 import { ColorPickerPopup } from "../commons/ColorPickerPopup";
@@ -14,8 +15,9 @@ import { TextEditor } from "./TextEditor";
 import { ToolButton } from "./ToolButton";
 import { ToolbarButton } from "./ToolbarButton";
 import type { TextObject } from "./EditorCanvas";
+import { LassoIcon } from "../icons/LassoIcon";
 
-interface ToolbarProps {
+interface Props {
   activeTool: string;
   onToolChange: (tool: string) => void;
   penStrokeWidth: number;
@@ -24,12 +26,14 @@ interface ToolbarProps {
   handlePenStrokeColor: (value: string) => void;
   shapeType: string;
   setShapeType: (value: string) => void;
-  isTextEditorVisible: boolean; // New prop
-  selectedTextObject?: TextObject; // New prop
-  handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void; // Updated prop
+  shapeSelectMode: "rect" | "lasso";
+  setShapeSelectMode: (mode: "rect" | "lasso") => void;
+  isTextEditorVisible: boolean;
+  selectedTextObject?: TextObject;
+  handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({
+export const Toolbar: React.FC<Props> = ({
   activeTool,
   onToolChange,
   penStrokeWidth,
@@ -38,11 +42,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   handlePenStrokeColor,
   shapeType,
   setShapeType,
+  shapeSelectMode,
+  setShapeSelectMode,
   isTextEditorVisible,
   selectedTextObject,
   handleUpdateTextObject,
 }) => {
+  const toolbarRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const [isToolPopupOpen, setIsToolPopupOpen] = useState(false);
   const [colorPopupMode, setColorPopupMode] = useState<
     "picker" | "palette" | null
   >(null);
@@ -51,7 +59,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (!wrapperRef.current?.contains(e.target as Node)) {
+      if (!toolbarRef.current?.contains(e.target as Node)) {
+        setIsToolPopupOpen(false);
         setColorPopupMode(null);
       }
     };
@@ -59,6 +68,20 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    const hasToolPopup =
+      activeTool === "pen" ||
+      activeTool === "eraser" ||
+      activeTool === "shape" ||
+      activeTool === "diagram";
+
+    setIsToolPopupOpen(hasToolPopup);
+    if (activeTool !== "pen") {
+      setColorPopupMode(null);
+    }
+  }, [activeTool]);
+
   const tools = [
     { tool: "mouse", icon: <ClickIcon /> },
     { tool: "pen", icon: <PencilIcon /> },
@@ -78,9 +101,21 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     handlePenStrokeColor(value);
   };
 
+  const handleToolClick = (tool: string) => {
+    const hasPopup =
+      tool === "pen" || tool === "eraser" || tool === "shape" || tool === "diagram";
+
+    if (tool === activeTool) {
+      if (hasPopup) setIsToolPopupOpen(true);
+      return;
+    }
+
+    onToolChange(tool);
+  };
+
   return (
-    <div className="flex flex-col gap-[7px] items-center mt-[40px] mb-[40px]">
-      <div className="flex justify-around w-[584px] p-[14px_18px] bg-white rounded-[24px] border border-[#90A1B9] shadow-md">
+    <div ref={toolbarRef} className="relative mt-[20px] flex flex-col items-center">
+      <div className="flex items-center justify-center gap-[8px] w-[584px] p-[8px] bg-white rounded-[24px] border border-[#90A1B9] shadow-md">
         {tools.map((el) => (
           <ToolButton
             key={el.tool}
@@ -89,13 +124,16 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             icon={el.icon}
             label={el.tool}
             onToolChange={onToolChange}
+            onClick={() => handleToolClick(el.tool)}
           />
         ))}
       </div>
-      {(activeTool === "pen" || activeTool === "eraser") && (
+
+      {/* 하단 서브 바 - absolute 로 캔버스 영역에 영향 없이 표시 */}
+      {isToolPopupOpen && (activeTool === "pen" || activeTool === "eraser") && (
         <div
           ref={wrapperRef}
-          className={`absolute z-[50] top-[140px] ${activeTool === "pen" && "left-[415px]"} ${activeTool === "eraser" && "right-[455px]"} border flex items-center gap-[12px] border-[#90A1B9] p-[8px_10px] rounded-[6px] bg-[#F1F5F9]`}
+          className="absolute top-full mt-[7px] border flex items-center gap-[12px] border-[#90A1B9] p-[8px_10px] rounded-[6px] bg-[#F1F5F9] z-20"
         >
           {penStrokeWidths.map((el) => (
             <ToolbarButton
@@ -128,7 +166,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             </>
           )}
           {colorPopupMode && (
-            <div className="absolute top-[5px] right-[-180px] mt-[20px] z-50">
+            <div className="absolute top-full right-0 mt-[6px] z-50">
               {colorPopupMode === "picker" ? (
                 <ColorPickerPopup
                   onClose={() => setColorPopupMode(null)}
@@ -154,7 +192,33 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           )}
         </div>
       )}
-      {activeTool === "diagram" && (
+      {isToolPopupOpen && activeTool === "shape" && (
+        <div className="absolute top-full mt-[7px] z-20 flex items-center gap-[6px] border border-[#90A1B9] p-[6px_10px] rounded-[6px] bg-[#F1F5F9]">
+          <button
+            onClick={() => setShapeSelectMode("rect")}
+            className={`flex items-center gap-[4px] px-[8px] py-[4px] rounded-[4px] text-[13px] transition-colors ${
+              shapeSelectMode === "rect"
+                ? "bg-[#1447E6] text-white"
+                : "text-[#45556C] hover:bg-[#E2E8F0]"
+            }`}
+          >
+            <ShapeIcon />
+            정사형
+          </button>
+          <button
+            onClick={() => setShapeSelectMode("lasso")}
+            className={`flex items-center gap-[4px] px-[8px] py-[4px] rounded-[4px] text-[13px] transition-colors ${
+              shapeSelectMode === "lasso"
+                ? "bg-[#1447E6] text-white"
+                : "text-[#45556C] hover:bg-[#E2E8F0]"
+            }`}
+          >
+            <LassoIcon />
+            자유형
+          </button>
+        </div>
+      )}
+      {isToolPopupOpen && activeTool === "diagram" && (
         <DiagramPopup shapeType={shapeType} setShapeType={setShapeType} />
       )}
       {isTextEditorVisible && selectedTextObject && (

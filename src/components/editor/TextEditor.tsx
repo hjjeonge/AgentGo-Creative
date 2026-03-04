@@ -1,5 +1,5 @@
 import type React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SwitchAccordion } from "../commons/SwitchAccordion";
 import { ColorPickerPopup } from "../commons/ColorPickerPopup";
 import { ColorPalette } from "../commons/ColorPalette";
@@ -26,6 +26,7 @@ import { TypographyPopover } from "./TypographyPopover";
 import { VerticalAlignPopover } from "./VerticalAlignPopover";
 import { StrokeContent } from "./StrokeContent";
 import { ShadowContent } from "./ShadowContent";
+import { SpecialCharPopup } from "./SpecialCharPopup";
 
 const fontStyle = [
   { name: "bold", img: Bold, tooltip: "굵게" },
@@ -55,6 +56,8 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   const [activePopupTarget, setActivePopupTarget] = useState<
     "text" | "highlight" | "stroke" | "shadow" | null
   >(null);
+  const [isSpecialCharOpen, setIsSpecialCharOpen] = useState(false);
+  const specialCharRef = useRef<HTMLDivElement>(null);
   const recentTextColors = useColorHistoryStore((state) => state.recentColors);
   const addRecentColor = useColorHistoryStore((state) => state.addRecentColor);
 
@@ -90,6 +93,24 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   const closePopup = () => {
     setActivePopupTarget(null);
   };
+
+  const handleInsertSpecialChar = (char: string) => {
+    if (!selectedTextObject) return;
+    handleUpdateTextObject(selectedTextObject.id, {
+      text: selectedTextObject.text + char,
+    });
+  };
+
+  useEffect(() => {
+    if (!isSpecialCharOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (!specialCharRef.current?.contains(e.target as Node)) {
+        setIsSpecialCharOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isSpecialCharOpen]);
 
   useEffect(() => {
     if (!selectedTextObject) {
@@ -179,9 +200,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         <StrokeContent
           stroke={selectedTextObject?.stroke}
           strokeWidth={selectedTextObject?.strokeWidth}
-          colorPopupMode={
-            activePopupTarget === "stroke" ? popupMode : null
-          }
+          colorPopupMode={activePopupTarget === "stroke" ? popupMode : null}
           onOpenPicker={() => openPicker("stroke")}
           onOpenPalette={() => openPalette("stroke")}
           onBackToPicker={() => openPicker("stroke", true)}
@@ -214,9 +233,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           shadowOpacity={selectedTextObject?.shadowOpacity}
           shadowDistance={selectedTextObject?.shadowDistance}
           shadowBlur={selectedTextObject?.shadowBlur}
-          colorPopupMode={
-            activePopupTarget === "shadow" ? popupMode : null
-          }
+          colorPopupMode={activePopupTarget === "shadow" ? popupMode : null}
           onOpenPicker={() => openPicker("shadow")}
           onOpenPalette={() => openPalette("shadow")}
           onBackToPicker={() => openPicker("shadow", true)}
@@ -275,7 +292,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   ];
 
   return (
-    <div className="absolute z-[50] top-[140px] right-[195px] rounded-[6px] bg-[#F1F5F9] border border-[#90A1B9] p-[24px] flex flex-col gap-[7px]">
+    <div className="absolute z-[50] top-full mt-[8px] rounded-[6px] border border-[#90A1B9] bg-[#F1F5F9] p-[24px] flex flex-col gap-[7px] shadow-md">
       <div className="flex flex-col gap-[14px]">
         <FontFamilySelect
           selectedTextObject={selectedTextObject}
@@ -461,9 +478,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                         {popupMode === "picker" ? (
                           <ColorPickerPopup
                             onClose={closePopup}
-                            onOpenPalette={() =>
-                              openPalette("highlight")
-                            }
+                            onOpenPalette={() => openPalette("highlight")}
                             currentColor={normalizedHighlightColor}
                             recentlyUseColorList={recentTextColors}
                             onSelectColor={(value) => {
@@ -496,11 +511,20 @@ export const TextEditor: React.FC<TextEditorProps> = ({
               }
 
               return (
-                <ToolbarButton
-                  key={el.name}
-                  icon={el.img}
-                  tooltip={el.tooltip}
-                />
+                <div key={el.name} className="relative" ref={specialCharRef}>
+                  <ToolbarButton
+                    icon={el.img}
+                    tooltip={el.tooltip}
+                    onClick={() => setIsSpecialCharOpen((prev) => !prev)}
+                    isActive={isSpecialCharOpen}
+                  />
+                  {isSpecialCharOpen && (
+                    <SpecialCharPopup
+                      onInsert={handleInsertSpecialChar}
+                      onClose={() => setIsSpecialCharOpen(false)}
+                    />
+                  )}
+                </div>
               );
             })}
           </div>

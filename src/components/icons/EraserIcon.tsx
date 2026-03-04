@@ -4,7 +4,7 @@ export const EraserIcon: React.FC = () => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="34"
+      width="30"
       height="29"
       viewBox="0 0 34 29"
       fill="none"
