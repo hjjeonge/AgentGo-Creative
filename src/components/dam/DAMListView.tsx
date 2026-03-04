@@ -15,16 +15,23 @@ interface Props {
 
 export const DAMListView: React.FC<Props> = ({ files, onContextMenu, onDotsClick, onDownload, onRename }) => {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const getStatusStyle = (status?: string) => {
+    if (status === "approved") return { label: "Approved", dot: "bg-[#16A34A]", text: "text-[#166534]" };
+    if (status === "rejected") return { label: "Rejected", dot: "bg-[#DC2626]", text: "text-[#991B1B]" };
+    if (status === "pending") return { label: "Pending", dot: "bg-[#D97706]", text: "text-[#9A3412]" };
+    return { label: "No status", dot: "bg-[#94A3B8]", text: "text-[#64748B]" };
+  };
 
   return (
     <div className="px-[20px]">
       {/* 헤더 */}
-      <div className="grid grid-cols-[40px_1fr_180px_100px_200px_64px] gap-[8px] px-[8px] py-[10px] border-b border-[#E2E8F0] text-[12px] text-[#94A3B8] font-medium">
+      <div className="grid grid-cols-[40px_1fr_140px_100px_170px_120px_64px] gap-[8px] px-[8px] py-[10px] border-b border-[#E2E8F0] text-[12px] text-[#94A3B8] font-medium">
         <span>종류</span>
         <span>이름</span>
         <span>사람</span>
         <span>크기</span>
         <span>수정한 날짜</span>
+        <span>상태</span>
         <span />
       </div>
 
@@ -35,7 +42,7 @@ export const DAMListView: React.FC<Props> = ({ files, onContextMenu, onDotsClick
           onContextMenu={(e) => onContextMenu(e, file.id)}
           onMouseEnter={() => setHoveredId(file.id)}
           onMouseLeave={() => setHoveredId(null)}
-          className={`group grid grid-cols-[40px_1fr_180px_100px_200px_64px] gap-[8px] px-[8px] py-[12px] border-b border-[#F1F5F9] items-center cursor-pointer ${
+          className={`group grid grid-cols-[40px_1fr_140px_100px_170px_120px_64px] gap-[8px] px-[8px] py-[12px] border-b border-[#F1F5F9] items-center cursor-pointer ${
             hoveredId === file.id ? "bg-[#F8FAFC]" : ""
           }`}
         >
@@ -46,6 +53,10 @@ export const DAMListView: React.FC<Props> = ({ files, onContextMenu, onDotsClick
           <span className="text-[13px] text-[#475569] truncate">{file.person}</span>
           <span className="text-[13px] text-[#475569]">{file.size}</span>
           <span className="text-[13px] text-[#475569]">{file.modifiedAt}</span>
+          <span className={`inline-flex items-center gap-[6px] text-[12px] font-medium ${getStatusStyle(file.status).text}`}>
+            <span className={`w-[8px] h-[8px] rounded-full ${getStatusStyle(file.status).dot}`} />
+            {getStatusStyle(file.status).label}
+          </span>
           <div className="flex items-center gap-[4px] justify-end">
             {hoveredId === file.id ? (
               <>

@@ -18,6 +18,7 @@ const MENU_ITEMS = [
   { label: "상세정보", action: "detail" },
   { label: "다운로드", action: "download" },
   { label: "이름 바꾸기", action: "rename" },
+  { label: "권한 설정", action: "permission" },
   { label: "복사하기", action: "copy" },
   { label: "삭제하기", action: "delete" },
 ];

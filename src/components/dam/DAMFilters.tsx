@@ -8,6 +8,8 @@ export interface FilterState {
   person: string | null;
   dateFrom: string | null;
   dateTo: string | null;
+  status: string | null;
+  mimeTypes: string[];
 }
 
 const FILE_TYPES = [
