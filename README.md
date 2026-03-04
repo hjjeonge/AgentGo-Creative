@@ -63,6 +63,7 @@ npm run lint
 
 ```env
 VITE_API_URL=http://localhost:8000
+VITE_DAM_USE_DEV_DUMMY=true
 ```
 
 ---
@@ -140,11 +141,20 @@ VITE_API_URL=http://localhost:8000
 - 폴더 트리 사이드바 (고정 폴더 + 동적 폴더)
 - Grid / List View 전환
 - 파일 타입 아이콘 (이미지/영상/PDF/ZIP 등)
-- 컨텍스트 메뉴: 상세정보, 다운로드, 이름 변경, 복사, 삭제
-- 에셋 상세 모달: 미리보기 + 메타데이터 편집
+- 컨텍스트 메뉴: 상세정보, 다운로드, 이름 변경, 권한 설정, 복사, 삭제
+- 에셋 상세 모달: 미리보기 + Asset Information(Basic/Advanced/Tags/Workfront) 편집
 - 필터: 파일 유형 / 사용자 / 날짜 (DatePicker)
-- 에셋 업로드 모달: 파일 업로드 + 메타데이터 입력
+- 에셋 업로드 모달: 파일 업로드 + Asset Information(메타데이터) 입력
 - 검색 기능
+- 고급 필터: 상태/파일 타입/MIME 타입
+- 권한 설정 모달: 접근 레벨 추가/변경/삭제 UI
+- 업로드 AI 분석 영역: 진행률 + Category/Value/Reason 테이블
+- 상세 정보 Tags 탭: Reason 툴팁 UI
+- My Workspace: 업무 탭/테이블 + 상세 드로어 + 상태 변경
+- Collections: 컬렉션 배너 + 공유 링크 생성
+- Rich Media: 비디오 속도 오버레이 + Smart Crop 비율 프리셋
+- Creative 연계 패널: 우측 미니 그리드 + Drag payload
+- 개발환경(`npm run dev`)에서는 DAM API가 더미 데이터로 동작 (`VITE_DAM_USE_DEV_DUMMY=false`로 실서버 호출 전환 가능)
 
 ---
 
@@ -246,7 +256,7 @@ docker run -d -p 3000:80 agentgo-front
 | 대시보드 (프로젝트/템플릿) | 완료 |
 | 템플릿 빌더 (AI 생성) | 완료 |
 | 이미지 에디터 (캔버스/도구/이력) | 완료 |
-| DAM (폴더/에셋/검색/필터) | 완료 |
+| DAM (폴더/에셋/검색/필터/권한/Asset Information/Workspace/Collections) | 진행중 |
 | API 서비스 레이어 | 완료 |
 | 테스트 | 미착수 |
 
