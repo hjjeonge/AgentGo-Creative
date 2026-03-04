@@ -1,12 +1,12 @@
-import type React from "react";
-import { useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import New from "./../../assets/file-new-line.svg";
-import Upload from "./../../assets/upload-cloud-2-line.svg";
-import AI from "./../../assets/ai.svg";
-import Home from "./../../assets/home.svg";
-import { useState } from "react";
-import { AiToolPanel } from "./AiToolPanel";
+import type React from 'react';
+import { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import New from './../../assets/file-new-line.svg';
+import Upload from './../../assets/upload-cloud-2-line.svg';
+import AI from './../../assets/ai.svg';
+import Home from './../../assets/home.svg';
+import { useState } from 'react';
+import { AiToolPanel } from './AiToolPanel';
 
 interface Props {
   hasImage: boolean;
@@ -36,7 +36,7 @@ export const Aside: React.FC<Props> = ({
     if (!file) return;
     const url = URL.createObjectURL(file);
     onUpload(url);
-    e.target.value = "";
+    e.target.value = '';
   };
 
   return (
@@ -72,7 +72,7 @@ export const Aside: React.FC<Props> = ({
           </button>
         </div>
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate('/')}
           className="flex flex-col gap-[4px] items-center hover:opacity-70"
         >
           <img src={Home} className="w-[30px] h-[30px]" />

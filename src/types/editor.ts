@@ -1,4 +1,8 @@
-import type { DrawLine, Shape, TextObject } from "../components/editor/EditorCanvas";
+import type {
+  DrawLine,
+  Shape,
+  TextObject,
+} from '../components/editor/EditorCanvas';
 
 export interface CanvasSnapshot {
   lines: DrawLine[];

@@ -1,1 +1,1 @@
-declare module "react-color-palette/css";
+declare module 'react-color-palette/css';

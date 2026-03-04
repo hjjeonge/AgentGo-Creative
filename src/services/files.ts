@@ -1,4 +1,4 @@
-import { upload } from "./apiClient";
+import { upload } from './apiClient';
 
 export interface FileUploadResponse {
   file_url: string;
@@ -8,6 +8,6 @@ export interface FileUploadResponse {
 
 export async function uploadFile(file: File): Promise<FileUploadResponse> {
   const formData = new FormData();
-  formData.append("file", file);
-  return upload<FileUploadResponse>("/api/files/upload", formData);
+  formData.append('file', file);
+  return upload<FileUploadResponse>('/api/files/upload', formData);
 }

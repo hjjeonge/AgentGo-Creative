@@ -1,12 +1,12 @@
-import type React from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import ListBulleted from "./../../assets/format_list_bulleted.svg";
-import NumberedList from "./../../assets/format_list_numbered.svg";
+import type React from 'react';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import ListBulleted from './../../assets/format_list_bulleted.svg';
+import NumberedList from './../../assets/format_list_numbered.svg';
 
 interface Props {
   children: React.ReactNode;
-  value?: "none" | "ordered" | "unordered";
-  onChange: (value: "none" | "ordered" | "unordered") => void;
+  value?: 'none' | 'ordered' | 'unordered';
+  onChange: (value: 'none' | 'ordered' | 'unordered') => void;
 }
 
 export const ListFOrmatPopover: React.FC<Props> = ({
@@ -15,8 +15,8 @@ export const ListFOrmatPopover: React.FC<Props> = ({
   onChange,
 }: Props) => {
   const list = [
-    { name: "unordered", img: ListBulleted },
-    { name: "ordered", img: NumberedList },
+    { name: 'unordered', img: ListBulleted },
+    { name: 'ordered', img: NumberedList },
   ];
 
   return (
@@ -27,8 +27,8 @@ export const ListFOrmatPopover: React.FC<Props> = ({
           {list.map((el) => (
             <button
               key={el.name}
-              className={`flex items-center justify-center w-[40px] h-[40px] p-[3px] ${value === el.name ? "bg-[#E2E8F0] rounded-[6px]" : ""}`}
-              onClick={() => onChange((el.name as Props["value"]) ?? "none")}
+              className={`flex items-center justify-center w-[40px] h-[40px] p-[3px] ${value === el.name ? 'bg-[#E2E8F0] rounded-[6px]' : ''}`}
+              onClick={() => onChange((el.name as Props['value']) ?? 'none')}
             >
               <img src={el.img} />
             </button>

@@ -1,7 +1,10 @@
-import type React from "react";
-import { useNavigate } from "react-router-dom";
-import { Template } from "./Template";
-import { DEFAULT_TEMPLATE_KEY, TEMPLATE_CONFIGS } from "../../constants/templateConfigs";
+import type React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Template } from './Template';
+import {
+  DEFAULT_TEMPLATE_KEY,
+  TEMPLATE_CONFIGS,
+} from '../../constants/templateConfigs';
 
 export interface TemplateCard {
   key: string;
@@ -33,7 +36,7 @@ export const Content: React.FC = () => {
           </span>
         </div>
         <button
-          onClick={() => navigate("/editor")}
+          onClick={() => navigate('/editor')}
           className="bg-[linear-gradient(135deg,#0055E9_0%,#6A14D9_100%)] p-[14px_24px] rounded-[8px] flex items-center gap-[4px] text-[#F8FAFC] text-[17px] font-bold leading-[29.88px] w-fit"
         >
           <span>+</span>
@@ -46,7 +49,9 @@ export const Content: React.FC = () => {
         ))}
         <div className="flex items-center justify-center w-[168px] h-[190px]">
           <button
-            onClick={() => navigate(`/template?template=${DEFAULT_TEMPLATE_KEY}`)}
+            onClick={() =>
+              navigate(`/template?template=${DEFAULT_TEMPLATE_KEY}`)
+            }
             className="flex items-center justify-center w-[80px] h-[80px] bg-[#155DFC] rounded-full text-white text-[32px]"
           >
             +

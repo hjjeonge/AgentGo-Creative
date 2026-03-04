@@ -1,16 +1,16 @@
-import type React from "react";
-import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { logout } from "../../services/auth";
-import { authStorage } from "../../services/apiClient";
-import { getMyProfile } from "../../services/users";
-import Dots from "./../../assets/dots.svg";
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { logout } from '../../services/auth';
+import { authStorage } from '../../services/apiClient';
+import { getMyProfile } from '../../services/users';
+import Dots from './../../assets/dots.svg';
 
 export const UserCard: React.FC = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [name, setName] = useState("User");
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState('User');
+  const [email, setEmail] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAuthed, setIsAuthed] = useState(!!authStorage.getAccessToken());
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -18,9 +18,9 @@ export const UserCard: React.FC = () => {
   useEffect(() => {
     if (!authStorage.getAccessToken()) return;
 
-    if (import.meta.env.DEV && authStorage.getAccessToken() === "dev-token") {
-      setName("테스트");
-      setEmail("test@itcen.com");
+    if (import.meta.env.DEV && authStorage.getAccessToken() === 'dev-token') {
+      setName('테스트');
+      setEmail('test@itcen.com');
       setIsAdmin(true);
       return;
     }
@@ -34,7 +34,7 @@ export const UserCard: React.FC = () => {
       .catch(() => {
         authStorage.clear();
         setIsAuthed(false);
-        navigate("/login");
+        navigate('/login');
       });
   }, []);
 
@@ -42,24 +42,24 @@ export const UserCard: React.FC = () => {
     const handler = (e: MouseEvent) => {
       if (!wrapRef.current?.contains(e.target as Node)) setMenuOpen(false);
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, []);
 
   const handleAction = async (action: string) => {
     setMenuOpen(false);
-    if (action === "logout") {
+    if (action === 'logout') {
       await logout();
       setIsAuthed(false);
-      navigate("/login");
+      navigate('/login');
     }
-    if (action === "admin") navigate("/dam");
+    if (action === 'admin') navigate('/dam');
   };
 
   if (!isAuthed) {
     return (
       <button
-        onClick={() => navigate("/login")}
+        onClick={() => navigate('/login')}
         className="h-[42px] px-[16px] rounded-[8px] border border-[#569DFF]/20 bg-[#F8FAFF] text-[13px] font-semibold text-[#0F172B]"
       >
         로그인
@@ -68,8 +68,8 @@ export const UserCard: React.FC = () => {
   }
 
   const menuItems = [
-    ...(isAdmin ? [{ label: "관리자", action: "admin" }] : []),
-    { label: "로그아웃", action: "logout" },
+    ...(isAdmin ? [{ label: '관리자', action: 'admin' }] : []),
+    { label: '로그아웃', action: 'logout' },
   ];
 
   return (
@@ -98,7 +98,7 @@ export const UserCard: React.FC = () => {
               key={item.action}
               onClick={() => handleAction(item.action)}
               className={`w-full text-left px-[16px] py-[10px] text-[14px] hover:bg-[#F1F5F9] ${
-                item.action === "logout" ? "text-[#E11D48]" : "text-[#0F172B]"
+                item.action === 'logout' ? 'text-[#E11D48]' : 'text-[#0F172B]'
               }`}
             >
               {item.label}

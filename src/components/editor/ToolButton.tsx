@@ -1,4 +1,4 @@
-import type React from "react";
+import type React from 'react';
 
 interface Props {
   toolName: string;
@@ -23,8 +23,8 @@ export const ToolButton: React.FC<Props> = ({
       onClick={onClick || (() => onToolChange(toolName))}
       className={`w-[45px] h-[45px] p-[5px] flex items-center justify-center ${
         activeTool === toolName
-          ? "border border-[#1447E6] bg-[#EFF6FF] text-[#155DFC] rounded-[6px]"
-          : "hover:bg-gray-100 rounded-[6px]"
+          ? 'border border-[#1447E6] bg-[#EFF6FF] text-[#155DFC] rounded-[6px]'
+          : 'hover:bg-gray-100 rounded-[6px]'
       }`}
     >
       {icon}

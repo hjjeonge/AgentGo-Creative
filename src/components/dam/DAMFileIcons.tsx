@@ -1,6 +1,6 @@
-import type React from "react";
+import type React from 'react';
 
-export type FileType = "folder" | "video" | "pdf" | "zip" | "image" | "other";
+export type FileType = 'folder' | 'video' | 'pdf' | 'zip' | 'image' | 'other';
 
 export const FolderIcon: React.FC<{ size?: number }> = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 20 20" fill="none">
@@ -22,7 +22,9 @@ export const PdfIcon: React.FC<{ size?: number }> = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 20 20" fill="none">
     <rect x="3" y="2" width="14" height="16" rx="2" fill="#64748B" />
     <rect x="5" y="2" width="10" height="5" rx="1" fill="#94A3B8" />
-    <text x="5" y="14" fontSize="5" fill="white" fontWeight="bold">PDF</text>
+    <text x="5" y="14" fontSize="5" fill="white" fontWeight="bold">
+      PDF
+    </text>
   </svg>
 );
 
@@ -40,7 +42,12 @@ export const ImageIcon: React.FC<{ size?: number }> = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 20 20" fill="none">
     <rect x="2" y="4" width="16" height="12" rx="2" fill="#64748B" />
     <circle cx="7" cy="8" r="1.5" fill="#CBD5E1" />
-    <path d="M2 13L6 9L9 12L13 8L18 13" stroke="#CBD5E1" strokeWidth="1.2" fill="none" />
+    <path
+      d="M2 13L6 9L9 12L13 8L18 13"
+      stroke="#CBD5E1"
+      strokeWidth="1.2"
+      fill="none"
+    />
   </svg>
 );
 
@@ -53,13 +60,22 @@ export const OtherIcon: React.FC<{ size?: number }> = ({ size = 20 }) => (
   </svg>
 );
 
-export const FileIcon: React.FC<{ type: FileType; size?: number }> = ({ type, size = 20 }) => {
+export const FileIcon: React.FC<{ type: FileType; size?: number }> = ({
+  type,
+  size = 20,
+}) => {
   switch (type) {
-    case "folder": return <FolderIcon size={size} />;
-    case "video":  return <VideoIcon size={size} />;
-    case "pdf":    return <PdfIcon size={size} />;
-    case "zip":    return <ZipIcon size={size} />;
-    case "image":  return <ImageIcon size={size} />;
-    default:       return <OtherIcon size={size} />;
+    case 'folder':
+      return <FolderIcon size={size} />;
+    case 'video':
+      return <VideoIcon size={size} />;
+    case 'pdf':
+      return <PdfIcon size={size} />;
+    case 'zip':
+      return <ZipIcon size={size} />;
+    case 'image':
+      return <ImageIcon size={size} />;
+    default:
+      return <OtherIcon size={size} />;
   }
 };

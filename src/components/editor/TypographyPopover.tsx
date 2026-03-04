@@ -1,5 +1,5 @@
-import type React from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import type React from 'react';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 interface Props {
   children: React.ReactNode;
@@ -45,7 +45,9 @@ export const TypographyPopover: React.FC<Props> = ({
               step="0.1"
               value={lineHeight ?? 1.2}
               onChange={(e) =>
-                onChangeLineHeight(Math.max(0.1, parseFloat(e.target.value) || 0))
+                onChangeLineHeight(
+                  Math.max(0.1, parseFloat(e.target.value) || 0),
+                )
               }
               className="border border-[#CAD5E2] rounded-[6px] p-[7px]"
             />

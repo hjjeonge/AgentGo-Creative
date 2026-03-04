@@ -1,22 +1,22 @@
-﻿import type React from "react";
+﻿import type React from 'react';
 import {
   forwardRef,
   useEffect,
   useImperativeHandle,
   useRef,
   useState,
-} from "react";
-import { useNavigate } from "react-router-dom";
+} from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   EditorCanvas,
   type DrawLine,
   type Shape,
   type TextObject,
-} from "./EditorCanvas";
-import { loadGoogleFont } from "../../utils/fontLoader";
-import { Toolbar } from "./Toolbar";
-import { Prompt } from "./Prompt";
-import type { CanvasHandle, CanvasSnapshot } from "../../types/editor";
+} from './EditorCanvas';
+import { loadGoogleFont } from '../../utils/fontLoader';
+import { Toolbar } from './Toolbar';
+import { Prompt } from './Prompt';
+import type { CanvasHandle, CanvasSnapshot } from '../../types/editor';
 
 interface Rect {
   x: number;
@@ -55,16 +55,16 @@ interface Props {
   breadcrumbPath?: string | null;
 }
 
-const DEFAULT_PLACEHOLDER_TEXT = "텍스트를 입력하세요";
+const DEFAULT_PLACEHOLDER_TEXT = '텍스트를 입력하세요';
 
 export const Canvas = forwardRef<CanvasHandle, Props>(
   ({ onGenerate, breadcrumbLabel, breadcrumbPath }, ref) => {
     const navigate = useNavigate();
-    const [activeTool, setActiveTool] = useState<string>("mouse");
+    const [activeTool, setActiveTool] = useState<string>('mouse');
     const containerRef = useRef<HTMLDivElement>(null);
     const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
-    type ViewMode = "fit" | "actual" | "fill" | "custom";
-    const [viewMode, setViewMode] = useState<ViewMode>("fit");
+    type ViewMode = 'fit' | 'actual' | 'fill' | 'custom';
+    const [viewMode, setViewMode] = useState<ViewMode>('fit');
     const [viewScale, setViewScale] = useState(1);
     const [imageNaturalSize, setImageNaturalSize] = useState<{
       width: number;
@@ -83,9 +83,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         };
       };
 
-      container.addEventListener("mousemove", handlePointerMove);
+      container.addEventListener('mousemove', handlePointerMove);
       return () =>
-        container.removeEventListener("mousemove", handlePointerMove);
+        container.removeEventListener('mousemove', handlePointerMove);
     }, []);
 
     const [backgroundImage, setBackgroundImageState] = useState<string | null>(
@@ -96,7 +96,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     const [texts, setTexts] = useState<TextObject[]>([]);
     const [currentLine, setCurrentLine] = useState<DrawLine | null>(null);
     const [isDrawing, setIsDrawing] = useState(false);
-    const [shapeType, setShapeType] = useState("square");
+    const [shapeType, setShapeType] = useState('square');
 
     const [penStrokeWidth, setPenStrokeWidth] = useState(2);
     const [brushPreview, setBrushPreview] = useState({
@@ -107,15 +107,15 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     });
     const lastPointerRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
     const previewTimeoutRef = useRef<number | null>(null);
-    const [penStrokeColor, setPenStrokeColor] = useState("#E7000B");
+    const [penStrokeColor, setPenStrokeColor] = useState('#E7000B');
 
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [editingTextId, setEditingTextId] = useState<string | null>(null);
     const [selectionRect, setSelectionRect] = useState<Rect | null>(null);
     const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
-    const [shapeSelectMode, setShapeSelectMode] = useState<"rect" | "lasso">(
-      "rect",
+    const [shapeSelectMode, setShapeSelectMode] = useState<'rect' | 'lasso'>(
+      'rect',
     );
     const [lassoPath, setLassoPath] = useState<number[]>([]);
     const [isLassoing, setIsLassoing] = useState(false);
@@ -132,7 +132,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
         // Ctrl+Z: Undo
-        if (e.key === "z" && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
+        if (e.key === 'z' && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
           e.preventDefault();
           const prev = undoStack.current.pop();
           if (!prev) return;
@@ -147,8 +147,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         }
         // Ctrl+Y or Ctrl+Shift+Z: Redo
         if (
-          (e.key === "y" && (e.ctrlKey || e.metaKey)) ||
-          (e.key === "z" && (e.ctrlKey || e.metaKey) && e.shiftKey)
+          (e.key === 'y' && (e.ctrlKey || e.metaKey)) ||
+          (e.key === 'z' && (e.ctrlKey || e.metaKey) && e.shiftKey)
         ) {
           e.preventDefault();
           const next = redoStack.current.pop();
@@ -163,11 +163,11 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           return;
         }
         // Brush size ([ / ])
-        if ((e.key === "[" || e.key === "]") && !editingTextId) {
+        if ((e.key === '[' || e.key === ']') && !editingTextId) {
           e.preventDefault();
           const delta = e.shiftKey ? 5 : 1;
           const next =
-            e.key === "]" ? penStrokeWidth + delta : penStrokeWidth - delta;
+            e.key === ']' ? penStrokeWidth + delta : penStrokeWidth - delta;
           const clamped = Math.max(1, Math.min(200, next));
           setPenStrokeWidth(clamped);
           showBrushPreview(clamped);
@@ -175,7 +175,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         }
 
         // Delete/Backspace: 선택 객체 삭제
-        if ((e.key === "Delete" || e.key === "Backspace") && !editingTextId) {
+        if ((e.key === 'Delete' || e.key === 'Backspace') && !editingTextId) {
           const toDelete =
             selectedIds.length > 0
               ? selectedIds
@@ -185,9 +185,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           if (toDelete.length === 0) return;
           pushUndo();
           toDelete.forEach((id) => {
-            if (id.startsWith("text_")) {
+            if (id.startsWith('text_')) {
               setTexts((prev) => prev.filter((t) => t.id !== id));
-            } else if (id.startsWith("shape_")) {
+            } else if (id.startsWith('shape_')) {
               setShapes((prev) => prev.filter((s) => s.id !== id));
             }
           });
@@ -195,8 +195,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           setSelectedIds([]);
         }
       };
-      window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
     }, [selectedId, selectedIds, editingTextId, penStrokeWidth]);
 
     // Refs for snapshot (always up-to-date)
@@ -252,7 +252,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       setBackgroundImage: (url: string | null) => {
         backgroundImageRef.current = url;
         setBackgroundImageState(url);
-        setViewMode("fit");
+        setViewMode('fit');
       },
       getSnapshot: (): CanvasSnapshot => ({
         lines: linesRef.current,
@@ -265,7 +265,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         setShapes(snapshot.shapes);
         setTexts(snapshot.texts);
         setBackgroundImageState(snapshot.backgroundImage);
-        setViewMode("fit");
+        setViewMode('fit');
         setSelectedId(null);
         setSelectedIds([]);
         setEditingTextId(null);
@@ -277,7 +277,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         setTexts([]);
         setBackgroundImageState(null);
         setImageNaturalSize(null);
-        setViewMode("fit");
+        setViewMode('fit');
         setViewScale(1);
         setSelectedId(null);
         setSelectedIds([]);
@@ -308,7 +308,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 
     const handleAddText = () => {
       pushUndo();
-      const defaultFont = "Noto Sans KR";
+      const defaultFont = 'Noto Sans KR';
       loadGoogleFont(defaultFont);
 
       const newText: TextObject = {
@@ -318,20 +318,20 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         y: 150,
         width: 200,
         fontSize: 24,
-        fill: "#000000",
+        fill: '#000000',
         fontFamily: defaultFont,
-        fontStyle: "normal",
-        textDecoration: "",
-        align: "left",
-        verticalAlign: "top",
+        fontStyle: 'normal',
+        textDecoration: '',
+        align: 'left',
+        verticalAlign: 'top',
         letterSpacing: 0,
         lineHeight: 1.2,
         scaleX: 1,
-        listFormat: "none",
-        stroke: "#000000",
+        listFormat: 'none',
+        stroke: '#000000',
         strokeWidth: 0,
         strokeEnabled: false,
-        shadowColor: "none",
+        shadowColor: 'none',
         shadowBlur: 0,
         shadowOpacity: 0,
         shadowOffsetX: 0,
@@ -340,16 +340,16 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         shadowDistance: 0,
         shadowEnabled: false,
         verticalWriting: false,
-        backgroundColor: "#FFFF00",
+        backgroundColor: '#FFFF00',
         backgroundEnabled: false,
       };
       setTexts((prev) => [...prev, newText]);
       setSelectedId(newText.id);
-      setActiveTool("mouse");
+      setActiveTool('mouse');
     };
 
     const removeUneditedPlaceholderTexts = (candidateIds: string[]) => {
-      const targetIds = candidateIds.filter((id) => id.startsWith("text_"));
+      const targetIds = candidateIds.filter((id) => id.startsWith('text_'));
       if (targetIds.length === 0) return;
 
       const removableIds = targetIds.filter((id) => {
@@ -366,7 +366,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     };
 
     const handleToolChange = (tool: string) => {
-      if (tool === "text") {
+      if (tool === 'text') {
         handleAddText();
         return;
       }
@@ -440,7 +440,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     useEffect(() => {
       if (!backgroundImage) {
         setImageNaturalSize(null);
-        setViewMode("fit");
+        setViewMode('fit');
         setViewScale(1);
         return;
       }
@@ -457,27 +457,27 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 
     useEffect(() => {
       if (!backgroundImage) return;
-      if (viewMode === "fit") {
+      if (viewMode === 'fit') {
         setViewScale(fitScale);
-      } else if (viewMode === "actual") {
+      } else if (viewMode === 'actual') {
         setViewScale(1);
-      } else if (viewMode === "fill") {
+      } else if (viewMode === 'fill') {
         setViewScale(fillScale);
       }
     }, [backgroundImage, viewMode, fitScale, fillScale]);
 
     const handleSetFit = () => {
-      setViewMode("fit");
+      setViewMode('fit');
       setViewScale(fitScale);
     };
 
     const handleSetActual = () => {
-      setViewMode("actual");
+      setViewMode('actual');
       setViewScale(1);
     };
 
     const handleSetFill = () => {
-      setViewMode("fill");
+      setViewMode('fill');
       setViewScale(fillScale);
     };
 
@@ -487,7 +487,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       const zoomFactor = e.deltaY > 0 ? 0.95 : 1.05;
       const minScale = Math.min(fitScale, 1);
       const nextScale = Math.max(minScale, Math.min(6, viewScale * zoomFactor));
-      setViewMode("custom");
+      setViewMode('custom');
       setViewScale(nextScale);
     };
 
@@ -516,9 +516,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         setSelectedIds([]);
         setEditingTextId(null);
 
-        if (activeTool === "shape") {
+        if (activeTool === 'shape') {
           const pos = e.target.getStage().getRelativePointerPosition();
-          if (shapeSelectMode === "rect") {
+          if (shapeSelectMode === 'rect') {
             selectionStartRef.current = { x: pos.x, y: pos.y };
             setSelectionRect({ x: pos.x, y: pos.y, width: 0, height: 0 });
           } else {
@@ -529,7 +529,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         }
       }
 
-      if (activeTool !== "pen" && activeTool !== "eraser") {
+      if (activeTool !== 'pen' && activeTool !== 'eraser') {
         return;
       }
 
@@ -544,9 +544,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     };
 
     const handleMouseMove = (e: any) => {
-      if (activeTool === "shape") {
+      if (activeTool === 'shape') {
         const pos = e.target.getStage().getRelativePointerPosition();
-        if (shapeSelectMode === "rect" && selectionStartRef.current) {
+        if (shapeSelectMode === 'rect' && selectionStartRef.current) {
           const start = selectionStartRef.current;
           setSelectionRect({
             x: Math.min(pos.x, start.x),
@@ -556,13 +556,13 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           });
           return;
         }
-        if (shapeSelectMode === "lasso" && isLassoing) {
+        if (shapeSelectMode === 'lasso' && isLassoing) {
           setLassoPath((prev) => [...prev, pos.x, pos.y]);
           return;
         }
       }
 
-      if (!isDrawing || (activeTool !== "pen" && activeTool !== "eraser"))
+      if (!isDrawing || (activeTool !== 'pen' && activeTool !== 'eraser'))
         return;
 
       const stage = e.target.getStage();
@@ -589,8 +589,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     };
 
     const handleMouseUp = () => {
-      if (activeTool === "shape") {
-        if (shapeSelectMode === "rect" && selectionStartRef.current) {
+      if (activeTool === 'shape') {
+        if (shapeSelectMode === 'rect' && selectionStartRef.current) {
           selectionStartRef.current = null;
           if (
             selectionRect &&
@@ -623,7 +623,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           return;
         }
 
-        if (shapeSelectMode === "lasso" && isLassoing) {
+        if (shapeSelectMode === 'lasso' && isLassoing) {
           setIsLassoing(false);
           if (lassoPath.length >= 6) {
             const ids: string[] = [];
@@ -659,13 +659,13 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     const handleAddShape = (shapeType: string) => {
       setShapeType(shapeType);
       const getDefaultSize = (type: string) => {
-        if (type === "square" || type === "round_square" || type === "circle") {
+        if (type === 'square' || type === 'round_square' || type === 'circle') {
           return { width: 120, height: 120 };
         }
-        if (type === "semicircle") {
+        if (type === 'semicircle') {
           return { width: 140, height: 80 };
         }
-        if (type === "arrow" || type === "arrow_fill") {
+        if (type === 'arrow' || type === 'arrow_fill') {
           return { width: 170, height: 90 };
         }
         return { width: 160, height: 100 };
@@ -680,7 +680,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         y: 100,
         width: size.width,
         height: size.height,
-        fill: "#EF4444",
+        fill: '#EF4444',
       };
       setShapes((prev) => [...prev, newShape]);
     };
@@ -725,7 +725,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       );
     };
 
-    const isTextSelected = selectedId?.startsWith("text_") && !editingTextId;
+    const isTextSelected = selectedId?.startsWith('text_') && !editingTextId;
     const selectedTextObject = isTextSelected
       ? texts.find((t) => t.id === selectedId)
       : undefined;
@@ -735,7 +735,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         {/* 브레드크럼 */}
         <div className="flex items-center gap-[6px] text-[13px] mt-[10px]">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate('/')}
             className="text-[#64748B] hover:text-[#155DFC]"
           >
             홈
@@ -783,21 +783,21 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
               <button
                 type="button"
                 onClick={handleSetFit}
-                className={`rounded-[6px] px-[10px] py-[4px] text-[12px] ${viewMode === "fit" ? "bg-[#1447E6] text-white" : "text-[#334155] hover:bg-[#F1F5F9]"}`}
+                className={`rounded-[6px] px-[10px] py-[4px] text-[12px] ${viewMode === 'fit' ? 'bg-[#1447E6] text-white' : 'text-[#334155] hover:bg-[#F1F5F9]'}`}
               >
                 Fit
               </button>
               <button
                 type="button"
                 onClick={handleSetActual}
-                className={`rounded-[6px] px-[10px] py-[4px] text-[12px] ${viewMode === "actual" ? "bg-[#1447E6] text-white" : "text-[#334155] hover:bg-[#F1F5F9]"}`}
+                className={`rounded-[6px] px-[10px] py-[4px] text-[12px] ${viewMode === 'actual' ? 'bg-[#1447E6] text-white' : 'text-[#334155] hover:bg-[#F1F5F9]'}`}
               >
                 100%
               </button>
               <button
                 type="button"
                 onClick={handleSetFill}
-                className={`rounded-[6px] px-[10px] py-[4px] text-[12px] ${viewMode === "fill" ? "bg-[#1447E6] text-white" : "text-[#334155] hover:bg-[#F1F5F9]"}`}
+                className={`rounded-[6px] px-[10px] py-[4px] text-[12px] ${viewMode === 'fill' ? 'bg-[#1447E6] text-white' : 'text-[#334155] hover:bg-[#F1F5F9]'}`}
               >
                 Fill
               </button>
@@ -811,15 +811,15 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
             <div
               aria-hidden="true"
               style={{
-                position: "absolute",
+                position: 'absolute',
                 left: brushPreview.x - brushPreview.size / 2,
                 top: brushPreview.y - brushPreview.size / 2,
                 width: brushPreview.size,
                 height: brushPreview.size,
-                borderRadius: "50%",
-                border: "1.5px solid rgba(21,93,252,0.9)",
-                boxShadow: "0 0 0 1px rgba(255,255,255,0.8)",
-                pointerEvents: "none",
+                borderRadius: '50%',
+                border: '1.5px solid rgba(21,93,252,0.9)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.8)',
+                pointerEvents: 'none',
                 zIndex: 5,
               }}
             />
@@ -829,8 +829,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
             <div
               style={{
                 transform: `scale(${viewScale})`,
-                transformOrigin: "center center",
-                transition: "transform 120ms ease-out",
+                transformOrigin: 'center center',
+                transition: 'transform 120ms ease-out',
               }}
             >
               <EditorCanvas
@@ -882,4 +882,4 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
   },
 );
 
-Canvas.displayName = "Canvas";
+Canvas.displayName = 'Canvas';

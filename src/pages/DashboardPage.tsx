@@ -1,7 +1,7 @@
-import type React from "react";
-import { Aside } from "../components/dashboard/Aside";
-import { useState } from "react";
-import { Content } from "../components/dashboard/Content";
+import type React from 'react';
+import { Aside } from '../components/dashboard/Aside';
+import { useState } from 'react';
+import { Content } from '../components/dashboard/Content';
 
 export const DashboardPage: React.FC = () => {
   const [asideOpen, setAsideOpen] = useState(true);
@@ -12,11 +12,11 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div
-      className={`${asideOpen ? "grid grid-cols-[280px_1fr]" : "relative flex"} h-full`}
+      className={`${asideOpen ? 'grid grid-cols-[280px_1fr]' : 'relative flex'} h-full`}
     >
       <Aside asideOpen={asideOpen} handleAside={handleAside} />
       <div
-        className={`${!asideOpen && "flex-1"}`}
+        className={`${!asideOpen && 'flex-1'}`}
         style={{
           background: `
       radial-gradient(100% 120% at 50% -20%, rgba(86,157,255,0.15) 0%, rgba(0,85,233,0.08) 30%, rgba(0,85,233,0) 60%),

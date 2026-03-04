@@ -20,16 +20,16 @@ AI 기반 이미지 생성 및 편집 플랫폼의 프론트엔드입니다.
 
 ## 기술 스택
 
-| 분류 | 라이브러리 | 버전 |
-|------|-----------|------|
-| Framework | React + TypeScript | 19 |
-| Build Tool | Vite | 7.3.1 |
-| Canvas | Konva + react-konva | 10.2.0 |
-| State | Zustand | 5.0.11 |
-| Routing | react-router-dom | 7.13.0 |
-| Styling | Tailwind CSS v4 | 4.1.18 |
-| UI | Radix UI + shadcn/ui | — |
-| Icons | Lucide React | 0.563.0 |
+| 분류       | 라이브러리           | 버전    |
+| ---------- | -------------------- | ------- |
+| Framework  | React + TypeScript   | 19      |
+| Build Tool | Vite                 | 7.3.1   |
+| Canvas     | Konva + react-konva  | 10.2.0  |
+| State      | Zustand              | 5.0.11  |
+| Routing    | react-router-dom     | 7.13.0  |
+| Styling    | Tailwind CSS v4      | 4.1.18  |
+| UI         | Radix UI + shadcn/ui | —       |
+| Icons      | Lucide React         | 0.563.0 |
 
 ---
 
@@ -70,26 +70,28 @@ VITE_DAM_USE_DEV_DUMMY=true
 
 ## 화면 구성
 
-| 경로 | 페이지 | 인증 | 설명 |
-|------|--------|------|------|
-| `/login` | LoginPage | 불필요 | 이메일/비밀번호 로그인 |
-| `/` | DashboardPage | 필요 | 최근 프로젝트, 즐겨찾기 템플릿 |
-| `/template` | TemplatePage | 필요 | AI 이미지 생성 설정 |
-| `/editor` | EditorPage | 필요 | 캔버스 기반 이미지 편집기 |
-| `/dam` | DAMPage | 필요 | 디지털 에셋 관리 |
-| `/*` | — | — | `/login`으로 리다이렉트 |
+| 경로        | 페이지        | 인증   | 설명                           |
+| ----------- | ------------- | ------ | ------------------------------ |
+| `/login`    | LoginPage     | 불필요 | 이메일/비밀번호 로그인         |
+| `/`         | DashboardPage | 필요   | 최근 프로젝트, 즐겨찾기 템플릿 |
+| `/template` | TemplatePage  | 필요   | AI 이미지 생성 설정            |
+| `/editor`   | EditorPage    | 필요   | 캔버스 기반 이미지 편집기      |
+| `/dam`      | DAMPage       | 필요   | 디지털 에셋 관리               |
+| `/*`        | —             | —      | `/login`으로 리다이렉트        |
 
 ---
 
 ## 주요 기능
 
 ### 대시보드 (`/`)
+
 - 최근 프로젝트 목록 사이드바 (접기/펼치기)
 - 즐겨찾기 템플릿 목록
 - "Create Now" 버튼 → 에디터 이동
 - 유저카드 (로그아웃, DAM 이동)
 
 ### 템플릿 빌더 (`/template`)
+
 - 이미지 업로드
 - 타겟 키워드 설정 (최대 5개 + 프리셋)
 - 컨셉/프롬프트 텍스트 입력
@@ -102,22 +104,24 @@ VITE_DAM_USE_DEV_DUMMY=true
 ### 이미지 에디터 (`/editor`)
 
 #### 캔버스
+
 - 이미지 업로드 시 원본 비율 유지, 정중앙 렌더링
 - Pan/Zoom 지원
 - 브레드크럼 네비게이션
 
 #### 편집 도구
 
-| 도구 | 기능 |
-|------|------|
-| 선택 (Mouse) | 클릭 선택 + 드래그 캔버스 이동 (pan) |
-| 펜 | 굵기/색상 선택, 자유 드로잉 |
-| 지우개 | 굵기 조절, 지우기 |
-| 도형 (Diagram) | 16가지 도형 추가 |
-| 객체 선택 (Shape) | 바운딩박스 / 라소(자유형) 다중 선택 |
-| 텍스트 | 폰트/크기/스타일/색상/정렬/특수문자(72개) |
+| 도구              | 기능                                      |
+| ----------------- | ----------------------------------------- |
+| 선택 (Mouse)      | 클릭 선택 + 드래그 캔버스 이동 (pan)      |
+| 펜                | 굵기/색상 선택, 자유 드로잉               |
+| 지우개            | 굵기 조절, 지우기                         |
+| 도형 (Diagram)    | 16가지 도형 추가                          |
+| 객체 선택 (Shape) | 바운딩박스 / 라소(자유형) 다중 선택       |
+| 텍스트            | 폰트/크기/스타일/색상/정렬/특수문자(72개) |
 
 #### 텍스트 옵션
+
 - 외곽선 (색상/굵기)
 - 그림자 (방향/거리/불투명도/흐림)
 - 세로쓰기
@@ -125,19 +129,23 @@ VITE_DAM_USE_DEV_DUMMY=true
 - 글머리기호 (없음/순번/점)
 
 #### 단축키
+
 - `Ctrl+Z`: 실행 취소 (Undo)
 - `Ctrl+Y` / `Ctrl+Shift+Z`: 다시 실행 (Redo)
 - `Delete` / `Backspace`: 선택 객체 삭제
 
 #### 작업이력
+
 - 최대 20개 저장
 - 클릭으로 해당 시점 복원
 
 #### AI 프롬프트
+
 - 텍스트 프롬프트 입력
 - 레퍼런스 이미지 최대 10개 첨부
 
 ### DAM (`/dam`)
+
 - 폴더 트리 사이드바 (고정 폴더 + 동적 폴더)
 - Grid / List View 전환
 - 파일 타입 아이콘 (이미지/영상/PDF/ZIP 등)
@@ -211,16 +219,19 @@ src/
 ## 아키텍처
 
 ### 라우팅
+
 - React Router v7, 토큰 기반 인증 라우트 보호
 - 인증된 라우트에 Layout 래퍼 적용
 - Query Parameters로 에디터 브레드크럼 정보 전달
 
 ### 상태 관리
+
 - Zustand: 색상 히스토리 (최근 7색)
 - Canvas: forwardRef + useImperativeHandle로 로컬 상태 관리
 - EditorPage에서 history, hasCanvasImage 등 상태 리프팅
 
 ### API 통신
+
 - `apiClient.ts`: GET/POST/PUT/PATCH/DELETE/upload 헬퍼
 - Bearer 토큰 자동 포함
 - ApiError 클래스 기반 에러 핸들링
@@ -228,6 +239,7 @@ src/
 - FormData 기반 파일 업로드
 
 ### 캔버스 구현
+
 - Konva Stage + 멀티 레이어 (선, 도형, 텍스트, 배경)
 - 스냅샷/복원 패턴 기반 Undo/Redo
 - 선택 도구 활성화 시 Pan 지원
@@ -250,15 +262,15 @@ docker run -d -p 3000:80 agentgo-front
 
 ## 개발 현황
 
-| 항목 | 상태 |
-|------|------|
-| 로그인 (JWT 인증) | 완료 |
-| 대시보드 (프로젝트/템플릿) | 완료 |
-| 템플릿 빌더 (AI 생성) | 완료 |
-| 이미지 에디터 (캔버스/도구/이력) | 완료 |
+| 항목                                                                   | 상태   |
+| ---------------------------------------------------------------------- | ------ |
+| 로그인 (JWT 인증)                                                      | 완료   |
+| 대시보드 (프로젝트/템플릿)                                             | 완료   |
+| 템플릿 빌더 (AI 생성)                                                  | 완료   |
+| 이미지 에디터 (캔버스/도구/이력)                                       | 완료   |
 | DAM (폴더/에셋/검색/필터/권한/Asset Information/Workspace/Collections) | 진행중 |
-| API 서비스 레이어 | 완료 |
-| 테스트 | 미착수 |
+| API 서비스 레이어                                                      | 완료   |
+| 테스트                                                                 | 미착수 |
 
 ---
 

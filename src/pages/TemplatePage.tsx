@@ -1,25 +1,25 @@
-import type React from "react";
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import UploadIcon from "../assets/upload-cloud-2-line.svg";
-import CloseIcon from "../assets/close-line.svg";
-import AddIcon from "../assets/add.svg";
-import { FormRow } from "../components/template/FormRow";
-import { SizePreviewIcon } from "../components/template/SizePreviewIcon";
-import { getImageJob, generateImage } from "../services/images";
-import { uploadFile } from "../services/files";
+import type React from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import UploadIcon from '../assets/upload-cloud-2-line.svg';
+import CloseIcon from '../assets/close-line.svg';
+import AddIcon from '../assets/add.svg';
+import { FormRow } from '../components/template/FormRow';
+import { SizePreviewIcon } from '../components/template/SizePreviewIcon';
+import { getImageJob, generateImage } from '../services/images';
+import { uploadFile } from '../services/files';
 import {
   DEFAULT_TEMPLATE_KEY,
   TARGET_KEYWORDS,
   getTemplateConfig,
   type TemplateField,
-} from "../constants/templateConfigs";
+} from '../constants/templateConfigs';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const resolveImageUrl = (url: string | null | undefined) => {
   if (!url) return null;
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
   return `${API_BASE_URL}${url}`;
 };
 
@@ -28,7 +28,7 @@ type FormFiles = Record<string, File[]>;
 
 const buildInitialValues = (fields: TemplateField[]): FormValues => {
   return fields.reduce<FormValues>((acc, field) => {
-    acc[field.key] = field.type === "tags" ? [] : "";
+    acc[field.key] = field.type === 'tags' ? [] : '';
     return acc;
   }, {});
 };
@@ -37,7 +37,7 @@ export const TemplatePage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const templateKey = searchParams.get("template") ?? DEFAULT_TEMPLATE_KEY;
+  const templateKey = searchParams.get('template') ?? DEFAULT_TEMPLATE_KEY;
   const template = useMemo(() => getTemplateConfig(templateKey), [templateKey]);
 
   const [values, setValues] = useState<FormValues>({});
@@ -54,7 +54,7 @@ export const TemplatePage: React.FC = () => {
 
   const getStringValue = (key: string): string => {
     const value = values[key];
-    return typeof value === "string" ? value : "";
+    return typeof value === 'string' ? value : '';
   };
 
   const getTagsValue = (key: string): string[] => {
@@ -78,7 +78,7 @@ export const TemplatePage: React.FC = () => {
       ...prev,
       [field.key]: [...current, trimmed],
     }));
-    setTagInput((prev) => ({ ...prev, [field.key]: "" }));
+    setTagInput((prev) => ({ ...prev, [field.key]: '' }));
   };
 
   const removeTag = (fieldKey: string, tag: string) => {
@@ -114,11 +114,11 @@ export const TemplatePage: React.FC = () => {
   const isFieldFilled = (field: TemplateField): boolean => {
     if (!field.required) return true;
 
-    if (field.type === "file" || field.type === "files") {
+    if (field.type === 'file' || field.type === 'files') {
       return (files[field.key]?.length ?? 0) > 0;
     }
 
-    if (field.type === "tags") {
+    if (field.type === 'tags') {
       return getTagsValue(field.key).length > 0;
     }
 
@@ -134,13 +134,13 @@ export const TemplatePage: React.FC = () => {
       const value = templateInputs[field.key];
       if (!value) return;
       if (Array.isArray(value) && value.length === 0) return;
-      if (typeof value === "string" && value.trim().length === 0) return;
+      if (typeof value === 'string' && value.trim().length === 0) return;
 
-      const serialized = Array.isArray(value) ? value.join(", ") : value;
+      const serialized = Array.isArray(value) ? value.join(', ') : value;
       lines.push(`${field.label}: ${serialized}`);
     });
 
-    return lines.join("\n");
+    return lines.join('\n');
   };
 
   const handleGenerate = async () => {
@@ -152,7 +152,7 @@ export const TemplatePage: React.FC = () => {
       const uploadedByField: Record<string, string[]> = {};
 
       for (const field of template.fields) {
-        if (field.type !== "file" && field.type !== "files") continue;
+        if (field.type !== 'file' && field.type !== 'files') continue;
 
         const selectedFiles = files[field.key] ?? [];
         if (!selectedFiles.length) continue;
@@ -169,19 +169,19 @@ export const TemplatePage: React.FC = () => {
       const templateInputs: Record<string, string | string[]> = {};
 
       template.fields.forEach((field) => {
-        if (field.type === "file") {
+        if (field.type === 'file') {
           const single = uploadedByField[field.key]?.[0];
           if (single) templateInputs[field.key] = single;
           return;
         }
 
-        if (field.type === "files") {
+        if (field.type === 'files') {
           const many = uploadedByField[field.key] ?? [];
           if (many.length > 0) templateInputs[field.key] = many;
           return;
         }
 
-        if (field.type === "tags") {
+        if (field.type === 'tags') {
           const tags = getTagsValue(field.key);
           if (tags.length > 0) templateInputs[field.key] = tags;
           return;
@@ -193,12 +193,12 @@ export const TemplatePage: React.FC = () => {
 
       const allReferenceUrls = Object.values(uploadedByField).flat();
       const prompt = buildPrompt(templateInputs);
-      const sizeValue = getStringValue("size") || undefined;
-      const targets = getTagsValue("target_audience");
+      const sizeValue = getStringValue('size') || undefined;
+      const targets = getTagsValue('target_audience');
 
       const res = await generateImage({
         prompt,
-        concept: getStringValue("concept") || undefined,
+        concept: getStringValue('concept') || undefined,
         size: sizeValue,
         targets: targets.length > 0 ? targets : undefined,
         reference_urls: allReferenceUrls,
@@ -208,16 +208,16 @@ export const TemplatePage: React.FC = () => {
       });
 
       let job = res;
-      if (job.status !== "completed") {
+      if (job.status !== 'completed') {
         const maxAttempts = 30;
         for (let i = 0; i < maxAttempts; i++) {
           await new Promise((resolve) => setTimeout(resolve, 2000));
           job = await getImageJob(res.job_id);
-          if (job.status === "completed" || job.status === "failed") break;
+          if (job.status === 'completed' || job.status === 'failed') break;
         }
       }
 
-      if (job.status === "completed" && job.result_url) {
+      if (job.status === 'completed' && job.result_url) {
         const imageUrl = resolveImageUrl(job.result_url);
         if (imageUrl) {
           navigate(
@@ -231,19 +231,19 @@ export const TemplatePage: React.FC = () => {
         }
       }
 
-      if (job.status === "failed") {
-        setErrorMessage("이미지 생성에 실패했습니다.");
+      if (job.status === 'failed') {
+        setErrorMessage('이미지 생성에 실패했습니다.');
         return;
       }
 
       setErrorMessage(
-        "이미지 생성 시간이 초과되었습니다. 잠시 후 다시 시도해 주세요.",
+        '이미지 생성 시간이 초과되었습니다. 잠시 후 다시 시도해 주세요.',
       );
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
-          : "이미지 생성 요청에 실패했습니다.";
+          : '이미지 생성 요청에 실패했습니다.';
       setErrorMessage(message);
     } finally {
       setIsSubmitting(false);
@@ -251,10 +251,10 @@ export const TemplatePage: React.FC = () => {
   };
 
   const renderField = (field: TemplateField) => {
-    if (field.type === "file" || field.type === "files") {
+    if (field.type === 'file' || field.type === 'files') {
       const inputId = `file-input-${field.key}`;
       const selectedFiles = files[field.key] ?? [];
-      const isMulti = field.type === "files";
+      const isMulti = field.type === 'files';
 
       return (
         <FormRow key={field.key} label={field.label} required={field.required}>
@@ -271,7 +271,7 @@ export const TemplatePage: React.FC = () => {
               if (isMulti) handleMultiFiles(field.key, nextFiles);
               else handleSingleFile(field.key, nextFiles[0] ?? null);
 
-              event.target.value = "";
+              event.target.value = '';
             }}
           />
           <div className="flex items-center gap-[8px] flex-wrap">
@@ -291,18 +291,18 @@ export const TemplatePage: React.FC = () => {
               className="border border-dashed border-[#155DFC] px-[14px] py-[7px] rounded-[8px] flex items-center gap-[6px] text-[13px] text-[#475569] cursor-pointer"
             >
               <img src={UploadIcon} className="w-[14px] h-[14px]" />
-              {isMulti ? "파일 선택" : "업로드"}
+              {isMulti ? '파일 선택' : '업로드'}
             </label>
           </div>
         </FormRow>
       );
     }
 
-    if (field.type === "tags") {
+    if (field.type === 'tags') {
       const selectedTags = getTagsValue(field.key);
       const maxItems = field.maxItems ?? 5;
-      const currentTagInput = tagInput[field.key] ?? "";
-      const showPresets = field.key.includes("audience");
+      const currentTagInput = tagInput[field.key] ?? '';
+      const showPresets = field.key.includes('audience');
 
       return (
         <FormRow key={field.key} label={field.label} required={field.required}>
@@ -327,12 +327,12 @@ export const TemplatePage: React.FC = () => {
                 }));
               }}
               onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === ";") {
+                if (event.key === 'Enter' || event.key === ';') {
                   event.preventDefault();
                   addTag(field, currentTagInput);
                 }
                 if (
-                  event.key === "Backspace" &&
+                  event.key === 'Backspace' &&
                   !currentTagInput &&
                   selectedTags.length > 0
                 ) {
@@ -343,7 +343,7 @@ export const TemplatePage: React.FC = () => {
               placeholder={
                 selectedTags.length === 0
                   ? `${field.label}을(를) 입력해 주세요 (최대 ${maxItems}개)`
-                  : ""
+                  : ''
               }
               className="flex-1 outline-none text-[14px] min-w-[180px] placeholder:text-[#94A3B8] bg-transparent"
             />
@@ -366,7 +366,7 @@ export const TemplatePage: React.FC = () => {
                     else addTag(field, keyword);
                   }}
                   className={`px-[14px] py-[5px] rounded-[12px] border text-[13px] whitespace-nowrap border-[#155DFC] text-[#0F172B] ${
-                    selectedTags.includes(keyword) ? " bg-[#EFF6FF]" : ""
+                    selectedTags.includes(keyword) ? ' bg-[#EFF6FF]' : ''
                   }`}
                 >
                   {keyword}
@@ -378,7 +378,7 @@ export const TemplatePage: React.FC = () => {
       );
     }
 
-    if (field.type === "textarea") {
+    if (field.type === 'textarea') {
       return (
         <FormRow key={field.key} label={field.label} required={field.required}>
           <textarea
@@ -391,7 +391,7 @@ export const TemplatePage: React.FC = () => {
       );
     }
 
-    if (field.type === "select") {
+    if (field.type === 'select') {
       return (
         <FormRow key={field.key} label={field.label} required={field.required}>
           <select
@@ -410,8 +410,8 @@ export const TemplatePage: React.FC = () => {
       );
     }
 
-    if (field.type === "size") {
-      const options = field.options ?? ["1:1", "4:5", "16:9", "9:16"];
+    if (field.type === 'size') {
+      const options = field.options ?? ['1:1', '4:5', '16:9', '9:16'];
       const selected = getStringValue(field.key);
 
       return (
@@ -422,7 +422,7 @@ export const TemplatePage: React.FC = () => {
                 key={size}
                 onClick={() => setStringValue(field.key, size)}
                 className={`w-[118px] h-[72px] border border-[#155DFC] rounded-[12px] flex items-center justify-center gap-[8px] text-[14px] text-[#0F172B] ${
-                  selected === size ? "bg-[#EFF6FF]" : ""
+                  selected === size ? 'bg-[#EFF6FF]' : ''
                 }`}
               >
                 <SizePreviewIcon ratio={size} active={selected === size} />
@@ -451,7 +451,7 @@ export const TemplatePage: React.FC = () => {
       <div className="max-w-[1000px] mx-auto py-[40px] px-[20px] bg-white border-l border-r border-[#E2E8F0]">
         <div className="flex items-center gap-[8px] text-[14px] mb-[16px]">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate('/')}
             className="text-[#64748B] hover:text-[#155DFC]"
           >
             홈
@@ -461,9 +461,9 @@ export const TemplatePage: React.FC = () => {
         </div>
 
         <div className="mb-[24px] rounded-[10px] border border-[#DBEAFE] bg-[#EFF6FF] px-[14px] py-[10px] text-[13px] text-[#1E3A8A]">
-          {template.aiStatus === "available"
+          {template.aiStatus === 'available'
             ? `AI 연동 기준: ${template.aiFeature} API 입력 규격`
-            : "AI 서버 미구현 템플릿입니다. 입력값은 현재 key-value 프롬프트로 조합되어 생성됩니다."}
+            : 'AI 서버 미구현 템플릿입니다. 입력값은 현재 key-value 프롬프트로 조합되어 생성됩니다.'}
         </div>
 
         <div className="flex flex-col gap-[32px]">
@@ -482,11 +482,11 @@ export const TemplatePage: React.FC = () => {
             disabled={!canGenerate || isSubmitting}
             className={`px-[40px] py-[12px] rounded-[8px] text-[15px] font-medium ${
               canGenerate && !isSubmitting
-                ? "bg-[#155DFC] text-white"
-                : "bg-[#CBD5E1] text-[#94A3B8] cursor-not-allowed"
+                ? 'bg-[#155DFC] text-white'
+                : 'bg-[#CBD5E1] text-[#94A3B8] cursor-not-allowed'
             }`}
           >
-            {isSubmitting ? "생성 중..." : "이미지 생성"}
+            {isSubmitting ? '생성 중...' : '이미지 생성'}
           </button>
         </div>
       </div>

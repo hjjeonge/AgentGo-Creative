@@ -1,5 +1,5 @@
-import type React from "react";
-import { Switch } from "../ui/switch";
+import type React from 'react';
+import { Switch } from '../ui/switch';
 
 interface Props {
   checked?: boolean;

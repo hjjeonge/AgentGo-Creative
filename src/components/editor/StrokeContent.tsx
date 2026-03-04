@@ -1,15 +1,15 @@
-import type React from "react";
-import { useMemo } from "react";
-import { ColorPalette } from "../commons/ColorPalette";
-import { ColorPickerPopup } from "../commons/ColorPickerPopup";
-import { useColorHistoryStore } from "../../store/colorHistoryStore";
+import type React from 'react';
+import { useMemo } from 'react';
+import { ColorPalette } from '../commons/ColorPalette';
+import { ColorPickerPopup } from '../commons/ColorPickerPopup';
+import { useColorHistoryStore } from '../../store/colorHistoryStore';
 
 interface Props {
   stroke?: string;
   strokeWidth?: number;
   onChangeStroke: (value: string) => void;
   onChangeStrokeWidth: (value: number) => void;
-  colorPopupMode: "picker" | "palette" | null;
+  colorPopupMode: 'picker' | 'palette' | null;
   onOpenPicker: () => void;
   onOpenPalette: () => void;
   onBackToPicker: () => void;
@@ -31,10 +31,11 @@ export const StrokeContent: React.FC<Props> = ({
   const addRecentColor = useColorHistoryStore((state) => state.addRecentColor);
 
   const normalizedCurrent = useMemo(() => {
-    if (!stroke) return "#000000";
-    return stroke.startsWith("#") ? stroke.toUpperCase() : `#${stroke}`.toUpperCase();
+    if (!stroke) return '#000000';
+    return stroke.startsWith('#')
+      ? stroke.toUpperCase()
+      : `#${stroke}`.toUpperCase();
   }, [stroke]);
-
 
   return (
     <div className="flex flex-col p-[7px] border-b border-[#E2E8F0]  text-[16px] leading-[24px] text-[#0F172B]">
@@ -47,12 +48,12 @@ export const StrokeContent: React.FC<Props> = ({
           >
             <div
               className="w-full h-full rounded-[3px]"
-              style={{ backgroundColor: stroke ?? "#000000" }}
+              style={{ backgroundColor: stroke ?? '#000000' }}
             />
           </button>
           {colorPopupMode && (
             <div className="absolute left-full top-0 ml-[8px] z-[100]">
-              {colorPopupMode === "picker" ? (
+              {colorPopupMode === 'picker' ? (
                 <ColorPickerPopup
                   onClose={onClosePicker}
                   onOpenPalette={onOpenPalette}

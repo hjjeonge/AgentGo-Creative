@@ -1,5 +1,5 @@
-﻿import Konva from "konva";
-import React, { useEffect, useRef, useState } from "react";
+﻿import Konva from 'konva';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Arrow,
   Ellipse,
@@ -12,7 +12,7 @@ import {
   Stage,
   Text,
   Transformer,
-} from "react-konva";
+} from 'react-konva';
 
 export interface DrawLine {
   points: number[];
@@ -42,12 +42,12 @@ export interface TextObject {
   fontFamily?: string;
   fontStyle?: string;
   textDecoration?: string;
-  align?: "left" | "center" | "right" | "justify";
-  verticalAlign?: "top" | "middle" | "bottom";
+  align?: 'left' | 'center' | 'right' | 'justify';
+  verticalAlign?: 'top' | 'middle' | 'bottom';
   letterSpacing?: number;
   lineHeight?: number;
   scaleX?: number;
-  listFormat?: "none" | "unordered" | "ordered";
+  listFormat?: 'none' | 'unordered' | 'ordered';
   stroke?: string;
   strokeWidth?: number;
   strokeEnabled?: boolean;
@@ -174,7 +174,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   const handleTextareaKeyDown = (
     e: React.KeyboardEvent<HTMLTextAreaElement>,
   ) => {
-    if (e.key === "Escape") {
+    if (e.key === 'Escape') {
       finishEditing();
     }
   };
@@ -183,21 +183,21 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   const stageRef = useRef<any>(null);
   const toVerticalText = (value: string) => {
     return value
-      .split("\n")
-      .map((line) => line.split("").join("\n"))
-      .join("\n\n");
+      .split('\n')
+      .map((line) => line.split('').join('\n'))
+      .join('\n\n');
   };
 
   const getListFormattedText = (text: TextObject) => {
     let baseText = text.text;
-    if (text.listFormat && text.listFormat !== "none") {
-      const lines = baseText.split("\n");
-      if (text.listFormat === "unordered") {
-        baseText = lines.map((line) => `• ${line}`).join("\n");
+    if (text.listFormat && text.listFormat !== 'none') {
+      const lines = baseText.split('\n');
+      if (text.listFormat === 'unordered') {
+        baseText = lines.map((line) => `• ${line}`).join('\n');
       } else {
         baseText = lines
           .map((line, index) => `${index + 1}. ${line}`)
-          .join("\n");
+          .join('\n');
       }
     }
     return baseText;
@@ -218,7 +218,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   const renderDiagramShape = (shape: Shape) => {
     const width = Math.max(10, shape.width);
     const height = Math.max(10, shape.height);
-    const stroke = "rgba(15, 23, 43, 0.18)";
+    const stroke = 'rgba(15, 23, 43, 0.18)';
     const common = {
       fill: shape.fill,
       stroke,
@@ -226,7 +226,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
     };
 
     switch (shape.type) {
-      case "round_square":
+      case 'round_square':
         return (
           <Rect
             x={0}
@@ -237,9 +237,9 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             {...common}
           />
         );
-      case "oblong":
+      case 'oblong':
         return <Rect x={0} y={0} width={width} height={height} {...common} />;
-      case "round_oblong":
+      case 'round_oblong':
         return (
           <Rect
             x={0}
@@ -250,7 +250,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             {...common}
           />
         );
-      case "triangle":
+      case 'triangle':
         return (
           <Line
             points={[width / 2, 0, width, height, 0, height]}
@@ -258,7 +258,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             {...common}
           />
         );
-      case "rhombus":
+      case 'rhombus':
         return (
           <Line
             points={[
@@ -275,7 +275,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             {...common}
           />
         );
-      case "pentagon":
+      case 'pentagon':
         return (
           <Line
             points={buildPolygonPoints(5, width, height)}
@@ -283,7 +283,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             {...common}
           />
         );
-      case "hexagon":
+      case 'hexagon':
         return (
           <Line
             points={buildPolygonPoints(6, width, height)}
@@ -291,8 +291,8 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             {...common}
           />
         );
-      case "circle":
-      case "oval":
+      case 'circle':
+      case 'oval':
         return (
           <Ellipse
             x={width / 2}
@@ -302,7 +302,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             {...common}
           />
         );
-      case "semicircle":
+      case 'semicircle':
         return (
           <Path
             data="M 0 100 A 50 50 0 0 1 100 100 L 0 100 Z"
@@ -313,7 +313,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             {...common}
           />
         );
-      case "circle_cut":
+      case 'circle_cut':
         return (
           <Path
             data="M 50 0 A 50 50 0 1 1 50 100 L 100 50 Z"
@@ -324,7 +324,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             {...common}
           />
         );
-      case "arrow":
+      case 'arrow':
         return (
           <Line
             points={[
@@ -347,7 +347,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             {...common}
           />
         );
-      case "arrow_fill":
+      case 'arrow_fill':
         return (
           <Arrow
             points={[0, height / 2, width, height / 2]}
@@ -357,7 +357,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             {...common}
           />
         );
-      case "label":
+      case 'label':
         return (
           <Line
             points={[
@@ -376,7 +376,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             {...common}
           />
         );
-      case "label_cut":
+      case 'label_cut':
         return (
           <Line
             points={[
@@ -397,14 +397,14 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             {...common}
           />
         );
-      case "square":
+      case 'square':
       default:
         return <Rect x={0} y={0} width={width} height={height} {...common} />;
     }
   };
 
   return (
-    <div style={{ position: "relative", cursor: "default" }}>
+    <div style={{ position: 'relative', cursor: 'default' }}>
       <Stage
         ref={stageRef}
         width={stageSize.width}
@@ -436,7 +436,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               tension={0.5}
               lineCap="round"
               globalCompositeOperation={
-                line.tool === "eraser" ? "destination-out" : "source-over"
+                line.tool === 'eraser' ? 'destination-out' : 'source-over'
               }
             />
           ))}
@@ -448,9 +448,9 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               tension={0.5}
               lineCap="round"
               globalCompositeOperation={
-                currentLine.tool === "eraser"
-                  ? "destination-out"
-                  : "source-over"
+                currentLine.tool === 'eraser'
+                  ? 'destination-out'
+                  : 'source-over'
               }
             />
           )}
@@ -498,10 +498,10 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             if (
               text.backgroundEnabled &&
               text.backgroundColor &&
-              text.backgroundColor !== "transparent"
+              text.backgroundColor !== 'transparent'
             ) {
               const displayText = getDisplayText(text);
-              const lines = displayText.split("\n");
+              const lines = displayText.split('\n');
 
               return (
                 <Group
@@ -536,16 +536,16 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
                     const rectHeight = rawTextHeight * 0.9;
                     const rectOffsetY = (rawTextHeight - rectHeight) / 2;
                     const requestedWidth = text.width;
-                    const align = text.align ?? "left";
+                    const align = text.align ?? 'left';
                     const maxWidth =
-                      align === "left" || !requestedWidth
+                      align === 'left' || !requestedWidth
                         ? textWidth
                         : Math.max(requestedWidth, textWidth);
                     let rectOffsetX = 0;
-                    if (maxWidth && align !== "left") {
-                      if (align === "center") {
+                    if (maxWidth && align !== 'left') {
+                      if (align === 'center') {
                         rectOffsetX = (maxWidth - textWidth) / 2;
-                      } else if (align === "right") {
+                      } else if (align === 'right') {
                         rectOffsetX = maxWidth - textWidth;
                       }
                     }
@@ -657,10 +657,10 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             rotateEnabled={true}
             keepRatio={true}
             enabledAnchors={[
-              "top-left",
-              "top-right",
-              "bottom-left",
-              "bottom-right",
+              'top-left',
+              'top-right',
+              'bottom-left',
+              'bottom-right',
             ]}
           />
         </Layer>
@@ -675,16 +675,16 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
           onKeyDown={handleTextareaKeyDown}
           onBlur={finishEditing}
           style={{
-            position: "absolute",
+            position: 'absolute',
             top: `${editingText.y}px`,
             left: `${editingText.x}px`,
             width: `${editingText.width ?? getNodeSize(editingText.id).width}px`,
             height: `${getNodeSize(editingText.id).height}px`,
             fontSize: `${editingText.fontSize}px`,
             color: editingText.fill,
-            border: "1px solid #000",
-            resize: "none",
-            overflow: "hidden",
+            border: '1px solid #000',
+            resize: 'none',
+            overflow: 'hidden',
             fontFamily: editingText.fontFamily,
             fontStyle: editingText.fontStyle,
             textDecoration: editingText.textDecoration,
@@ -699,7 +699,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               editingText.scaleX && editingText.scaleX !== 1
                 ? `scaleX(${editingText.scaleX})`
                 : undefined,
-            transformOrigin: "left top",
+            transformOrigin: 'left top',
           }}
         />
       )}

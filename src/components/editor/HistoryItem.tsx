@@ -1,5 +1,5 @@
-import type React from "react";
-import type { HistoryEntry } from "../../types/editor";
+import type React from 'react';
+import type { HistoryEntry } from '../../types/editor';
 
 interface Props {
   entry: HistoryEntry;

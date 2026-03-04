@@ -1,7 +1,7 @@
-import type React from "react";
-import { ColorPicker, useColor, type IColor } from "react-color-palette";
-import "react-color-palette/css";
-import Arrow from "./../../assets/arrow_down.svg";
+import type React from 'react';
+import { ColorPicker, useColor, type IColor } from 'react-color-palette';
+import 'react-color-palette/css';
+import Arrow from './../../assets/arrow_down.svg';
 
 interface Props {
   colorCode: string;
@@ -32,7 +32,7 @@ export const ColorPalette: React.FC<Props> = ({
       <ColorPicker
         color={color}
         onChange={handleColor}
-        hideInput={["rgb", "hsv"]}
+        hideInput={['rgb', 'hsv']}
       />
     </div>
   );

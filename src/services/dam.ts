@@ -1,4 +1,4 @@
-import { del, download, get, patch, post, upload } from "./apiClient";
+import { del, download, get, patch, post, upload } from './apiClient';
 
 export interface UploaderInfo {
   id: string;
@@ -46,15 +46,15 @@ export interface AssetPermission {
   id: string;
   name: string;
   email: string;
-  access_level: "owner" | "change-permissions" | "can-edit" | "can-view";
+  access_level: 'owner' | 'change-permissions' | 'can-edit' | 'can-view';
 }
 
 export interface WorkspaceTask {
   id: string;
   title: string;
   description: string;
-  status: "todo" | "in-progress" | "review" | "done";
-  priority: "low" | "medium" | "high";
+  status: 'todo' | 'in-progress' | 'review' | 'done';
+  priority: 'low' | 'medium' | 'high';
   creator: {
     name: string;
     avatar?: string;
@@ -73,7 +73,8 @@ export interface CollectionItem {
   share_token?: string;
 }
 
-const USE_DEV_DUMMY = import.meta.env.DEV && import.meta.env.VITE_DAM_USE_DEV_DUMMY !== "false";
+const USE_DEV_DUMMY =
+  import.meta.env.DEV && import.meta.env.VITE_DAM_USE_DEV_DUMMY !== 'false';
 
 type DevAsset = AssetDetail & {
   folder_id?: string;
@@ -81,17 +82,17 @@ type DevAsset = AssetDetail & {
 
 const DEV_FOLDERS: FolderNode[] = [
   {
-    id: "folder-2026",
-    name: "2026",
+    id: 'folder-2026',
+    name: '2026',
     children: [
-      { id: "folder-2026-spring", name: "Spring Campaign" },
-      { id: "folder-2026-summer", name: "Summer Campaign" },
+      { id: 'folder-2026-spring', name: 'Spring Campaign' },
+      { id: 'folder-2026-summer', name: 'Summer Campaign' },
     ],
   },
   {
-    id: "folder-2025",
-    name: "2025",
-    children: [{ id: "folder-2025-archive", name: "Archive" }],
+    id: 'folder-2025',
+    name: '2025',
+    children: [{ id: 'folder-2025-archive', name: 'Archive' }],
   },
 ];
 
@@ -101,132 +102,184 @@ const createDevAssets = (): DevAsset[] => {
 
   return [
     {
-      id: "dev-asset-1",
-      name: "livingroom-hero.jpg",
-      file_type: "image",
-      file_url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&auto=format&fit=crop&q=80",
-      file_size: "3287342",
-      uploaded_by: "James Rodriguez",
+      id: 'dev-asset-1',
+      name: 'livingroom-hero.jpg',
+      file_type: 'image',
+      file_url:
+        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&auto=format&fit=crop&q=80',
+      file_size: '3287342',
+      uploaded_by: 'James Rodriguez',
       metadata: {
-        status: "approved",
-        title: "Livingroom Hero",
-        description: "Main visual for 2026 spring campaign.",
-        author: "Creative Team",
-        resolution: "3840x2160",
-        make: "Sony",
-        model: "A7R4",
-        gps_lat: "37.5665",
-        gps_lng: "126.9780",
-        gps_alt: "12.5",
-        ai_summary: "Modern, warm, product-focused scene.",
+        status: 'approved',
+        title: 'Livingroom Hero',
+        description: 'Main visual for 2026 spring campaign.',
+        author: 'Creative Team',
+        resolution: '3840x2160',
+        make: 'Sony',
+        model: 'A7R4',
+        gps_lat: '37.5665',
+        gps_lng: '126.9780',
+        gps_alt: '12.5',
+        ai_summary: 'Modern, warm, product-focused scene.',
         ai_tags: [
-          { category: "Type", value: "Interior", reason: "Object layout and composition match interior scenes." },
-          { category: "Mood", value: "Warm", reason: "Color temperature and lighting are warm." },
-          { category: "Material", value: "Wood", reason: "Texture features suggest wooden surface." },
+          {
+            category: 'Type',
+            value: 'Interior',
+            reason: 'Object layout and composition match interior scenes.',
+          },
+          {
+            category: 'Mood',
+            value: 'Warm',
+            reason: 'Color temperature and lighting are warm.',
+          },
+          {
+            category: 'Material',
+            value: 'Wood',
+            reason: 'Texture features suggest wooden surface.',
+          },
         ],
       },
       reference_images: [
-        "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1493666438817-866a91353ca9?w=400&auto=format&fit=crop&q=80",
+        'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1493666438817-866a91353ca9?w=400&auto=format&fit=crop&q=80',
       ],
       created_at: isoNow,
       updated_at: isoNow,
-      folder_id: "folder-2026-spring",
+      folder_id: 'folder-2026-spring',
     },
     {
-      id: "dev-asset-2",
-      name: "product-cut.mp4",
-      file_type: "video",
-      file_url: "https://www.w3schools.com/html/mov_bbb.mp4",
-      file_size: "73400320",
-      uploaded_by: "Isabella Anderson",
-      metadata: { status: "pending", title: "Product Cut", description: "Short ad clip." },
+      id: 'dev-asset-2',
+      name: 'product-cut.mp4',
+      file_type: 'video',
+      file_url: 'https://www.w3schools.com/html/mov_bbb.mp4',
+      file_size: '73400320',
+      uploaded_by: 'Isabella Anderson',
+      metadata: {
+        status: 'pending',
+        title: 'Product Cut',
+        description: 'Short ad clip.',
+      },
       reference_images: [],
       created_at: isoNow,
       updated_at: isoNow,
-      folder_id: "folder-2026-summer",
+      folder_id: 'folder-2026-summer',
     },
     {
-      id: "dev-asset-3",
-      name: "campaign-guide.pdf",
-      file_type: "pdf",
-      file_url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-      file_size: "1054720",
-      uploaded_by: "Natalie Clark",
-      metadata: { status: "rejected", title: "Guide PDF", description: "Needs revision." },
+      id: 'dev-asset-3',
+      name: 'campaign-guide.pdf',
+      file_type: 'pdf',
+      file_url:
+        'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+      file_size: '1054720',
+      uploaded_by: 'Natalie Clark',
+      metadata: {
+        status: 'rejected',
+        title: 'Guide PDF',
+        description: 'Needs revision.',
+      },
       reference_images: [],
       created_at: isoNow,
       updated_at: isoNow,
-      folder_id: "folder-2026-spring",
+      folder_id: 'folder-2026-spring',
     },
     {
-      id: "dev-asset-4",
-      name: "archive-pack.zip",
-      file_type: "zip",
-      file_url: "https://example.com/archive-pack.zip",
-      file_size: "90485760",
-      uploaded_by: "David Garcia",
-      metadata: { status: "none", title: "Archive Pack" },
+      id: 'dev-asset-4',
+      name: 'archive-pack.zip',
+      file_type: 'zip',
+      file_url: 'https://example.com/archive-pack.zip',
+      file_size: '90485760',
+      uploaded_by: 'David Garcia',
+      metadata: { status: 'none', title: 'Archive Pack' },
       reference_images: [],
       created_at: isoNow,
       updated_at: isoNow,
-      folder_id: "folder-2025-archive",
+      folder_id: 'folder-2025-archive',
     },
   ];
 };
 
 let devAssets: DevAsset[] = createDevAssets();
 let devPermissionsByAsset: Record<string, AssetPermission[]> = {
-  "dev-asset-1": [
-    { id: "perm-1", name: "Admin", email: "admin@itcen.com", access_level: "owner" },
-    { id: "perm-2", name: "James Rodriguez", email: "james@itcen.com", access_level: "change-permissions" },
-    { id: "perm-3", name: "Isabella Anderson", email: "isabella@itcen.com", access_level: "can-view" },
+  'dev-asset-1': [
+    {
+      id: 'perm-1',
+      name: 'Admin',
+      email: 'admin@itcen.com',
+      access_level: 'owner',
+    },
+    {
+      id: 'perm-2',
+      name: 'James Rodriguez',
+      email: 'james@itcen.com',
+      access_level: 'change-permissions',
+    },
+    {
+      id: 'perm-3',
+      name: 'Isabella Anderson',
+      email: 'isabella@itcen.com',
+      access_level: 'can-view',
+    },
   ],
 };
 
 let devTasks: WorkspaceTask[] = [
   {
-    id: "task-1",
-    title: "Spring hero metadata review",
-    description: "Check AI tags and publish status before client handoff.",
-    status: "review",
-    priority: "high",
-    creator: { name: "Admin" },
+    id: 'task-1',
+    title: 'Spring hero metadata review',
+    description: 'Check AI tags and publish status before client handoff.',
+    status: 'review',
+    priority: 'high',
+    creator: { name: 'Admin' },
     created_at: new Date().toISOString(),
-    due_date: "2026-03-10",
-    assignee: "Me",
-    linked_asset_id: "dev-asset-1",
+    due_date: '2026-03-10',
+    assignee: 'Me',
+    linked_asset_id: 'dev-asset-1',
   },
   {
-    id: "task-2",
-    title: "Video cut upload",
-    description: "Upload final mp4 and assign sharing permissions.",
-    status: "in-progress",
-    priority: "medium",
-    creator: { name: "James Rodriguez" },
+    id: 'task-2',
+    title: 'Video cut upload',
+    description: 'Upload final mp4 and assign sharing permissions.',
+    status: 'in-progress',
+    priority: 'medium',
+    creator: { name: 'James Rodriguez' },
     created_at: new Date().toISOString(),
-    due_date: "2026-03-14",
-    assignee: "Me",
-    linked_asset_id: "dev-asset-2",
+    due_date: '2026-03-14',
+    assignee: 'Me',
+    linked_asset_id: 'dev-asset-2',
   },
   {
-    id: "task-3",
-    title: "Archive cleanup",
-    description: "Move old campaign assets into collection archive.",
-    status: "todo",
-    priority: "low",
-    creator: { name: "Natalie Clark" },
+    id: 'task-3',
+    title: 'Archive cleanup',
+    description: 'Move old campaign assets into collection archive.',
+    status: 'todo',
+    priority: 'low',
+    creator: { name: 'Natalie Clark' },
     created_at: new Date().toISOString(),
-    due_date: "2026-03-20",
-    assignee: "Team",
-    linked_asset_id: "dev-asset-4",
+    due_date: '2026-03-20',
+    assignee: 'Team',
+    linked_asset_id: 'dev-asset-4',
   },
 ];
 
 let devCollections: CollectionItem[] = [
-  { id: "coll-summer", name: "Summer Campaign", description: "Summer 2026 visual assets", asset_ids: ["dev-asset-1", "dev-asset-2"] },
-  { id: "coll-ski", name: "Ski Season 2026", description: "Winter product creatives", asset_ids: ["dev-asset-3"] },
-  { id: "coll-modern", name: "Modern Interior", description: "Interior moodboard set", asset_ids: ["dev-asset-1"] },
+  {
+    id: 'coll-summer',
+    name: 'Summer Campaign',
+    description: 'Summer 2026 visual assets',
+    asset_ids: ['dev-asset-1', 'dev-asset-2'],
+  },
+  {
+    id: 'coll-ski',
+    name: 'Ski Season 2026',
+    description: 'Winter product creatives',
+    asset_ids: ['dev-asset-3'],
+  },
+  {
+    id: 'coll-modern',
+    name: 'Modern Interior',
+    description: 'Interior moodboard set',
+    asset_ids: ['dev-asset-1'],
+  },
 ];
 
 const flattenFolders = (folders: FolderNode[]): FolderNode[] => {
@@ -241,7 +294,9 @@ const flattenFolders = (folders: FolderNode[]): FolderNode[] => {
   return acc;
 };
 
-const DEV_FOLDER_IDS = new Set(flattenFolders(DEV_FOLDERS).map((folder) => folder.id));
+const DEV_FOLDER_IDS = new Set(
+  flattenFolders(DEV_FOLDERS).map((folder) => folder.id),
+);
 
 const toSummary = (asset: DevAsset): AssetSummary => ({
   id: asset.id,
@@ -261,7 +316,7 @@ export async function getFolderTree(): Promise<FolderNode[]> {
   if (USE_DEV_DUMMY) {
     return DEV_FOLDERS;
   }
-  return get<FolderNode[]>("/api/dam/folders");
+  return get<FolderNode[]>('/api/dam/folders');
 }
 
 export async function listAssets(params?: {
@@ -286,9 +341,16 @@ export async function listAssets(params?: {
       if (keyword && !includesIgnoreCase(asset.name, keyword)) return false;
       if (fileType && asset.file_type !== fileType) return false;
       if (userName && asset.uploaded_by !== userName) return false;
-      if (folderId && DEV_FOLDER_IDS.has(folderId) && asset.folder_id !== folderId) return false;
-      if (dateFrom && new Date(asset.updated_at) < new Date(dateFrom)) return false;
-      if (dateTo && new Date(asset.updated_at) > new Date(`${dateTo}T23:59:59`)) return false;
+      if (
+        folderId &&
+        DEV_FOLDER_IDS.has(folderId) &&
+        asset.folder_id !== folderId
+      )
+        return false;
+      if (dateFrom && new Date(asset.updated_at) < new Date(dateFrom))
+        return false;
+      if (dateTo && new Date(asset.updated_at) > new Date(`${dateTo}T23:59:59`))
+        return false;
       return true;
     });
 
@@ -299,8 +361,14 @@ export async function listAssets(params?: {
   }
 
   const query = params
-    ? "?" + new URLSearchParams(Object.entries(params).filter(([, v]) => v != null && v !== "") as [string, string][]).toString()
-    : "";
+    ? '?' +
+      new URLSearchParams(
+        Object.entries(params).filter(([, v]) => v != null && v !== '') as [
+          string,
+          string,
+        ][],
+      ).toString()
+    : '';
   return get<AssetListResponse>(`/api/dam/assets${query}`);
 }
 
@@ -308,17 +376,20 @@ export async function getAssetDetail(assetId: string): Promise<AssetDetail> {
   if (USE_DEV_DUMMY) {
     const found = devAssets.find((asset) => asset.id === assetId);
     if (!found) {
-      throw new Error("Asset not found");
+      throw new Error('Asset not found');
     }
     return found;
   }
   return get<AssetDetail>(`/api/dam/assets/${assetId}`);
 }
 
-export async function renameAsset(assetId: string, name: string): Promise<AssetSummary> {
+export async function renameAsset(
+  assetId: string,
+  name: string,
+): Promise<AssetSummary> {
   if (USE_DEV_DUMMY) {
     const target = devAssets.find((asset) => asset.id === assetId);
-    if (!target) throw new Error("Asset not found");
+    if (!target) throw new Error('Asset not found');
     target.name = name;
     target.updated_at = new Date().toISOString();
     return toSummary(target);
@@ -329,15 +400,17 @@ export async function renameAsset(assetId: string, name: string): Promise<AssetS
 export async function copyAsset(assetId: string): Promise<AssetDetail> {
   if (USE_DEV_DUMMY) {
     const target = devAssets.find((asset) => asset.id === assetId);
-    if (!target) throw new Error("Asset not found");
+    if (!target) throw new Error('Asset not found');
     const copied: DevAsset = {
       ...target,
       id: `dev-copy-${Date.now()}`,
-      name: `${target.name.replace(/(\.[^.]*)?$/, "")}_copy${target.name.includes(".") ? target.name.slice(target.name.lastIndexOf(".")) : ""}`,
+      name: `${target.name.replace(/(\.[^.]*)?$/, '')}_copy${target.name.includes('.') ? target.name.slice(target.name.lastIndexOf('.')) : ''}`,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       metadata: target.metadata ? { ...target.metadata } : undefined,
-      reference_images: target.reference_images ? [...target.reference_images] : [],
+      reference_images: target.reference_images
+        ? [...target.reference_images]
+        : [],
     };
     devAssets = [copied, ...devAssets];
     return copied;
@@ -360,30 +433,37 @@ export function downloadAssetUrl(assetId: string): string {
 export async function downloadAsset(assetId: string): Promise<Blob> {
   if (USE_DEV_DUMMY) {
     const file = devAssets.find((asset) => asset.id === assetId);
-    const fileName = file?.name || "asset";
-    return new Blob([`Dummy DAM asset download: ${fileName}`], { type: "text/plain" });
+    const fileName = file?.name || 'asset';
+    return new Blob([`Dummy DAM asset download: ${fileName}`], {
+      type: 'text/plain',
+    });
   }
   return download(downloadAssetUrl(assetId));
 }
 
-export async function uploadAsset(file: File, name: string, metadata?: Record<string, unknown>, folderId?: string): Promise<AssetDetail> {
+export async function uploadAsset(
+  file: File,
+  name: string,
+  metadata?: Record<string, unknown>,
+  folderId?: string,
+): Promise<AssetDetail> {
   if (USE_DEV_DUMMY) {
     const now = new Date().toISOString();
     const next: DevAsset = {
       id: `dev-upload-${Date.now()}`,
       name,
-      file_type: file.type.includes("image")
-        ? "image"
-        : file.type.includes("video")
-          ? "video"
-          : file.type.includes("pdf")
-            ? "pdf"
-            : file.name.toLowerCase().endsWith(".zip")
-              ? "zip"
-              : "other",
+      file_type: file.type.includes('image')
+        ? 'image'
+        : file.type.includes('video')
+          ? 'video'
+          : file.type.includes('pdf')
+            ? 'pdf'
+            : file.name.toLowerCase().endsWith('.zip')
+              ? 'zip'
+              : 'other',
       file_url: URL.createObjectURL(file),
       file_size: String(file.size),
-      uploaded_by: "Dev User",
+      uploaded_by: 'Dev User',
       metadata: metadata || {},
       reference_images: [],
       created_at: now,
@@ -395,23 +475,26 @@ export async function uploadAsset(file: File, name: string, metadata?: Record<st
   }
 
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append('file', file);
 
   const query = new URLSearchParams({ name });
   if (metadata) {
-    query.set("metadata", JSON.stringify(metadata));
+    query.set('metadata', JSON.stringify(metadata));
   }
   if (folderId) {
-    query.set("folder_id", folderId);
+    query.set('folder_id', folderId);
   }
 
   return upload<AssetDetail>(`/api/dam/assets?${query.toString()}`, formData);
 }
 
-export async function updateAssetMetadata(assetId: string, metadata: Record<string, unknown>): Promise<AssetDetail> {
+export async function updateAssetMetadata(
+  assetId: string,
+  metadata: Record<string, unknown>,
+): Promise<AssetDetail> {
   if (USE_DEV_DUMMY) {
     const target = devAssets.find((asset) => asset.id === assetId);
-    if (!target) throw new Error("Asset not found");
+    if (!target) throw new Error('Asset not found');
     target.metadata = {
       ...(target.metadata || {}),
       ...metadata,
@@ -419,7 +502,9 @@ export async function updateAssetMetadata(assetId: string, metadata: Record<stri
     target.updated_at = new Date().toISOString();
     return target;
   }
-  return patch<AssetDetail>(`/api/dam/assets/${assetId}/metadata`, { metadata });
+  return patch<AssetDetail>(`/api/dam/assets/${assetId}/metadata`, {
+    metadata,
+  });
 }
 
 export async function listUploaders(): Promise<UploaderInfo[]> {
@@ -427,7 +512,7 @@ export async function listUploaders(): Promise<UploaderInfo[]> {
     const map = new Map<string, UploaderInfo>();
     devAssets.forEach((asset) => {
       if (!map.has(asset.uploaded_by)) {
-        const local = asset.uploaded_by.toLowerCase().replace(/\s+/g, ".");
+        const local = asset.uploaded_by.toLowerCase().replace(/\s+/g, '.');
         map.set(asset.uploaded_by, {
           id: `uploader-${local}`,
           name: asset.uploaded_by,
@@ -437,37 +522,54 @@ export async function listUploaders(): Promise<UploaderInfo[]> {
     });
     return [...map.values()];
   }
-  return get<UploaderInfo[]>("/api/dam/assets/uploaders");
+  return get<UploaderInfo[]>('/api/dam/assets/uploaders');
 }
 
-export async function listAssetPermissions(assetId: string): Promise<AssetPermission[]> {
+export async function listAssetPermissions(
+  assetId: string,
+): Promise<AssetPermission[]> {
   if (USE_DEV_DUMMY) {
-    return devPermissionsByAsset[assetId] || [
-      { id: "perm-owner", name: "Admin", email: "admin@itcen.com", access_level: "owner" },
-    ];
+    return (
+      devPermissionsByAsset[assetId] || [
+        {
+          id: 'perm-owner',
+          name: 'Admin',
+          email: 'admin@itcen.com',
+          access_level: 'owner',
+        },
+      ]
+    );
   }
   return get<AssetPermission[]>(`/api/dam/assets/${assetId}/permissions`);
 }
 
-export async function saveAssetPermissions(assetId: string, permissions: AssetPermission[]): Promise<AssetPermission[]> {
+export async function saveAssetPermissions(
+  assetId: string,
+  permissions: AssetPermission[],
+): Promise<AssetPermission[]> {
   if (USE_DEV_DUMMY) {
     devPermissionsByAsset[assetId] = permissions;
     return permissions;
   }
-  return post<AssetPermission[]>(`/api/dam/assets/${assetId}/permissions`, { permissions });
+  return post<AssetPermission[]>(`/api/dam/assets/${assetId}/permissions`, {
+    permissions,
+  });
 }
 
 export async function listWorkspaceTasks(): Promise<WorkspaceTask[]> {
   if (USE_DEV_DUMMY) {
     return devTasks;
   }
-  return get<WorkspaceTask[]>("/api/dam/workspace/tasks");
+  return get<WorkspaceTask[]>('/api/dam/workspace/tasks');
 }
 
-export async function updateWorkspaceTask(taskId: string, payload: Partial<WorkspaceTask>): Promise<WorkspaceTask> {
+export async function updateWorkspaceTask(
+  taskId: string,
+  payload: Partial<WorkspaceTask>,
+): Promise<WorkspaceTask> {
   if (USE_DEV_DUMMY) {
     const target = devTasks.find((task) => task.id === taskId);
-    if (!target) throw new Error("Task not found");
+    if (!target) throw new Error('Task not found');
     Object.assign(target, payload);
     return target;
   }
@@ -478,38 +580,51 @@ export async function listCollections(): Promise<CollectionItem[]> {
   if (USE_DEV_DUMMY) {
     return devCollections;
   }
-  return get<CollectionItem[]>("/api/dam/collections");
+  return get<CollectionItem[]>('/api/dam/collections');
 }
 
-export async function createCollectionShareLink(collectionId: string): Promise<{ url: string }> {
+export async function createCollectionShareLink(
+  collectionId: string,
+): Promise<{ url: string }> {
   if (USE_DEV_DUMMY) {
     const collection = devCollections.find((item) => item.id === collectionId);
-    if (!collection) throw new Error("Collection not found");
-    const token = collection.share_token || `share-${collectionId}-${Date.now()}`;
+    if (!collection) throw new Error('Collection not found');
+    const token =
+      collection.share_token || `share-${collectionId}-${Date.now()}`;
     collection.share_token = token;
     return { url: `${window.location.origin}/dam/share/${token}` };
   }
   return post<{ url: string }>(`/api/dam/collections/${collectionId}/share`);
 }
 
-export async function addAssetToCollection(collectionId: string, assetId: string): Promise<CollectionItem> {
+export async function addAssetToCollection(
+  collectionId: string,
+  assetId: string,
+): Promise<CollectionItem> {
   if (USE_DEV_DUMMY) {
     const collection = devCollections.find((item) => item.id === collectionId);
-    if (!collection) throw new Error("Collection not found");
+    if (!collection) throw new Error('Collection not found');
     if (!collection.asset_ids.includes(assetId)) {
       collection.asset_ids.push(assetId);
     }
     return collection;
   }
-  return post<CollectionItem>(`/api/dam/collections/${collectionId}/assets`, { asset_id: assetId });
+  return post<CollectionItem>(`/api/dam/collections/${collectionId}/assets`, {
+    asset_id: assetId,
+  });
 }
 
-export async function removeAssetFromCollection(collectionId: string, assetId: string): Promise<CollectionItem> {
+export async function removeAssetFromCollection(
+  collectionId: string,
+  assetId: string,
+): Promise<CollectionItem> {
   if (USE_DEV_DUMMY) {
     const collection = devCollections.find((item) => item.id === collectionId);
-    if (!collection) throw new Error("Collection not found");
+    if (!collection) throw new Error('Collection not found');
     collection.asset_ids = collection.asset_ids.filter((id) => id !== assetId);
     return collection;
   }
-  return del<CollectionItem>(`/api/dam/collections/${collectionId}/assets/${assetId}`);
+  return del<CollectionItem>(
+    `/api/dam/collections/${collectionId}/assets/${assetId}`,
+  );
 }

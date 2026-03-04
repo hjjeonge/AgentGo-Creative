@@ -1,4 +1,4 @@
-import { get } from "./apiClient";
+import { get } from './apiClient';
 
 export interface UserProfile {
   id: string;
@@ -8,5 +8,5 @@ export interface UserProfile {
 }
 
 export async function getMyProfile(): Promise<UserProfile> {
-  return get<UserProfile>("/api/users/me");
+  return get<UserProfile>('/api/users/me');
 }

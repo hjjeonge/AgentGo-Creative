@@ -1,4 +1,4 @@
-import { get, post } from "./apiClient";
+import { get, post } from './apiClient';
 
 export interface ImageGenerateRequest {
   brand_guideline_id?: string;
@@ -18,10 +18,14 @@ export interface ImageGenerateResponse {
   result_url?: string | null;
 }
 
-export async function generateImage(body: ImageGenerateRequest): Promise<ImageGenerateResponse> {
-  return post<ImageGenerateResponse>("/api/images/generate", body);
+export async function generateImage(
+  body: ImageGenerateRequest,
+): Promise<ImageGenerateResponse> {
+  return post<ImageGenerateResponse>('/api/images/generate', body);
 }
 
-export async function getImageJob(jobId: string): Promise<ImageGenerateResponse> {
+export async function getImageJob(
+  jobId: string,
+): Promise<ImageGenerateResponse> {
   return get<ImageGenerateResponse>(`/api/images/jobs/${jobId}`);
 }
