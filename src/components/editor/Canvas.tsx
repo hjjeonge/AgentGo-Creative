@@ -658,19 +658,31 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 
     const handleAddShape = (shapeType: string) => {
       setShapeType(shapeType);
-      if (shapeType === "square") {
-        pushUndo();
-        const newSquare: Shape = {
-          id: `shape_${shapes.length}`,
-          type: "square",
-          x: 100,
-          y: 100,
-          width: 50,
-          height: 50,
-          fill: "red",
-        };
-        setShapes((prev) => [...prev, newSquare]);
-      }
+      const getDefaultSize = (type: string) => {
+        if (type === "square" || type === "round_square" || type === "circle") {
+          return { width: 120, height: 120 };
+        }
+        if (type === "semicircle") {
+          return { width: 140, height: 80 };
+        }
+        if (type === "arrow" || type === "arrow_fill") {
+          return { width: 170, height: 90 };
+        }
+        return { width: 160, height: 100 };
+      };
+
+      const size = getDefaultSize(shapeType);
+      pushUndo();
+      const newShape: Shape = {
+        id: `shape_${shapes.length}`,
+        type: shapeType,
+        x: 100,
+        y: 100,
+        width: size.width,
+        height: size.height,
+        fill: "#EF4444",
+      };
+      setShapes((prev) => [...prev, newShape]);
     };
 
     const handleTransformEnd = (e: any) => {
@@ -719,7 +731,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       : undefined;
 
     return (
-      <section className="h-full flex-1 min-w-0 bg-[#E2E8F0] relative flex flex-col items-center">
+      <section className="h-full flex-1 min-w-0 bg-[#E2E8F0] relative flex flex-col items-center overflow-auto">
         {/* 브레드크럼 */}
         <div className="flex items-center gap-[6px] text-[13px] mt-[10px]">
           <button
@@ -764,7 +776,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         <div
           ref={containerRef}
           onWheel={handleCanvasWheel}
-          className="relative flex-1 w-full flex items-center justify-center overflow-hidden bg-white"
+          className="relative w-[480px] h-[600px] mt-[20px] mb-[16px] shrink-0 flex items-center justify-center overflow-hidden rounded-[12px] border border-[#CBD5E1] bg-white"
         >
           {backgroundImage && (
             <div className="absolute right-[16px] top-[12px] z-[12] flex items-center gap-[6px] rounded-[8px] border border-[#CBD5E1] bg-white/95 p-[4px] shadow-sm">
