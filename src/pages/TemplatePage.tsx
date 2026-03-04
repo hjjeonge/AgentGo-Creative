@@ -161,7 +161,7 @@ export const TemplatePage: React.FC = () => {
           selectedFiles.map(async (file) => {
             const uploaded = await uploadFile(file);
             return uploaded.file_url;
-          })
+          }),
         );
         uploadedByField[field.key] = urls;
       }
@@ -222,10 +222,10 @@ export const TemplatePage: React.FC = () => {
         if (imageUrl) {
           navigate(
             `/editor?image=${encodeURIComponent(imageUrl)}&prompt=${encodeURIComponent(
-              prompt
+              prompt,
             )}&templateName=${encodeURIComponent(
-              template.title
-            )}&templatePath=${encodeURIComponent(`/template?template=${template.key}`)}`
+              template.title,
+            )}&templatePath=${encodeURIComponent(`/template?template=${template.key}`)}`,
           );
           return;
         }
@@ -236,10 +236,14 @@ export const TemplatePage: React.FC = () => {
         return;
       }
 
-      setErrorMessage("이미지 생성 시간이 초과되었습니다. 잠시 후 다시 시도해 주세요.");
+      setErrorMessage(
+        "이미지 생성 시간이 초과되었습니다. 잠시 후 다시 시도해 주세요.",
+      );
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "이미지 생성 요청에 실패했습니다.";
+        error instanceof Error
+          ? error.message
+          : "이미지 생성 요청에 실패했습니다.";
       setErrorMessage(message);
     } finally {
       setIsSubmitting(false);
@@ -284,7 +288,7 @@ export const TemplatePage: React.FC = () => {
             ))}
             <label
               htmlFor={inputId}
-              className="border border-dashed border-[#CBD5E1] px-[14px] py-[7px] rounded-[8px] flex items-center gap-[6px] text-[13px] text-[#475569] cursor-pointer"
+              className="border border-dashed border-[#155DFC] px-[14px] py-[7px] rounded-[8px] flex items-center gap-[6px] text-[13px] text-[#475569] cursor-pointer"
             >
               <img src={UploadIcon} className="w-[14px] h-[14px]" />
               {isMulti ? "파일 선택" : "업로드"}
@@ -302,11 +306,11 @@ export const TemplatePage: React.FC = () => {
 
       return (
         <FormRow key={field.key} label={field.label} required={field.required}>
-          <div className="border border-[#CBD5E1] rounded-[8px] p-[8px_12px] flex flex-wrap gap-[6px] min-h-[48px] focus-within:border-[#155DFC]">
+          <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-[8px] p-[8px_12px] flex flex-wrap gap-[6px] min-h-[48px]">
             {selectedTags.map((tag) => (
               <span
                 key={tag}
-                className="flex items-center gap-[4px] bg-[#EFF6FF] border border-[#155DFC] rounded-full px-[10px] py-[3px] text-[13px] text-[#155DFC]"
+                className="flex items-center gap-[4px] bg-[#EFF6FF] border border-[#155DFC] rounded-full px-[10px] py-[3px] text-[13px] text-[#0F172B]"
               >
                 {tag}
                 <button onClick={() => removeTag(field.key, tag)}>
@@ -317,14 +321,21 @@ export const TemplatePage: React.FC = () => {
             <input
               value={currentTagInput}
               onChange={(event) => {
-                setTagInput((prev) => ({ ...prev, [field.key]: event.target.value }));
+                setTagInput((prev) => ({
+                  ...prev,
+                  [field.key]: event.target.value,
+                }));
               }}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === ";") {
                   event.preventDefault();
                   addTag(field, currentTagInput);
                 }
-                if (event.key === "Backspace" && !currentTagInput && selectedTags.length > 0) {
+                if (
+                  event.key === "Backspace" &&
+                  !currentTagInput &&
+                  selectedTags.length > 0
+                ) {
                   const lastTag = selectedTags[selectedTags.length - 1];
                   removeTag(field.key, lastTag);
                 }
@@ -339,24 +350,23 @@ export const TemplatePage: React.FC = () => {
           </div>
           <button
             onClick={() => addTag(field, currentTagInput)}
-            className="mt-[8px] w-full border border-dashed border-[#CBD5E1] py-[8px] rounded-[8px] text-[14px] text-[#64748B] flex items-center justify-center gap-[4px]"
+            className="mt-[8px] w-full border border-dashed border-[#155DFC] py-[8px] rounded-[12px] text-[14px] text-[#0F172B] flex items-center justify-center gap-[4px]"
           >
             <img src={AddIcon} className="w-[14px] h-[14px]" />
             직접추가
           </button>
           {showPresets && (
-            <div className="mt-[12px] flex flex-wrap gap-[8px]">
+            <div className="mt-[12px] grid grid-cols-7 gap-[14px]">
               {TARGET_KEYWORDS.map((keyword) => (
                 <button
                   key={keyword}
                   onClick={() => {
-                    if (selectedTags.includes(keyword)) removeTag(field.key, keyword);
+                    if (selectedTags.includes(keyword))
+                      removeTag(field.key, keyword);
                     else addTag(field, keyword);
                   }}
-                  className={`px-[14px] py-[5px] rounded-full border text-[13px] ${
-                    selectedTags.includes(keyword)
-                      ? "border-[#155DFC] text-[#155DFC] bg-[#EFF6FF]"
-                      : "border-[#CBD5E1] text-[#0F172B]"
+                  className={`px-[14px] py-[5px] rounded-[12px] border text-[13px] whitespace-nowrap border-[#155DFC] text-[#0F172B] ${
+                    selectedTags.includes(keyword) ? " bg-[#EFF6FF]" : ""
                   }`}
                 >
                   {keyword}
@@ -375,7 +385,7 @@ export const TemplatePage: React.FC = () => {
             value={getStringValue(field.key)}
             onChange={(event) => setStringValue(field.key, event.target.value)}
             placeholder={field.placeholder}
-            className="w-full border border-[#CBD5E1] rounded-[8px] p-[12px] text-[14px] resize-none h-[120px] placeholder:text-[#94A3B8] outline-none focus:border-[#155DFC]"
+            className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-[8px] p-[12px] text-[14px] resize-none h-[120px] placeholder:text-[#94A3B8] outline-none"
           />
         </FormRow>
       );
@@ -411,10 +421,8 @@ export const TemplatePage: React.FC = () => {
               <button
                 key={size}
                 onClick={() => setStringValue(field.key, size)}
-                className={`w-[118px] h-[72px] border-2 border-dashed rounded-[12px] flex items-center justify-center gap-[8px] text-[14px] ${
-                  selected === size
-                    ? "border-[#155DFC] text-[#155DFC] bg-[#EFF6FF]"
-                    : "border-[#CBD5E1] text-[#64748B]"
+                className={`w-[118px] h-[72px] border border-[#155DFC] rounded-[12px] flex items-center justify-center gap-[8px] text-[14px] text-[#0F172B] ${
+                  selected === size ? "bg-[#EFF6FF]" : ""
                 }`}
               >
                 <SizePreviewIcon ratio={size} active={selected === size} />
@@ -439,14 +447,17 @@ export const TemplatePage: React.FC = () => {
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-[#F1F5F9]">
-      <div className="max-w-[740px] mx-auto py-[40px] px-[20px]">
+    <div className="h-full overflow-y-auto bg-[#F8FAFC]">
+      <div className="max-w-[1000px] mx-auto py-[40px] px-[20px] bg-white border-l border-r border-[#E2E8F0]">
         <div className="flex items-center gap-[8px] text-[14px] mb-[16px]">
-          <button onClick={() => navigate("/")} className="text-[#64748B] hover:text-[#155DFC]">
+          <button
+            onClick={() => navigate("/")}
+            className="text-[#64748B] hover:text-[#155DFC]"
+          >
             홈
           </button>
           <span className="text-[#94A3B8]">&gt;</span>
-          <span className="text-[#0F172B] font-medium">{template.title}</span>
+          <span className="text-[#0F172B] font-bold">{template.title}</span>
         </div>
 
         <div className="mb-[24px] rounded-[10px] border border-[#DBEAFE] bg-[#EFF6FF] px-[14px] py-[10px] text-[13px] text-[#1E3A8A]">
@@ -455,7 +466,9 @@ export const TemplatePage: React.FC = () => {
             : "AI 서버 미구현 템플릿입니다. 입력값은 현재 key-value 프롬프트로 조합되어 생성됩니다."}
         </div>
 
-        <div className="flex flex-col gap-[32px]">{template.fields.map((field) => renderField(field))}</div>
+        <div className="flex flex-col gap-[32px]">
+          {template.fields.map((field) => renderField(field))}
+        </div>
 
         {errorMessage && (
           <div className="mt-[24px] rounded-[8px] border border-[#FCA5A5] bg-[#FEF2F2] px-[14px] py-[10px] text-[13px] text-[#991B1B]">

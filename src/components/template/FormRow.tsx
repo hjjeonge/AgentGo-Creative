@@ -8,7 +8,7 @@ interface Props {
 
 export const FormRow: React.FC<Props> = ({ label, required, children }) => (
   <div className="flex gap-[24px]">
-    <div className="w-[80px] shrink-0 pt-[10px] text-right">
+    <div className="w-[80px] shrink-0">
       <span className="text-[14px] text-[#475569]">
         {required && <span className="text-[#E11D48]">*</span>}
         {label}
