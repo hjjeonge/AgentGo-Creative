@@ -22,7 +22,7 @@ export const App: React.FC = () => {
           <Route element={<Layout />}>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/template" element={<TemplatePage />} />
-            <Route path="/editor" element={<EditorPage />} />
+            <Route path="/editor/:projectId" element={<EditorPage />} />
             <Route path="/dam" element={<DAMPage />} />
           </Route>
         </Route>

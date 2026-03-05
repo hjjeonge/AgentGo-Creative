@@ -5,6 +5,7 @@ import {
   DEFAULT_TEMPLATE_KEY,
   TEMPLATE_CONFIGS,
 } from '../../constants/templateConfigs';
+import { postNewProject } from '../../services/project/api';
 
 export interface TemplateCard {
   key: string;
@@ -23,6 +24,12 @@ const list: TemplateCard[] = TEMPLATE_CONFIGS.map((item) => ({
 export const Content: React.FC = () => {
   const navigate = useNavigate();
 
+  const onClickCreateNewProject = async () => {
+    const res = await postNewProject();
+    const id = res.data.projectId;
+    navigate(`/editor/${id}`);
+  };
+
   return (
     <div className="h-full flex flex-col items-center justify-center gap-[40px]">
       <div className="flex flex-col gap-[24px] items-center justify-center">
@@ -36,7 +43,7 @@ export const Content: React.FC = () => {
           </span>
         </div>
         <button
-          onClick={() => navigate('/editor')}
+          onClick={onClickCreateNewProject}
           className="bg-[linear-gradient(135deg,#0055E9_0%,#6A14D9_100%)] p-[14px_24px] rounded-[8px] flex items-center gap-[4px] text-[#F8FAFC] text-[17px] font-bold leading-[29.88px] w-fit"
         >
           <span>+</span>

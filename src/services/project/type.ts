@@ -5,6 +5,10 @@ export interface RecentProjectItem {
   thumbnail?: string | null;
 }
 
+export interface CreateProjectRes {
+  projectId: string;
+}
+
 export interface ProjectDetailRes {
   id: string;
   title: string;

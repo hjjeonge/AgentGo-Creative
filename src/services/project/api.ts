@@ -1,5 +1,6 @@
 import axiosInstance from '../axiosInstance';
 import type {
+  CreateProjectRes,
   HistoryItem,
   ProjectDetailRes,
   RecentProjectItem,
@@ -22,9 +23,9 @@ export const getProjectDetail = (projectId: string) => {
   return axiosInstance.get<ProjectDetailRes>(`/api/projects/${projectId}`);
 };
 
-// 프로젝트 생성
-export const postNewProject = (data: SaveProjectReq) => {
-  return axiosInstance.post<SaveProjectRes>('/api/projects', data);
+// 새 프로젝트 생성
+export const postNewProject = () => {
+  return axiosInstance.post<CreateProjectRes>('/api/projects');
 };
 
 // 프로젝트 수정
