@@ -1,10 +1,10 @@
-import type React from "react";
+import type React from 'react';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "../ui/tooltip";
+} from '../ui/tooltip';
 
 interface Props {
   content: string;

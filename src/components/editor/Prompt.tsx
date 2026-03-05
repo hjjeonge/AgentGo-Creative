@@ -1,6 +1,6 @@
-import type React from "react";
-import { useEffect, useRef, useState } from "react";
-import Close from "./../../assets/close-line.svg";
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import Close from './../../assets/close-line.svg';
 
 interface Props {
   onGenerate?: (prompt: string) => void;
@@ -9,7 +9,7 @@ interface Props {
 export const Prompt: React.FC<Props> = ({ onGenerate }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState('');
   const [images, setImages] = useState<{ file: File; url: string }[]>([]);
 
   const canSend = prompt.trim().length > 0;
@@ -22,7 +22,7 @@ export const Prompt: React.FC<Props> = ({ onGenerate }) => {
   const handleFiles = (fileList: FileList | null) => {
     if (!fileList) return;
     const nextFiles = Array.from(fileList).filter((file) =>
-      file.type.startsWith("image/"),
+      file.type.startsWith('image/'),
     );
     if (nextFiles.length === 0) return;
 
@@ -51,12 +51,12 @@ export const Prompt: React.FC<Props> = ({ onGenerate }) => {
   const handleSend = () => {
     if (!canSend) return;
     onGenerate?.(prompt);
-    setPrompt("");
+    setPrompt('');
     setImages([]);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -71,7 +71,7 @@ export const Prompt: React.FC<Props> = ({ onGenerate }) => {
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
-    textarea.style.height = "auto";
+    textarea.style.height = 'auto';
     const nextHeight = Math.min(textarea.scrollHeight, 320);
     textarea.style.height = `${nextHeight}px`;
   }, [prompt]);
@@ -116,8 +116,8 @@ export const Prompt: React.FC<Props> = ({ onGenerate }) => {
               disabled={isMaxImages}
               className={`text-[12px] leading-[19.88px] rounded-[4px] border px-[10px] py-[4px] transition-colors ${
                 isMaxImages
-                  ? "text-[#90A1B9] border-[#CAD5E2] cursor-not-allowed"
-                  : "text-[#0F172B] border-[#CAD5E2] hover:bg-[#F8FAFF]"
+                  ? 'text-[#90A1B9] border-[#CAD5E2] cursor-not-allowed'
+                  : 'text-[#0F172B] border-[#CAD5E2] hover:bg-[#F8FAFF]'
               }`}
             >
               레퍼런스 첨부
@@ -125,7 +125,7 @@ export const Prompt: React.FC<Props> = ({ onGenerate }) => {
             {images.length > 0 && (
               <span
                 className={`text-[12px] ${
-                  isMaxImages ? "text-[#E7000B] font-medium" : "text-[#64748B]"
+                  isMaxImages ? 'text-[#E7000B] font-medium' : 'text-[#64748B]'
                 }`}
               >
                 {images.length}/10
@@ -137,8 +137,8 @@ export const Prompt: React.FC<Props> = ({ onGenerate }) => {
             disabled={!canSend}
             className={`w-[32px] h-[32px] rounded-[4px] flex items-center justify-center transition-colors ${
               canSend
-                ? "bg-[#155DFC] hover:bg-[#0044CC]"
-                : "bg-[#90A1B9] cursor-not-allowed"
+                ? 'bg-[#155DFC] hover:bg-[#0044CC]'
+                : 'bg-[#90A1B9] cursor-not-allowed'
             }`}
           >
             <span className="text-white text-[16px] leading-none">↑</span>
@@ -152,7 +152,7 @@ export const Prompt: React.FC<Props> = ({ onGenerate }) => {
           className="hidden"
           onChange={(e) => {
             handleFiles(e.target.files);
-            e.currentTarget.value = "";
+            e.currentTarget.value = '';
           }}
         />
       </div>

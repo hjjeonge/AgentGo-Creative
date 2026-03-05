@@ -1,14 +1,14 @@
-import type React from "react";
+import type React from 'react';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "../ui/accordion";
-import { CustomSwitch } from "./CustomSwitch";
-import Arrow from "./../../assets/arrow_down.svg";
-import { useState } from "react";
-import { cn } from "../../lib/utils";
+} from '../ui/accordion';
+import { CustomSwitch } from './CustomSwitch';
+import Arrow from './../../assets/arrow_down.svg';
+import { useState } from 'react';
+import { cn } from '../../lib/utils';
 
 interface Props {
   value: string;
@@ -55,7 +55,7 @@ export const SwitchAccordion: React.FC<Props> = ({
                   <img
                     src={Arrow}
                     className={cn(
-                      `transition-transform duration-200 ${resolvedOpenValue === value ? "rotate-0" : "-rotate-90"}`,
+                      `transition-transform duration-200 ${resolvedOpenValue === value ? 'rotate-0' : '-rotate-90'}`,
                     )}
                   />
                 </button>

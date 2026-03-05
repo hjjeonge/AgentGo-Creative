@@ -1,31 +1,37 @@
-import type React from "react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { login } from "../services/auth";
-import Logo from "../assets/logo.svg";
+import type React from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Logo from '../assets/logo.svg';
+import { postLogin } from '../services/auth/api';
+import { setTokens } from '../utils/tokenManager';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
     if (!email || !password) {
-      setError("이메일과 비밀번호를 입력해주세요.");
+      setError('이메일과 비밀번호를 입력해주세요.');
       return;
     }
 
     setLoading(true);
     try {
-      await login({ email, password });
-      navigate("/");
+      const res = await postLogin({ email, password });
+      const { access_token, refresh_token } = res.data;
+      setTokens(access_token, refresh_token);
+      navigate('/');
     } catch (err) {
-      const message = err instanceof Error ? err.message : "이메일 또는 비밀번호가 올바르지 않습니다.";
+      const message =
+        err instanceof Error
+          ? err.message
+          : '이메일 또는 비밀번호가 올바르지 않습니다.';
       setError(message);
     } finally {
       setLoading(false);
@@ -43,7 +49,9 @@ export const LoginPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="flex flex-col gap-[16px]">
           {/* 이메일 */}
           <div className="flex flex-col gap-[6px]">
-            <label className="text-[13px] text-[#475569] font-medium">이메일</label>
+            <label className="text-[13px] text-[#475569] font-medium">
+              이메일
+            </label>
             <input
               type="email"
               value={email}
@@ -55,7 +63,9 @@ export const LoginPage: React.FC = () => {
 
           {/* 비밀번호 */}
           <div className="flex flex-col gap-[6px]">
-            <label className="text-[13px] text-[#475569] font-medium">비밀번호</label>
+            <label className="text-[13px] text-[#475569] font-medium">
+              비밀번호
+            </label>
             <input
               type="password"
               value={password}
@@ -66,9 +76,7 @@ export const LoginPage: React.FC = () => {
           </div>
 
           {/* 에러 메시지 */}
-          {error && (
-            <p className="text-[13px] text-[#E11D48]">{error}</p>
-          )}
+          {error && <p className="text-[13px] text-[#E11D48]">{error}</p>}
 
           {/* 로그인 버튼 */}
           <button
@@ -76,7 +84,7 @@ export const LoginPage: React.FC = () => {
             disabled={loading}
             className="mt-[8px] w-full bg-[linear-gradient(135deg,#0055E9_0%,#6A14D9_100%)] text-white py-[12px] rounded-[8px] text-[15px] font-bold disabled:opacity-60"
           >
-            {loading ? "로그인 중..." : "로그인"}
+            {loading ? '로그인 중...' : '로그인'}
           </button>
         </form>
       </div>

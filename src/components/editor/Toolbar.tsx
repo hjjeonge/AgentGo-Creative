@@ -1,21 +1,21 @@
-import type React from "react";
-import { useEffect, useRef, useState } from "react";
-import { getPenColorImg, getPenStrokeWidthImg } from "../../utils/getImage";
-import { ColorPalette } from "../commons/ColorPalette";
-import { ColorPickerPopup } from "../commons/ColorPickerPopup";
-import { useColorHistoryStore } from "../../store/colorHistoryStore";
-import { ClickIcon } from "../icons/ClickIcon";
-import { DiagramIcon } from "../icons/DiagramIcon";
-import { EraserIcon } from "../icons/EraserIcon";
-import { PencilIcon } from "../icons/PencilIcon";
-import { ShapeIcon } from "../icons/ShapeIcon";
-import { TextIcon } from "../icons/TextIcon";
-import { DiagramPopup } from "./DiagramPopup";
-import { TextEditor } from "./TextEditor";
-import { ToolButton } from "./ToolButton";
-import { ToolbarButton } from "./ToolbarButton";
-import type { TextObject } from "./EditorCanvas";
-import { LassoIcon } from "../icons/LassoIcon";
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { getPenColorImg, getPenStrokeWidthImg } from '../../utils/getImage';
+import { ColorPalette } from '../commons/ColorPalette';
+import { ColorPickerPopup } from '../commons/ColorPickerPopup';
+import { useColorHistoryStore } from '../../store/colorHistoryStore';
+import { ClickIcon } from '../icons/ClickIcon';
+import { DiagramIcon } from '../icons/DiagramIcon';
+import { EraserIcon } from '../icons/EraserIcon';
+import { PencilIcon } from '../icons/PencilIcon';
+import { ShapeIcon } from '../icons/ShapeIcon';
+import { TextIcon } from '../icons/TextIcon';
+import { DiagramPopup } from './DiagramPopup';
+import { TextEditor } from './TextEditor';
+import { ToolButton } from './ToolButton';
+import { ToolbarButton } from './ToolbarButton';
+import type { TextObject } from './EditorCanvas';
+import { LassoIcon } from '../icons/LassoIcon';
 
 interface Props {
   activeTool: string;
@@ -26,8 +26,8 @@ interface Props {
   handlePenStrokeColor: (value: string) => void;
   shapeType: string;
   setShapeType: (value: string) => void;
-  shapeSelectMode: "rect" | "lasso";
-  setShapeSelectMode: (mode: "rect" | "lasso") => void;
+  shapeSelectMode: 'rect' | 'lasso';
+  setShapeSelectMode: (mode: 'rect' | 'lasso') => void;
   isTextEditorVisible: boolean;
   selectedTextObject?: TextObject;
   handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void;
@@ -52,7 +52,7 @@ export const Toolbar: React.FC<Props> = ({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isToolPopupOpen, setIsToolPopupOpen] = useState(false);
   const [colorPopupMode, setColorPopupMode] = useState<
-    "picker" | "palette" | null
+    'picker' | 'palette' | null
   >(null);
   const recentColors = useColorHistoryStore((state) => state.recentColors);
   const addRecentColor = useColorHistoryStore((state) => state.addRecentColor);
@@ -65,37 +65,37 @@ export const Toolbar: React.FC<Props> = ({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   useEffect(() => {
     const hasToolPopup =
-      activeTool === "pen" ||
-      activeTool === "eraser" ||
-      activeTool === "shape" ||
-      activeTool === "diagram";
+      activeTool === 'pen' ||
+      activeTool === 'eraser' ||
+      activeTool === 'shape' ||
+      activeTool === 'diagram';
 
     setIsToolPopupOpen(hasToolPopup);
-    if (activeTool !== "pen") {
+    if (activeTool !== 'pen') {
       setColorPopupMode(null);
     }
   }, [activeTool]);
 
   const tools = [
-    { tool: "mouse", icon: <ClickIcon /> },
-    { tool: "pen", icon: <PencilIcon /> },
-    { tool: "eraser", icon: <EraserIcon /> },
-    { tool: "diagram", icon: <DiagramIcon /> },
-    { tool: "shape", icon: <ShapeIcon /> },
-    { tool: "text", icon: <TextIcon /> },
+    { tool: 'mouse', icon: <ClickIcon /> },
+    { tool: 'pen', icon: <PencilIcon /> },
+    { tool: 'eraser', icon: <EraserIcon /> },
+    { tool: 'diagram', icon: <DiagramIcon /> },
+    { tool: 'shape', icon: <ShapeIcon /> },
+    { tool: 'text', icon: <TextIcon /> },
   ];
   const penStrokeWidths = [2, 3, 5, 6];
-  const displayColors = ["#E7000B", "#155DFC", "#FFD230", "empty"];
+  const displayColors = ['#E7000B', '#155DFC', '#FFD230', 'empty'];
 
   const onClickColorOption = (value: string) => {
-    if (value === "empty") {
-      setColorPopupMode("picker");
+    if (value === 'empty') {
+      setColorPopupMode('picker');
       return;
     }
     handlePenStrokeColor(value);
@@ -103,7 +103,10 @@ export const Toolbar: React.FC<Props> = ({
 
   const handleToolClick = (tool: string) => {
     const hasPopup =
-      tool === "pen" || tool === "eraser" || tool === "shape" || tool === "diagram";
+      tool === 'pen' ||
+      tool === 'eraser' ||
+      tool === 'shape' ||
+      tool === 'diagram';
 
     if (tool === activeTool) {
       if (hasPopup) setIsToolPopupOpen(true);
@@ -114,7 +117,10 @@ export const Toolbar: React.FC<Props> = ({
   };
 
   return (
-    <div ref={toolbarRef} className="relative mt-[20px] flex flex-col items-center">
+    <div
+      ref={toolbarRef}
+      className="relative mt-[20px] flex flex-col items-center"
+    >
       <div className="flex items-center justify-center gap-[8px] w-[584px] p-[8px] bg-white rounded-[24px] border border-[#90A1B9] shadow-md">
         {tools.map((el) => (
           <ToolButton
@@ -130,7 +136,7 @@ export const Toolbar: React.FC<Props> = ({
       </div>
 
       {/* 하단 서브 바 - absolute 로 캔버스 영역에 영향 없이 표시 */}
-      {isToolPopupOpen && (activeTool === "pen" || activeTool === "eraser") && (
+      {isToolPopupOpen && (activeTool === 'pen' || activeTool === 'eraser') && (
         <div
           ref={wrapperRef}
           className="absolute top-full mt-[7px] border flex items-center gap-[12px] border-[#90A1B9] p-[8px_10px] rounded-[6px] bg-[#F1F5F9] z-20"
@@ -145,13 +151,13 @@ export const Toolbar: React.FC<Props> = ({
               className="w-[34px] h-[34px] rounded-[6px]"
             />
           ))}
-          {activeTool == "pen" && (
+          {activeTool == 'pen' && (
             <>
               <div className="w-[2.5px] h-[25px] bg-[#45556C]" />
               {displayColors.map((el) => {
                 const isPresetColor = displayColors.includes(penStrokeColor);
                 const isActive =
-                  penStrokeColor === el || (el === "empty" && !isPresetColor);
+                  penStrokeColor === el || (el === 'empty' && !isPresetColor);
                 return (
                   <ToolbarButton
                     key={el}
@@ -167,10 +173,10 @@ export const Toolbar: React.FC<Props> = ({
           )}
           {colorPopupMode && (
             <div className="absolute top-full right-0 mt-[6px] z-50">
-              {colorPopupMode === "picker" ? (
+              {colorPopupMode === 'picker' ? (
                 <ColorPickerPopup
                   onClose={() => setColorPopupMode(null)}
-                  onOpenPalette={() => setColorPopupMode("palette")}
+                  onOpenPalette={() => setColorPopupMode('palette')}
                   currentColor={penStrokeColor}
                   recentlyUseColorList={recentColors}
                   onSelectColor={(value) => {
@@ -185,32 +191,32 @@ export const Toolbar: React.FC<Props> = ({
                     handlePenStrokeColor(value);
                     addRecentColor(value);
                   }}
-                  onBack={() => setColorPopupMode("picker")}
+                  onBack={() => setColorPopupMode('picker')}
                 />
               )}
             </div>
           )}
         </div>
       )}
-      {isToolPopupOpen && activeTool === "shape" && (
+      {isToolPopupOpen && activeTool === 'shape' && (
         <div className="absolute top-full mt-[7px] z-20 flex items-center gap-[6px] border border-[#90A1B9] p-[6px_10px] rounded-[6px] bg-[#F1F5F9]">
           <button
-            onClick={() => setShapeSelectMode("rect")}
+            onClick={() => setShapeSelectMode('rect')}
             className={`flex items-center gap-[4px] px-[8px] py-[4px] rounded-[4px] text-[13px] transition-colors ${
-              shapeSelectMode === "rect"
-                ? "bg-[#1447E6] text-white"
-                : "text-[#45556C] hover:bg-[#E2E8F0]"
+              shapeSelectMode === 'rect'
+                ? 'bg-[#1447E6] text-white'
+                : 'text-[#45556C] hover:bg-[#E2E8F0]'
             }`}
           >
             <ShapeIcon />
             정사형
           </button>
           <button
-            onClick={() => setShapeSelectMode("lasso")}
+            onClick={() => setShapeSelectMode('lasso')}
             className={`flex items-center gap-[4px] px-[8px] py-[4px] rounded-[4px] text-[13px] transition-colors ${
-              shapeSelectMode === "lasso"
-                ? "bg-[#1447E6] text-white"
-                : "text-[#45556C] hover:bg-[#E2E8F0]"
+              shapeSelectMode === 'lasso'
+                ? 'bg-[#1447E6] text-white'
+                : 'text-[#45556C] hover:bg-[#E2E8F0]'
             }`}
           >
             <LassoIcon />
@@ -218,7 +224,7 @@ export const Toolbar: React.FC<Props> = ({
           </button>
         </div>
       )}
-      {isToolPopupOpen && activeTool === "diagram" && (
+      {isToolPopupOpen && activeTool === 'diagram' && (
         <DiagramPopup shapeType={shapeType} setShapeType={setShapeType} />
       )}
       {isTextEditorVisible && selectedTextObject && (

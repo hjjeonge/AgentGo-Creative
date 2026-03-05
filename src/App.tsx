@@ -1,15 +1,15 @@
-import type React from "react";
-import { Navigate, Outlet, Route, Routes } from "react-router-dom";
-import { DashboardPage } from "./pages/DashboardPage";
-import { EditorPage } from "./pages/EditorPage";
-import { TemplatePage } from "./pages/TemplatePage";
-import { DAMPage } from "./pages/DAMPage";
-import { LoginPage } from "./pages/LoginPage";
-import { Layout } from "./components/commons/Layout";
-import { authStorage } from "./services/apiClient";
+import type React from 'react';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { Layout } from './components/commons/Layout';
+import { DAMPage } from './pages/DAMPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { EditorPage } from './pages/EditorPage';
+import { LoginPage } from './pages/LoginPage';
+import { TemplatePage } from './pages/TemplatePage';
+import { getAccessToken } from './utils/tokenManager';
 
 const PrivateRoute: React.FC = () => {
-  const token = authStorage.getAccessToken();
+  const token = getAccessToken();
   return token ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
@@ -22,7 +22,7 @@ export const App: React.FC = () => {
           <Route element={<Layout />}>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/template" element={<TemplatePage />} />
-            <Route path="/editor" element={<EditorPage />} />
+            <Route path="/editor/:projectId" element={<EditorPage />} />
             <Route path="/dam" element={<DAMPage />} />
           </Route>
         </Route>

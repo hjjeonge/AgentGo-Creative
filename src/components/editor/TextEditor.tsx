@@ -1,44 +1,44 @@
-import type React from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { SwitchAccordion } from "../commons/SwitchAccordion";
-import { ColorPickerPopup } from "../commons/ColorPickerPopup";
-import { ColorPalette } from "../commons/ColorPalette";
-import { useColorHistoryStore } from "../../store/colorHistoryStore";
-import Add from "./../../assets/add.svg";
-import AlignCenter from "./../../assets/format_align_center.svg";
-import Bold from "./../../assets/format_bold.svg";
-import TextColor from "./../../assets/format_color_text.svg";
-import Highlighter from "./../../assets/format_ink_highlighter.svg";
-import Italic from "./../../assets/format_italic.svg";
-import LineSpacing from "./../../assets/format_line_spacing.svg";
-import ListBulleted from "./../../assets/format_list_bulleted.svg";
-import StrikeThrough from "./../../assets/format_strikethrough.svg";
-import Underlined from "./../../assets/format_underlined.svg";
-import Remove from "./../../assets/remove.svg";
-import Satisfied from "./../../assets/sentiment_satisfied.svg";
-import VerticalTop from "./../../assets/vertical_align_top.svg";
-import type { TextObject } from "./EditorCanvas"; // Import TextObject
-import { FontFamilySelect } from "./FontFamilySelect";
-import { ListFOrmatPopover } from "./ListFormatPopover";
-import { TextAlignPopover } from "./TextAlignPopver";
-import { ToolbarButton } from "./ToolbarButton";
-import { TypographyPopover } from "./TypographyPopover";
-import { VerticalAlignPopover } from "./VerticalAlignPopover";
-import { StrokeContent } from "./StrokeContent";
-import { ShadowContent } from "./ShadowContent";
-import { SpecialCharPopup } from "./SpecialCharPopup";
+import type React from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { SwitchAccordion } from '../commons/SwitchAccordion';
+import { ColorPickerPopup } from '../commons/ColorPickerPopup';
+import { ColorPalette } from '../commons/ColorPalette';
+import { useColorHistoryStore } from '../../store/colorHistoryStore';
+import Add from './../../assets/add.svg';
+import AlignCenter from './../../assets/format_align_center.svg';
+import Bold from './../../assets/format_bold.svg';
+import TextColor from './../../assets/format_color_text.svg';
+import Highlighter from './../../assets/format_ink_highlighter.svg';
+import Italic from './../../assets/format_italic.svg';
+import LineSpacing from './../../assets/format_line_spacing.svg';
+import ListBulleted from './../../assets/format_list_bulleted.svg';
+import StrikeThrough from './../../assets/format_strikethrough.svg';
+import Underlined from './../../assets/format_underlined.svg';
+import Remove from './../../assets/remove.svg';
+import Satisfied from './../../assets/sentiment_satisfied.svg';
+import VerticalTop from './../../assets/vertical_align_top.svg';
+import type { TextObject } from './EditorCanvas'; // Import TextObject
+import { FontFamilySelect } from './FontFamilySelect';
+import { ListFOrmatPopover } from './ListFormatPopover';
+import { TextAlignPopover } from './TextAlignPopver';
+import { ToolbarButton } from './ToolbarButton';
+import { TypographyPopover } from './TypographyPopover';
+import { VerticalAlignPopover } from './VerticalAlignPopover';
+import { StrokeContent } from './StrokeContent';
+import { ShadowContent } from './ShadowContent';
+import { SpecialCharPopup } from './SpecialCharPopup';
 
 const fontStyle = [
-  { name: "bold", img: Bold, tooltip: "굵게" },
-  { name: "italic", img: Italic, tooltip: "기울임" },
-  { name: "underline", img: Underlined, tooltip: "밑줄" },
-  { name: "strikethrough", img: StrikeThrough, tooltip: "취소선" },
+  { name: 'bold', img: Bold, tooltip: '굵게' },
+  { name: 'italic', img: Italic, tooltip: '기울임' },
+  { name: 'underline', img: Underlined, tooltip: '밑줄' },
+  { name: 'strikethrough', img: StrikeThrough, tooltip: '취소선' },
 ];
 
 const fontDeco = [
-  { name: "color", img: TextColor, tooltip: "글자색" },
-  { name: "highlighter", img: Highlighter, tooltip: "배경색" },
-  { name: "satisfied", img: Satisfied, tooltip: "특수문자" },
+  { name: 'color', img: TextColor, tooltip: '글자색' },
+  { name: 'highlighter', img: Highlighter, tooltip: '배경색' },
+  { name: 'satisfied', img: Satisfied, tooltip: '특수문자' },
 ];
 
 interface TextEditorProps {
@@ -52,9 +52,9 @@ export const TextEditor: React.FC<TextEditorProps> = ({
 }) => {
   const [strokeOpen, setStrokeOpen] = useState(false);
   const [shadowOpen, setShadowOpen] = useState(false);
-  const [popupMode, setPopupMode] = useState<"picker" | "palette">("picker");
+  const [popupMode, setPopupMode] = useState<'picker' | 'palette'>('picker');
   const [activePopupTarget, setActivePopupTarget] = useState<
-    "text" | "highlight" | "stroke" | "shadow" | null
+    'text' | 'highlight' | 'stroke' | 'shadow' | null
   >(null);
   const [isSpecialCharOpen, setIsSpecialCharOpen] = useState(false);
   const specialCharRef = useRef<HTMLDivElement>(null);
@@ -62,32 +62,32 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   const addRecentColor = useColorHistoryStore((state) => state.addRecentColor);
 
   const normalizedCurrentColor = useMemo(() => {
-    if (!selectedTextObject?.fill) return "#000000";
-    return selectedTextObject.fill.startsWith("#")
+    if (!selectedTextObject?.fill) return '#000000';
+    return selectedTextObject.fill.startsWith('#')
       ? selectedTextObject.fill.toUpperCase()
       : `#${selectedTextObject.fill}`.toUpperCase();
   }, [selectedTextObject?.fill]);
 
   const normalizedHighlightColor = useMemo(() => {
-    if (!selectedTextObject?.backgroundColor) return "#FFFF00";
-    return selectedTextObject.backgroundColor.startsWith("#")
+    if (!selectedTextObject?.backgroundColor) return '#FFFF00';
+    return selectedTextObject.backgroundColor.startsWith('#')
       ? selectedTextObject.backgroundColor.toUpperCase()
       : `#${selectedTextObject.backgroundColor}`.toUpperCase();
   }, [selectedTextObject?.backgroundColor]);
 
   const openPicker = (
-    target: "text" | "highlight" | "stroke" | "shadow",
+    target: 'text' | 'highlight' | 'stroke' | 'shadow',
     keepOpen = false,
   ) => {
     setActivePopupTarget((prev) =>
       keepOpen ? target : prev === target ? null : target,
     );
-    setPopupMode("picker");
+    setPopupMode('picker');
   };
 
-  const openPalette = (target: "text" | "highlight" | "stroke" | "shadow") => {
+  const openPalette = (target: 'text' | 'highlight' | 'stroke' | 'shadow') => {
     setActivePopupTarget(target);
-    setPopupMode("palette");
+    setPopupMode('palette');
   };
 
   const closePopup = () => {
@@ -108,8 +108,8 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         setIsSpecialCharOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isSpecialCharOpen]);
 
   useEffect(() => {
@@ -144,15 +144,15 @@ export const TextEditor: React.FC<TextEditorProps> = ({
     handleUpdateTextObject,
   ]);
   const handleStyleToggle = (
-    style: "bold" | "italic" | "underline" | "strikethrough",
+    style: 'bold' | 'italic' | 'underline' | 'strikethrough',
   ) => {
     if (!selectedTextObject) return;
 
-    if (style === "bold" || style === "italic") {
+    if (style === 'bold' || style === 'italic') {
       const currentStyles = new Set(
-        (selectedTextObject.fontStyle || "")
-          .split(" ")
-          .filter((s) => s && s !== "normal"),
+        (selectedTextObject.fontStyle || '')
+          .split(' ')
+          .filter((s) => s && s !== 'normal'),
       );
 
       if (currentStyles.has(style)) {
@@ -161,12 +161,12 @@ export const TextEditor: React.FC<TextEditorProps> = ({
         currentStyles.add(style);
       }
 
-      let newFontStyle = "";
-      if (currentStyles.has("bold")) newFontStyle += "bold ";
-      if (currentStyles.has("italic")) newFontStyle += "italic ";
+      let newFontStyle = '';
+      if (currentStyles.has('bold')) newFontStyle += 'bold ';
+      if (currentStyles.has('italic')) newFontStyle += 'italic ';
 
       newFontStyle = newFontStyle.trim();
-      if (newFontStyle === "") newFontStyle = "normal";
+      if (newFontStyle === '') newFontStyle = 'normal';
 
       handleUpdateTextObject(selectedTextObject.id, {
         fontStyle: newFontStyle,
@@ -174,9 +174,9 @@ export const TextEditor: React.FC<TextEditorProps> = ({
     } else {
       // underline or strikethrough
       const decorationName =
-        style === "underline" ? "underline" : "line-through";
+        style === 'underline' ? 'underline' : 'line-through';
       const currentDecorations = new Set(
-        (selectedTextObject.textDecoration || "").split(" ").filter((d) => d),
+        (selectedTextObject.textDecoration || '').split(' ').filter((d) => d),
       );
 
       if (currentDecorations.has(decorationName)) {
@@ -186,24 +186,24 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       }
 
       handleUpdateTextObject(selectedTextObject.id, {
-        textDecoration: Array.from(currentDecorations).join(" "),
+        textDecoration: Array.from(currentDecorations).join(' '),
       });
     }
   };
 
   const settingMenus = [
     {
-      name: "외곽선",
+      name: '외곽선',
       isShow: true,
-      contentClassName: "overflow-visible",
+      contentClassName: 'overflow-visible',
       content: (
         <StrokeContent
           stroke={selectedTextObject?.stroke}
           strokeWidth={selectedTextObject?.strokeWidth}
-          colorPopupMode={activePopupTarget === "stroke" ? popupMode : null}
-          onOpenPicker={() => openPicker("stroke")}
-          onOpenPalette={() => openPalette("stroke")}
-          onBackToPicker={() => openPicker("stroke", true)}
+          colorPopupMode={activePopupTarget === 'stroke' ? popupMode : null}
+          onOpenPicker={() => openPicker('stroke')}
+          onOpenPalette={() => openPalette('stroke')}
+          onBackToPicker={() => openPicker('stroke', true)}
           onClosePicker={closePopup}
           onChangeStroke={(value) =>
             selectedTextObject &&
@@ -223,9 +223,9 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       ),
     },
     {
-      name: "그림자",
+      name: '그림자',
       isShow: true,
-      contentClassName: "overflow-visible",
+      contentClassName: 'overflow-visible',
       content: (
         <ShadowContent
           shadowColor={selectedTextObject?.shadowColor}
@@ -233,10 +233,10 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           shadowOpacity={selectedTextObject?.shadowOpacity}
           shadowDistance={selectedTextObject?.shadowDistance}
           shadowBlur={selectedTextObject?.shadowBlur}
-          colorPopupMode={activePopupTarget === "shadow" ? popupMode : null}
-          onOpenPicker={() => openPicker("shadow")}
-          onOpenPalette={() => openPalette("shadow")}
-          onBackToPicker={() => openPicker("shadow", true)}
+          colorPopupMode={activePopupTarget === 'shadow' ? popupMode : null}
+          onOpenPicker={() => openPicker('shadow')}
+          onOpenPalette={() => openPalette('shadow')}
+          onBackToPicker={() => openPicker('shadow', true)}
           onClosePicker={closePopup}
           onChangeShadowColor={(value) =>
             selectedTextObject &&
@@ -285,7 +285,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
       ),
     },
     {
-      name: "세로쓰기",
+      name: '세로쓰기',
       isShow: false,
       content: null,
     },
@@ -342,17 +342,17 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                 tooltip={el.tooltip}
                 onClick={() => handleStyleToggle(el.name as any)}
                 isActive={
-                  (el.name === "bold" &&
-                    selectedTextObject?.fontStyle?.includes("bold")) ||
-                  (el.name === "italic" &&
-                    selectedTextObject?.fontStyle?.includes("italic")) ||
-                  (el.name === "underline" &&
+                  (el.name === 'bold' &&
+                    selectedTextObject?.fontStyle?.includes('bold')) ||
+                  (el.name === 'italic' &&
+                    selectedTextObject?.fontStyle?.includes('italic')) ||
+                  (el.name === 'underline' &&
                     selectedTextObject?.textDecoration?.includes(
-                      "underline",
+                      'underline',
                     )) ||
-                  (el.name === "strikethrough" &&
+                  (el.name === 'strikethrough' &&
                     selectedTextObject?.textDecoration?.includes(
-                      "line-through",
+                      'line-through',
                     )) ||
                   false
                 }
@@ -412,7 +412,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                 selectedTextObject &&
                 handleUpdateTextObject(selectedTextObject.id, {
                   listFormat:
-                    selectedTextObject.listFormat === value ? "none" : value,
+                    selectedTextObject.listFormat === value ? 'none' : value,
                 })
               }
             >
@@ -422,20 +422,20 @@ export const TextEditor: React.FC<TextEditorProps> = ({
           <div className="w-[1px] h-[30px] bg-[#90A1B9]" />
           <div className="flex items-center justify-between flex-1">
             {fontDeco.map((el) => {
-              if (el.name === "color") {
+              if (el.name === 'color') {
                 return (
                   <div key={el.name} className="relative">
                     <ToolbarButton
                       icon={el.img}
                       tooltip={el.tooltip}
-                      onClick={() => openPicker("text")}
+                      onClick={() => openPicker('text')}
                     />
-                    {activePopupTarget === "text" && (
+                    {activePopupTarget === 'text' && (
                       <div className="absolute top-full left-0 mt-[6px] z-[100]">
-                        {popupMode === "picker" ? (
+                        {popupMode === 'picker' ? (
                           <ColorPickerPopup
                             onClose={closePopup}
-                            onOpenPalette={() => openPalette("text")}
+                            onOpenPalette={() => openPalette('text')}
                             currentColor={normalizedCurrentColor}
                             recentlyUseColorList={recentTextColors}
                             onSelectColor={(value) => {
@@ -456,7 +456,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                               });
                               addRecentColor(value);
                             }}
-                            onBack={() => openPicker("text", true)}
+                            onBack={() => openPicker('text', true)}
                           />
                         )}
                       </div>
@@ -465,27 +465,27 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                 );
               }
 
-              if (el.name === "highlighter") {
+              if (el.name === 'highlighter') {
                 return (
                   <div key={el.name} className="relative">
                     <ToolbarButton
                       icon={el.img}
                       tooltip={el.tooltip}
-                      onClick={() => openPicker("highlight")}
+                      onClick={() => openPicker('highlight')}
                     />
-                    {activePopupTarget === "highlight" && (
+                    {activePopupTarget === 'highlight' && (
                       <div className="absolute top-full left-0 mt-[6px] z-[100]">
-                        {popupMode === "picker" ? (
+                        {popupMode === 'picker' ? (
                           <ColorPickerPopup
                             onClose={closePopup}
-                            onOpenPalette={() => openPalette("highlight")}
+                            onOpenPalette={() => openPalette('highlight')}
                             currentColor={normalizedHighlightColor}
                             recentlyUseColorList={recentTextColors}
                             onSelectColor={(value) => {
                               if (!selectedTextObject) return;
                               handleUpdateTextObject(selectedTextObject.id, {
                                 backgroundColor: value,
-                                backgroundEnabled: value !== "transparent",
+                                backgroundEnabled: value !== 'transparent',
                               });
                               addRecentColor(value);
                             }}
@@ -497,11 +497,11 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                               if (!selectedTextObject) return;
                               handleUpdateTextObject(selectedTextObject.id, {
                                 backgroundColor: value,
-                                backgroundEnabled: value !== "transparent",
+                                backgroundEnabled: value !== 'transparent',
                               });
                               addRecentColor(value);
                             }}
-                            onBack={() => openPicker("highlight", true)}
+                            onBack={() => openPicker('highlight', true)}
                           />
                         )}
                       </div>
@@ -540,22 +540,22 @@ export const TextEditor: React.FC<TextEditorProps> = ({
             isShow={menu.isShow}
             contentClassName={menu.contentClassName}
             isSwitchOn={
-              menu.name === "외곽선"
+              menu.name === '외곽선'
                 ? (selectedTextObject?.strokeEnabled ?? false)
-                : menu.name === "그림자"
+                : menu.name === '그림자'
                   ? (selectedTextObject?.shadowEnabled ?? false)
-                  : menu.name === "세로쓰기"
+                  : menu.name === '세로쓰기'
                     ? (selectedTextObject?.verticalWriting ?? false)
                     : undefined
             }
             handleSwitch={
-              menu.name === "외곽선"
+              menu.name === '외곽선'
                 ? (checked) => {
                     if (!selectedTextObject) return;
                     if (checked) {
                       handleUpdateTextObject(selectedTextObject.id, {
                         strokeEnabled: true,
-                        stroke: selectedTextObject.stroke ?? "#000000",
+                        stroke: selectedTextObject.stroke ?? '#000000',
                         strokeWidth:
                           selectedTextObject.strokeWidth &&
                           selectedTextObject.strokeWidth > 0
@@ -566,19 +566,19 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                     } else {
                       handleUpdateTextObject(selectedTextObject.id, {
                         strokeEnabled: false,
-                        stroke: "#000000",
+                        stroke: '#000000',
                         strokeWidth: 0,
                       });
                     }
                   }
-                : menu.name === "그림자"
+                : menu.name === '그림자'
                   ? (checked) => {
                       if (!selectedTextObject) return;
                       if (checked) {
                         handleUpdateTextObject(selectedTextObject.id, {
                           shadowEnabled: true,
                           shadowColor:
-                            selectedTextObject.shadowColor ?? "#000000",
+                            selectedTextObject.shadowColor ?? '#000000',
                           shadowOpacity:
                             selectedTextObject.shadowOpacity ?? 0.5,
                           shadowBlur:
@@ -608,7 +608,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                       } else {
                         handleUpdateTextObject(selectedTextObject.id, {
                           shadowEnabled: false,
-                          shadowColor: "#000000",
+                          shadowColor: '#000000',
                           shadowOpacity: 0,
                           shadowBlur: 0,
                           shadowDistance: 0,
@@ -618,7 +618,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                         });
                       }
                     }
-                  : menu.name === "세로쓰기"
+                  : menu.name === '세로쓰기'
                     ? (checked) => {
                         if (!selectedTextObject) return;
                         handleUpdateTextObject(selectedTextObject.id, {
@@ -628,16 +628,16 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                     : undefined
             }
             isOpen={
-              menu.name === "외곽선"
+              menu.name === '외곽선'
                 ? strokeOpen
-                : menu.name === "그림자"
+                : menu.name === '그림자'
                   ? shadowOpen
                   : undefined
             }
             handleOpen={
-              menu.name === "외곽선"
+              menu.name === '외곽선'
                 ? (open) => setStrokeOpen(open)
-                : menu.name === "그림자"
+                : menu.name === '그림자'
                   ? (open) => setShadowOpen(open)
                   : undefined
             }

@@ -1,9 +1,9 @@
-import { get, upload } from "./apiClient";
+import { get, upload } from './apiClient';
 
 // ── 공통 응답 타입 ───────────────────────────────────────────────────────
 
 export interface AIProxyResponse<T = Record<string, unknown>> {
-  status: "success" | "processing" | "failed";
+  status: 'success' | 'processing' | 'failed';
   result: T | null;
   meta: Record<string, unknown> | null;
 }
@@ -26,18 +26,18 @@ export interface KeyVisualParams {
 }
 
 export function generateKeyVisual(
-  params: KeyVisualParams
+  params: KeyVisualParams,
 ): Promise<AIProxyResponse<KeyVisualResult>> {
   const form = new FormData();
-  form.append("file", params.file);
-  form.append("feedback", params.feedback);
+  form.append('file', params.file);
+  form.append('feedback', params.feedback);
   if (params.guide_attributes) {
-    form.append("guide_attributes", JSON.stringify(params.guide_attributes));
+    form.append('guide_attributes', JSON.stringify(params.guide_attributes));
   }
   if (params.system_prompt) {
-    form.append("system_prompt", params.system_prompt);
+    form.append('system_prompt', params.system_prompt);
   }
-  return upload<AIProxyResponse<KeyVisualResult>>("/api/ai/key-visual", form);
+  return upload<AIProxyResponse<KeyVisualResult>>('/api/ai/key-visual', form);
 }
 
 // ── Multilingual Translation ─────────────────────────────────────────────
@@ -62,39 +62,39 @@ export interface MultilingualJobResult {
 
 export function translateMultilingual(
   file: File,
-  source_lang = "Korean",
-  target_lang = "English"
+  source_lang = 'Korean',
+  target_lang = 'English',
 ): Promise<AIProxyResponse<MultilingualResult>> {
   const form = new FormData();
-  form.append("file", file);
-  form.append("source_lang", source_lang);
-  form.append("target_lang", target_lang);
+  form.append('file', file);
+  form.append('source_lang', source_lang);
+  form.append('target_lang', target_lang);
   return upload<AIProxyResponse<MultilingualResult>>(
-    "/api/ai/multilingual/translate",
-    form
+    '/api/ai/multilingual/translate',
+    form,
   );
 }
 
 export function submitMultilingualJob(
   file: File,
-  source_lang = "Korean",
-  target_lang = "English"
+  source_lang = 'Korean',
+  target_lang = 'English',
 ): Promise<AIProxyResponse<MultilingualJobResult>> {
   const form = new FormData();
-  form.append("file", file);
-  form.append("source_lang", source_lang);
-  form.append("target_lang", target_lang);
+  form.append('file', file);
+  form.append('source_lang', source_lang);
+  form.append('target_lang', target_lang);
   return upload<AIProxyResponse<MultilingualJobResult>>(
-    "/api/ai/multilingual/translate/jobs",
-    form
+    '/api/ai/multilingual/translate/jobs',
+    form,
   );
 }
 
 export function getMultilingualJobStatus(
-  jobId: string
+  jobId: string,
 ): Promise<AIProxyResponse<MultilingualJobResult>> {
   return get<AIProxyResponse<MultilingualJobResult>>(
-    `/api/ai/multilingual/translate/jobs/${jobId}`
+    `/api/ai/multilingual/translate/jobs/${jobId}`,
   );
 }
 
@@ -115,24 +115,27 @@ export interface DetailCutParams {
 }
 
 export function renderDetailCut(
-  params: DetailCutParams
+  params: DetailCutParams,
 ): Promise<AIProxyResponse<DetailCutResult>> {
   const form = new FormData();
-  params.files.forEach((f) => form.append("files", f));
-  form.append("product_name", params.product_name);
-  form.append("target_angle", params.target_angle);
+  params.files.forEach((f) => form.append('files', f));
+  form.append('product_name', params.product_name);
+  form.append('target_angle', params.target_angle);
   if (params.source_angles) {
-    form.append("source_angles", JSON.stringify(params.source_angles));
+    form.append('source_angles', JSON.stringify(params.source_angles));
   }
   return upload<AIProxyResponse<DetailCutResult>>(
-    "/api/ai/detail-cut/render",
-    form
+    '/api/ai/detail-cut/render',
+    form,
   );
 }
 
 // ── 유틸리티: base64 → Blob URL 변환 ────────────────────────────────────
 
-export function base64ToBlobUrl(base64: string, mimeType = "image/png"): string {
+export function base64ToBlobUrl(
+  base64: string,
+  mimeType = 'image/png',
+): string {
   const byteString = atob(base64);
   const ab = new ArrayBuffer(byteString.length);
   const ia = new Uint8Array(ab);

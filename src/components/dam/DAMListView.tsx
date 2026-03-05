@@ -1,9 +1,9 @@
-import type React from "react";
-import { useState } from "react";
-import DotsIcon from "../../assets/dots.svg";
-import { FileIcon } from "./DAMFileIcons";
-import { type DAMFile } from "./DAMData";
-import { DownloadIcon, RenameIcon } from "./DAMViewIcons";
+import type React from 'react';
+import { useState } from 'react';
+import DotsIcon from '../../assets/dots.svg';
+import { FileIcon } from './DAMFileIcons';
+import { type DAMFile } from './DAMData';
+import { DownloadIcon, RenameIcon } from './DAMViewIcons';
 
 interface Props {
   files: DAMFile[];
@@ -13,13 +13,22 @@ interface Props {
   onRename: (fileId: string) => void;
 }
 
-export const DAMListView: React.FC<Props> = ({ files, onContextMenu, onDotsClick, onDownload, onRename }) => {
+export const DAMListView: React.FC<Props> = ({
+  files,
+  onContextMenu,
+  onDotsClick,
+  onDownload,
+  onRename,
+}) => {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const getStatusStyle = (status?: string) => {
-    if (status === "approved") return { label: "Approved", dot: "bg-[#16A34A]", text: "text-[#166534]" };
-    if (status === "rejected") return { label: "Rejected", dot: "bg-[#DC2626]", text: "text-[#991B1B]" };
-    if (status === "pending") return { label: "Pending", dot: "bg-[#D97706]", text: "text-[#9A3412]" };
-    return { label: "No status", dot: "bg-[#94A3B8]", text: "text-[#64748B]" };
+    if (status === 'approved')
+      return { label: 'Approved', dot: 'bg-[#16A34A]', text: 'text-[#166534]' };
+    if (status === 'rejected')
+      return { label: 'Rejected', dot: 'bg-[#DC2626]', text: 'text-[#991B1B]' };
+    if (status === 'pending')
+      return { label: 'Pending', dot: 'bg-[#D97706]', text: 'text-[#9A3412]' };
+    return { label: 'No status', dot: 'bg-[#94A3B8]', text: 'text-[#64748B]' };
   };
 
   return (
@@ -43,18 +52,26 @@ export const DAMListView: React.FC<Props> = ({ files, onContextMenu, onDotsClick
           onMouseEnter={() => setHoveredId(file.id)}
           onMouseLeave={() => setHoveredId(null)}
           className={`group grid grid-cols-[40px_1fr_140px_100px_170px_120px_64px] gap-[8px] px-[8px] py-[12px] border-b border-[#F1F5F9] items-center cursor-pointer ${
-            hoveredId === file.id ? "bg-[#F8FAFC]" : ""
+            hoveredId === file.id ? 'bg-[#F8FAFC]' : ''
           }`}
         >
           <div className="flex items-center justify-center">
             <FileIcon type={file.type} size={18} />
           </div>
-          <span className="text-[13px] text-[#0F172B] truncate">{file.name}</span>
-          <span className="text-[13px] text-[#475569] truncate">{file.person}</span>
+          <span className="text-[13px] text-[#0F172B] truncate">
+            {file.name}
+          </span>
+          <span className="text-[13px] text-[#475569] truncate">
+            {file.person}
+          </span>
           <span className="text-[13px] text-[#475569]">{file.size}</span>
           <span className="text-[13px] text-[#475569]">{file.modifiedAt}</span>
-          <span className={`inline-flex items-center gap-[6px] text-[12px] font-medium ${getStatusStyle(file.status).text}`}>
-            <span className={`w-[8px] h-[8px] rounded-full ${getStatusStyle(file.status).dot}`} />
+          <span
+            className={`inline-flex items-center gap-[6px] text-[12px] font-medium ${getStatusStyle(file.status).text}`}
+          >
+            <span
+              className={`w-[8px] h-[8px] rounded-full ${getStatusStyle(file.status).dot}`}
+            />
             {getStatusStyle(file.status).label}
           </span>
           <div className="flex items-center gap-[4px] justify-end">

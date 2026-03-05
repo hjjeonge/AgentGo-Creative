@@ -1,5 +1,5 @@
-import type React from "react";
-import { useState } from "react";
+import type React from 'react';
+import { useState } from 'react';
 
 interface Props {
   defaultValue: string;
@@ -7,7 +7,11 @@ interface Props {
   onCancel: () => void;
 }
 
-export const RenameModal: React.FC<Props> = ({ defaultValue, onConfirm, onCancel }) => {
+export const RenameModal: React.FC<Props> = ({
+  defaultValue,
+  onConfirm,
+  onCancel,
+}) => {
   const [value, setValue] = useState(defaultValue);
 
   return (
@@ -17,7 +21,9 @@ export const RenameModal: React.FC<Props> = ({ defaultValue, onConfirm, onCancel
         <input
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && value.trim()) onConfirm(value.trim()); }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && value.trim()) onConfirm(value.trim());
+          }}
           autoFocus
           className="border border-[#CBD5E1] rounded-[8px] px-[12px] py-[8px] text-[14px] text-[#0F172B] outline-none focus:border-[#155DFC]"
         />
@@ -29,7 +35,9 @@ export const RenameModal: React.FC<Props> = ({ defaultValue, onConfirm, onCancel
             취소
           </button>
           <button
-            onClick={() => { if (value.trim()) onConfirm(value.trim()); }}
+            onClick={() => {
+              if (value.trim()) onConfirm(value.trim());
+            }}
             className="px-[16px] py-[8px] bg-[#155DFC] text-white rounded-[8px] text-[13px] font-medium"
           >
             확인
