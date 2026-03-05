@@ -1,9 +1,10 @@
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { logout } from '../../services/auth';
 import { authStorage } from '../../services/apiClient';
+import { postLogout } from '../../services/auth/api';
 import { getMyProfile } from '../../services/users';
+import { clearTokens } from '../../utils/tokenManager';
 import Dots from './../../assets/dots.svg';
 
 export const UserCard: React.FC = () => {
@@ -49,7 +50,8 @@ export const UserCard: React.FC = () => {
   const handleAction = async (action: string) => {
     setMenuOpen(false);
     if (action === 'logout') {
-      await logout();
+      await postLogout();
+      clearTokens();
       setIsAuthed(false);
       navigate('/login');
     }

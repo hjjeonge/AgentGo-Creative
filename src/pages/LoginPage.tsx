@@ -1,8 +1,9 @@
 import type React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../services/auth';
 import Logo from '../assets/logo.svg';
+import { postLogin } from '../services/auth/api';
+import { setTokens } from '../utils/tokenManager';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -22,7 +23,9 @@ export const LoginPage: React.FC = () => {
 
     setLoading(true);
     try {
-      await login({ email, password });
+      const res = await postLogin({ email, password });
+      const { access_token, refresh_token } = res.data;
+      setTokens(access_token, refresh_token);
       navigate('/');
     } catch (err) {
       const message =
