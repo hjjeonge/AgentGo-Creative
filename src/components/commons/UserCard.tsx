@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authStorage } from '../../services/apiClient';
 import { getUserProfile, postLogout } from '../../services/auth/api';
-import { clearTokens } from '../../utils/tokenManager';
+import { clearTokens, getAccessToken } from '../../utils/tokenManager';
 import Dots from './../../assets/dots.svg';
 
 export const UserCard: React.FC = () => {
@@ -12,7 +12,7 @@ export const UserCard: React.FC = () => {
   const [name, setName] = useState('User');
   const [email, setEmail] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isAuthed, setIsAuthed] = useState(!!authStorage.getAccessToken());
+  const [isAuthed, setIsAuthed] = useState(!!getAccessToken());
   const wrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -71,6 +71,7 @@ export const UserCard: React.FC = () => {
   const menuItems = [
     ...(isAdmin ? [{ label: '관리자', action: 'admin' }] : []),
     { label: '로그아웃', action: 'logout' },
+    { label: 'DAM', action: 'dam' },
   ];
 
   return (
