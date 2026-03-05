@@ -1,17 +1,10 @@
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import UploadIcon from '../assets/upload-cloud-2-line.svg';
-import CloseIcon from '../assets/close-line.svg';
-import AddIcon from '../assets/add.svg';
-import { FormRow } from '../components/template/FormRow';
-import { SizePreviewIcon } from '../components/template/SizePreviewIcon';
+import { TemplateFieldRenderer } from '../components/template/TemplateFieldRenderer';
 import { getImageJob, generateImage } from '../services/images';
 import { uploadFile } from '../services/files';
-import {
-  DEFAULT_TEMPLATE_KEY,
-  TARGET_KEYWORDS,
-} from '../constants/templateConfigs';
+import { DEFAULT_TEMPLATE_KEY } from '../constants/templateConfigs';
 import type { TemplateField } from '../types/template';
 import { getTemplateConfig } from '../utils/getTemplateConfig';
 
@@ -251,198 +244,24 @@ export const TemplatePage: React.FC = () => {
   };
 
   const renderField = (field: TemplateField) => {
-    if (field.type === 'file' || field.type === 'files') {
-      const inputId = `file-input-${field.key}`;
-      const selectedFiles = files[field.key] ?? [];
-      const isMulti = field.type === 'files';
-
-      return (
-        <FormRow key={field.key} label={field.label} required={field.required}>
-          <input
-            id={inputId}
-            type="file"
-            accept="image/*"
-            multiple={isMulti}
-            className="hidden"
-            onChange={(event) => {
-              const nextFiles = Array.from(event.target.files ?? []);
-              if (!nextFiles.length) return;
-
-              if (isMulti) handleMultiFiles(field.key, nextFiles);
-              else handleSingleFile(field.key, nextFiles[0] ?? null);
-
-              event.target.value = '';
-            }}
-          />
-          <div className="flex items-center gap-[8px] flex-wrap">
-            {selectedFiles.map((file, index) => (
-              <span
-                key={`${file.name}-${index}`}
-                className="flex items-center gap-[6px] text-[14px] text-[#0F172B]"
-              >
-                {file.name}
-                <button onClick={() => removeFile(field.key, index)}>
-                  <img src={CloseIcon} className="w-[14px] h-[14px]" />
-                </button>
-              </span>
-            ))}
-            <label
-              htmlFor={inputId}
-              className="border border-dashed border-[#155DFC] px-[14px] py-[7px] rounded-[8px] flex items-center gap-[6px] text-[13px] text-[#475569] cursor-pointer"
-            >
-              <img src={UploadIcon} className="w-[14px] h-[14px]" />
-              {isMulti ? '파일 선택' : '업로드'}
-            </label>
-          </div>
-        </FormRow>
-      );
-    }
-
-    if (field.type === 'tags') {
-      const selectedTags = getTagsValue(field.key);
-      const maxItems = field.maxItems ?? 5;
-      const currentTagInput = tagInput[field.key] ?? '';
-      const showPresets = field.key.includes('audience');
-
-      return (
-        <FormRow key={field.key} label={field.label} required={field.required}>
-          <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-[8px] p-[8px_12px] flex flex-wrap gap-[6px] min-h-[48px]">
-            {selectedTags.map((tag) => (
-              <span
-                key={tag}
-                className="flex items-center gap-[4px] bg-[#EFF6FF] border border-[#155DFC] rounded-full px-[10px] py-[3px] text-[13px] text-[#0F172B]"
-              >
-                {tag}
-                <button onClick={() => removeTag(field.key, tag)}>
-                  <img src={CloseIcon} className="w-[12px] h-[12px]" />
-                </button>
-              </span>
-            ))}
-            <input
-              value={currentTagInput}
-              onChange={(event) => {
-                setTagInput((prev) => ({
-                  ...prev,
-                  [field.key]: event.target.value,
-                }));
-              }}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ';') {
-                  event.preventDefault();
-                  addTag(field, currentTagInput);
-                }
-                if (
-                  event.key === 'Backspace' &&
-                  !currentTagInput &&
-                  selectedTags.length > 0
-                ) {
-                  const lastTag = selectedTags[selectedTags.length - 1];
-                  removeTag(field.key, lastTag);
-                }
-              }}
-              placeholder={
-                selectedTags.length === 0
-                  ? `${field.label}을(를) 입력해 주세요 (최대 ${maxItems}개)`
-                  : ''
-              }
-              className="flex-1 outline-none text-[14px] min-w-[180px] placeholder:text-[#94A3B8] bg-transparent"
-            />
-          </div>
-          <button
-            onClick={() => addTag(field, currentTagInput)}
-            className="mt-[8px] w-full border border-dashed border-[#155DFC] py-[8px] rounded-[12px] text-[14px] text-[#0F172B] flex items-center justify-center gap-[4px]"
-          >
-            <img src={AddIcon} className="w-[14px] h-[14px]" />
-            직접추가
-          </button>
-          {showPresets && (
-            <div className="mt-[12px] grid grid-cols-7 gap-[14px]">
-              {TARGET_KEYWORDS.map((keyword) => (
-                <button
-                  key={keyword}
-                  onClick={() => {
-                    if (selectedTags.includes(keyword))
-                      removeTag(field.key, keyword);
-                    else addTag(field, keyword);
-                  }}
-                  className={`px-[14px] py-[5px] rounded-[12px] border text-[13px] whitespace-nowrap border-[#155DFC] text-[#0F172B] ${
-                    selectedTags.includes(keyword) ? ' bg-[#EFF6FF]' : ''
-                  }`}
-                >
-                  {keyword}
-                </button>
-              ))}
-            </div>
-          )}
-        </FormRow>
-      );
-    }
-
-    if (field.type === 'textarea') {
-      return (
-        <FormRow key={field.key} label={field.label} required={field.required}>
-          <textarea
-            value={getStringValue(field.key)}
-            onChange={(event) => setStringValue(field.key, event.target.value)}
-            placeholder={field.placeholder}
-            className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-[8px] p-[12px] text-[14px] resize-none h-[120px] placeholder:text-[#94A3B8] outline-none"
-          />
-        </FormRow>
-      );
-    }
-
-    if (field.type === 'select') {
-      return (
-        <FormRow key={field.key} label={field.label} required={field.required}>
-          <select
-            value={getStringValue(field.key)}
-            onChange={(event) => setStringValue(field.key, event.target.value)}
-            className="w-full h-[44px] border border-[#CBD5E1] rounded-[8px] px-[12px] text-[14px] text-[#0F172B] outline-none focus:border-[#155DFC] bg-white"
-          >
-            <option value="">선택해 주세요</option>
-            {(field.options ?? []).map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </FormRow>
-      );
-    }
-
-    if (field.type === 'size') {
-      const options = field.options ?? ['1:1', '4:5', '16:9', '9:16'];
-      const selected = getStringValue(field.key);
-
-      return (
-        <FormRow key={field.key} label={field.label} required={field.required}>
-          <div className="flex gap-[12px] flex-wrap">
-            {options.map((size) => (
-              <button
-                key={size}
-                onClick={() => setStringValue(field.key, size)}
-                className={`w-[118px] h-[72px] border border-[#155DFC] rounded-[12px] flex items-center justify-center gap-[8px] text-[14px] text-[#0F172B] ${
-                  selected === size ? 'bg-[#EFF6FF]' : ''
-                }`}
-              >
-                <SizePreviewIcon ratio={size} active={selected === size} />
-                <span>{size}</span>
-              </button>
-            ))}
-          </div>
-        </FormRow>
-      );
-    }
-
     return (
-      <FormRow key={field.key} label={field.label} required={field.required}>
-        <input
-          value={getStringValue(field.key)}
-          onChange={(event) => setStringValue(field.key, event.target.value)}
-          placeholder={field.placeholder}
-          className="w-full h-[44px] border border-[#CBD5E1] rounded-[8px] px-[12px] text-[14px] text-[#0F172B] placeholder:text-[#94A3B8] outline-none focus:border-[#155DFC]"
-        />
-      </FormRow>
+      <TemplateFieldRenderer
+        key={field.key}
+        field={field}
+        stringValue={getStringValue(field.key)}
+        selectedTags={getTagsValue(field.key)}
+        selectedFiles={files[field.key] ?? []}
+        currentTagInput={tagInput[field.key] ?? ''}
+        onSetStringValue={(value) => setStringValue(field.key, value)}
+        onSetTagInput={(value) => {
+          setTagInput((prev) => ({ ...prev, [field.key]: value }));
+        }}
+        onAddTag={(raw) => addTag(field, raw)}
+        onRemoveTag={(tag) => removeTag(field.key, tag)}
+        onSingleFileChange={(selected) => handleSingleFile(field.key, selected)}
+        onMultiFilesChange={(selected) => handleMultiFiles(field.key, selected)}
+        onRemoveFile={(index) => removeFile(field.key, index)}
+      />
     );
   };
 
