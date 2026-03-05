@@ -4,7 +4,10 @@ import Arrow from './../../assets/arrow_down.svg';
 import Collapse from './../../assets/Collapse.svg';
 import { RecentProjectItem, type RecentProject } from './RecentProjectItem';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
-import { getRecentProjects } from '../../services/projects';
+import {
+  deleteRecentProject,
+  getRecentProjects,
+} from '../../services/project/api';
 
 const MOCK_PROJECTS: RecentProject[] = [
   {
@@ -57,22 +60,22 @@ interface Props {
 }
 
 export const Aside: React.FC<Props> = ({ asideOpen, handleAside }: Props) => {
-  const [projects, setProjects] = useState<RecentProject[]>(MOCK_PROJECTS);
+  const [projects, setProjects] = useState<RecentProject[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<RecentProject | null>(null);
 
   useEffect(() => {
-    let alive = true;
     getRecentProjects()
-      .then((items) => {
-        if (!alive || items.length == 0) return;
-        setProjects(items);
+      .then((res) => {
+        if (!res.data.length) {
+          setProjects(MOCK_PROJECTS); // todo mockdata 삽입 부분 제거해야 함
+          return;
+        }
+        setProjects(res.data);
       })
       .catch(() => {
-        // keep mock data
+        console.log('최근 프로젝트 목록 조회에 실패했습니다.');
+        setProjects(MOCK_PROJECTS); // todo mockdata 삽입 부분 제거해야 함
       });
-    return () => {
-      alive = false;
-    };
   }, []);
 
   const handleDeleteRequest = (id: string) => {
@@ -80,11 +83,13 @@ export const Aside: React.FC<Props> = ({ asideOpen, handleAside }: Props) => {
     setDeleteTarget(target);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
     if (deleteTarget) {
       setProjects((prev) => prev.filter((p) => p.id !== deleteTarget.id));
     }
     setDeleteTarget(null);
+    await deleteRecentProject(deleteTarget?.id);
   };
 
   return (
