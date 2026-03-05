@@ -11,9 +11,9 @@ import { uploadFile } from '../services/files';
 import {
   DEFAULT_TEMPLATE_KEY,
   TARGET_KEYWORDS,
-  getTemplateConfig,
-  type TemplateField,
 } from '../constants/templateConfigs';
+import type { TemplateField } from '../types/template';
+import { getTemplateConfig } from '../utils/getTemplateConfig';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 

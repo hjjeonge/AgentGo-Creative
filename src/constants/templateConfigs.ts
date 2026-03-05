@@ -1,31 +1,4 @@
-export type TemplateFieldType =
-  | 'text'
-  | 'textarea'
-  | 'select'
-  | 'tags'
-  | 'size'
-  | 'file'
-  | 'files';
-
-export interface TemplateField {
-  key: string;
-  label: string;
-  type: TemplateFieldType;
-  required?: boolean;
-  placeholder?: string;
-  options?: string[];
-  maxItems?: number;
-}
-
-export interface TemplateConfig {
-  key: string;
-  title: string;
-  comment: string;
-  icon: string;
-  aiStatus: 'available' | 'planned';
-  aiFeature: string;
-  fields: TemplateField[];
-}
+import type { TemplateConfig } from '../types/template';
 
 const COMMON_SIZE_OPTIONS = ['1:1', '4:5', '16:9', '9:16'];
 
@@ -355,10 +328,3 @@ export const TARGET_KEYWORDS = [
 ];
 
 export const DEFAULT_TEMPLATE_KEY = 'sns_marketing';
-
-export function getTemplateConfig(templateKey: string | null): TemplateConfig {
-  return (
-    TEMPLATE_CONFIGS.find((item) => item.key === templateKey) ??
-    TEMPLATE_CONFIGS[0]
-  );
-}
