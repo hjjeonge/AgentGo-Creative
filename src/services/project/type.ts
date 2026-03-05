@@ -1,3 +1,9 @@
+import type {
+  DrawLine,
+  Shape,
+  TextObject,
+} from '../../components/editor/EditorCanvas';
+
 export interface RecentProjectItem {
   id: string;
   title: string;
@@ -9,13 +15,20 @@ export interface CreateProjectRes {
   projectId: string;
 }
 
+export interface CanvasSnapshot {
+  lines: DrawLine[];
+  shapes: Shape[];
+  texts: TextObject[];
+  backgroundImage: string | null;
+}
+
 export interface ProjectDetailRes {
   id: string;
   title: string;
   thumbnail_url: string | null;
   updated_at: string;
   latest_history_id: string | null;
-  snapshot: Record<string, unknown> | null;
+  snapshot: CanvasSnapshot | null; // snapShot 이 어떻게 오는거지?
 }
 
 export interface SaveProjectReq {
@@ -29,9 +42,9 @@ export interface SaveProjectRes {
   title: string;
 }
 
-export interface HistoryItem {
+export interface HistoryItemRes {
   id: string;
   title: string;
-  snapshot: Record<string, unknown>;
-  created_at: string;
+  snapshot: CanvasSnapshot;
+  timestamp: string;
 }

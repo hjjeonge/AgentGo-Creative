@@ -1,7 +1,7 @@
 import axiosInstance from '../axiosInstance';
 import type {
   CreateProjectRes,
-  HistoryItem,
+  HistoryItemRes,
   ProjectDetailRes,
   RecentProjectItem,
   SaveProjectReq,
@@ -35,5 +35,7 @@ export const putProject = (projectId: string, data: SaveProjectReq) => {
 
 // 작업이력 조회
 export const getProjectHistory = (projectId: string) => {
-  return axiosInstance.get<HistoryItem[]>(`/api/projects/${projectId}/history`);
+  return axiosInstance.get<HistoryItemRes[]>(
+    `/api/projects/${projectId}/history`,
+  );
 };

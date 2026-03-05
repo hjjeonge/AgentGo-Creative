@@ -2,13 +2,13 @@ import type React from 'react';
 import Collapse from './../../assets/Collapse.svg';
 import Arrow from './../../assets/arrow_down.svg';
 import { HistoryItem } from './HistoryItem';
-import type { HistoryEntry } from '../../types/editor';
+import type { HistoryItemRes } from '../../services/project/type';
 
 interface Props {
   historyOpen: boolean;
   handleWorkHistory: () => void;
-  history: HistoryEntry[];
-  onRestore: (entry: HistoryEntry) => void;
+  history: HistoryItemRes[];
+  onRestore: (entry: HistoryItemRes) => void;
 }
 
 export const HistoryPanel: React.FC<Props> = ({

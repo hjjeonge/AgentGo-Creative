@@ -1,23 +1,48 @@
 import type React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { HistoryPanel } from '../components/editor/HistoryPanel';
 import { Aside } from '../components/editor/Aside';
 import { Canvas } from '../components/editor/Canvas';
 import type { CanvasHandle, HistoryEntry } from '../types/editor';
+import { getProjectDetail, getProjectHistory } from '../services/project/api';
+import type { HistoryItemRes } from '../services/project/type';
 
 const MAX_HISTORY = 20;
 
 export const EditorPage: React.FC = () => {
   const location = useLocation();
-  const params = new URLSearchParams(location.search);
-  const breadcrumbLabel = params.get('templateName');
-  const breadcrumbPath = params.get('templatePath');
+  const { projectId = '' } = useParams();
+  const searchParams = new URLSearchParams(location.search);
+  const breadcrumbLabel = searchParams.get('templateName');
+  const breadcrumbPath = searchParams.get('templatePath');
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [history, setHistory] = useState<HistoryItemRes[]>([]);
   const [hasCanvasImage, setHasCanvasImage] = useState(false);
   const canvasRef = useRef<CanvasHandle>(null);
   const lastImageRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    // 프로젝트 상세 조회
+    getProjectDetail(projectId)
+      .then((res) => {
+        console.log('project id is ', projectId, ', detail res is ', res);
+        const snapshot = res.data.snapshot;
+        if (snapshot) {
+          canvasRef.current?.restoreSnapshot(snapshot);
+          setHasCanvasImage(snapshot.backgroundImage !== null);
+        }
+      })
+      .catch((err) => console.error('get project detail error ', err));
+
+    // 작업이력 조회
+    getProjectHistory(projectId)
+      .then((res) => {
+        setHistory(res.data);
+        console.log('history res :', res.data);
+      })
+      .catch((err) => console.error('get history list error ', err));
+  }, []);
 
   const handleWorkHistory = () => {
     setIsHistoryOpen((prev) => !prev);
@@ -59,7 +84,7 @@ export const EditorPage: React.FC = () => {
       hour12: false,
     });
 
-    const newEntry: HistoryEntry = {
+    const newEntry: HistoryItemRes = {
       id: `history_${Date.now()}`,
       title: prompt.length > 20 ? prompt.slice(0, 20) + '…' : prompt,
       timestamp,
@@ -74,8 +99,8 @@ export const EditorPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const imageUrl = params.get('image');
-    const prompt = params.get('prompt') || '생성 중';
+    const imageUrl = searchParams.get('image');
+    const prompt = searchParams.get('prompt') || '생성 중';
     if (imageUrl && imageUrl !== lastImageRef.current) {
       lastImageRef.current = imageUrl;
       canvasRef.current?.clearCanvas();
@@ -85,7 +110,7 @@ export const EditorPage: React.FC = () => {
     }
   }, [location.search]);
 
-  const handleRestore = (entry: HistoryEntry) => {
+  const handleRestore = (entry: HistoryItemRes) => {
     const confirmed = window.confirm(
       `"${entry.title}" 작업으로 돌아가시겠습니까?\n현재 작업 내용은 사라집니다.`,
     );

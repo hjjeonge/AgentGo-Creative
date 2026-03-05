@@ -8,6 +8,7 @@ import {
   deleteRecentProject,
   getRecentProjects,
 } from '../../services/project/api';
+import { useNavigate } from 'react-router-dom';
 
 const MOCK_PROJECTS: RecentProject[] = [
   {
@@ -62,6 +63,7 @@ interface Props {
 export const Aside: React.FC<Props> = ({ asideOpen, handleAside }: Props) => {
   const [projects, setProjects] = useState<RecentProject[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<RecentProject | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     getRecentProjects()
@@ -92,6 +94,10 @@ export const Aside: React.FC<Props> = ({ asideOpen, handleAside }: Props) => {
     await deleteRecentProject(deleteTarget?.id);
   };
 
+  const onClickRecentProjectItem = (projectId: string) => {
+    navigate(`/editor/${projectId}`);
+  };
+
   return (
     <>
       {asideOpen ? (
@@ -113,6 +119,7 @@ export const Aside: React.FC<Props> = ({ asideOpen, handleAside }: Props) => {
                 key={project.id}
                 project={project}
                 onDelete={handleDeleteRequest}
+                onClick={() => onClickRecentProjectItem(project.id)}
               />
             ))}
           </div>

@@ -1,9 +1,9 @@
 import type React from 'react';
-import type { HistoryEntry } from '../../types/editor';
+import type { HistoryItemRes } from '../../services/project/type';
 
 interface Props {
-  entry: HistoryEntry;
-  onClick: (entry: HistoryEntry) => void;
+  entry: HistoryItemRes;
+  onClick: (entry: HistoryItemRes) => void;
 }
 
 export const HistoryItem: React.FC<Props> = ({ entry, onClick }) => {

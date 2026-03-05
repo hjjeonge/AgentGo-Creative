@@ -1,5 +1,4 @@
 import type React from 'react';
-import { useNavigate } from 'react-router-dom';
 import RemoveIcon from '../../assets/remove.svg';
 
 export interface RecentProject {
@@ -12,18 +11,18 @@ export interface RecentProject {
 interface Props {
   project: RecentProject;
   onDelete: (id: string) => void;
+  onClick: () => void;
 }
 
 export const RecentProjectItem: React.FC<Props> = ({
   project,
   onDelete,
+  onClick,
 }: Props) => {
-  const navigate = useNavigate();
-
   return (
     <div
+      onClick={onClick}
       className="group overflow-hidden rounded-[10px] flex items-center justify-center p-[1px] bg-[linear-gradient(135deg,rgba(86,157,255,0.3)_0%,rgba(0,85,233,0.2)_50%,rgba(106,20,217,0.25)_100%)] box-border cursor-pointer"
-      onClick={() => navigate('/editor')}
     >
       <div className="relative bg-[#F8FAFF] p-[12px] flex items-center gap-[12px] w-full rounded-[9px]">
         {project.thumbnail ? (
