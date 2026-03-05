@@ -2,8 +2,7 @@ import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authStorage } from '../../services/apiClient';
-import { postLogout } from '../../services/auth/api';
-import { getMyProfile } from '../../services/users';
+import { getUserProfile, postLogout } from '../../services/auth/api';
 import { clearTokens } from '../../utils/tokenManager';
 import Dots from './../../assets/dots.svg';
 
@@ -26,11 +25,11 @@ export const UserCard: React.FC = () => {
       return;
     }
 
-    getMyProfile()
-      .then((profile) => {
-        setName(profile.name);
-        setEmail(profile.email);
-        setIsAdmin(!!profile.is_admin);
+    getUserProfile()
+      .then((res) => {
+        setName(res.data.name);
+        setEmail(res.data.email);
+        setIsAdmin(!!res.data.is_admin);
       })
       .catch(() => {
         authStorage.clear();
