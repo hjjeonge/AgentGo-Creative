@@ -8,14 +8,12 @@ import { DEFAULT_TEMPLATE_KEY } from '../constants/templateConfigs';
 import type { TemplateField } from '../types/template';
 import { getTemplateConfig } from '../utils/getTemplateConfig';
 import { useTemplateForm } from '../hooks/template/useTemplateForm';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
-const resolveImageUrl = (url: string | null | undefined) => {
-  if (!url) return null;
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return `${API_BASE_URL}${url}`;
-};
+import { buildPrompt } from '../utils/template/buildPrompt';
+import {
+  buildTemplateInputs,
+  extractReferenceUrls,
+} from '../utils/template/buildTemplateInputs';
+import { resolveImageUrl } from '../utils/template/resolveImageUrl';
 
 export const TemplatePage: React.FC = () => {
   const navigate = useNavigate();
@@ -41,22 +39,6 @@ export const TemplatePage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const buildPrompt = (templateInputs: Record<string, string | string[]>) => {
-    const lines: string[] = [template.title];
-
-    template.fields.forEach((field) => {
-      const value = templateInputs[field.key];
-      if (!value) return;
-      if (Array.isArray(value) && value.length === 0) return;
-      if (typeof value === 'string' && value.trim().length === 0) return;
-
-      const serialized = Array.isArray(value) ? value.join(', ') : value;
-      lines.push(`${field.label}: ${serialized}`);
-    });
-
-    return lines.join('\n');
-  };
-
   const handleGenerate = async () => {
     if (!canGenerate || isSubmitting) return;
     setIsSubmitting(true);
@@ -80,33 +62,19 @@ export const TemplatePage: React.FC = () => {
         uploadedByField[field.key] = urls;
       }
 
-      const templateInputs: Record<string, string | string[]> = {};
-
-      template.fields.forEach((field) => {
-        if (field.type === 'file') {
-          const single = uploadedByField[field.key]?.[0];
-          if (single) templateInputs[field.key] = single;
-          return;
-        }
-
-        if (field.type === 'files') {
-          const many = uploadedByField[field.key] ?? [];
-          if (many.length > 0) templateInputs[field.key] = many;
-          return;
-        }
-
-        if (field.type === 'tags') {
-          const tags = getTagsValue(field.key);
-          if (tags.length > 0) templateInputs[field.key] = tags;
-          return;
-        }
-
-        const textValue = getStringValue(field.key).trim();
-        if (textValue) templateInputs[field.key] = textValue;
+      const templateInputs = buildTemplateInputs({
+        fields: template.fields,
+        uploadedByField,
+        getStringValue,
+        getTagsValue,
       });
 
-      const allReferenceUrls = Object.values(uploadedByField).flat();
-      const prompt = buildPrompt(templateInputs);
+      const allReferenceUrls = extractReferenceUrls(uploadedByField);
+      const prompt = buildPrompt(
+        template.title,
+        template.fields,
+        templateInputs,
+      );
       const sizeValue = getStringValue('size') || undefined;
       const targets = getTagsValue('target_audience');
 
