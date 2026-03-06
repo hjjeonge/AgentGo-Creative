@@ -24,30 +24,6 @@ interface Rect {
   height: number;
 }
 
-const rectsOverlap = (r1: Rect, r2: Rect) =>
-  r1.x < r2.x + r2.width &&
-  r1.x + r1.width > r2.x &&
-  r1.y < r2.y + r2.height &&
-  r1.y + r1.height > r2.y;
-
-// 점이 폴리곤(flat [x1,y1,x2,y2,...]) 안에 있는지 ray-casting 알고리즘으로 판별
-const isPointInPolygon = (px: number, py: number, polygon: number[]) => {
-  let inside = false;
-  const n = polygon.length / 2;
-  let j = n - 1;
-  for (let i = 0; i < n; i++) {
-    const xi = polygon[i * 2],
-      yi = polygon[i * 2 + 1];
-    const xj = polygon[j * 2],
-      yj = polygon[j * 2 + 1];
-    if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) {
-      inside = !inside;
-    }
-    j = i;
-  }
-  return inside;
-};
-
 interface Props {
   onGenerate?: (prompt: string) => void;
   breadcrumbLabel?: string | null;
@@ -492,23 +468,26 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     }, []);
 
     const handleMouseDown = (e: any) => {
+      if (activeTool === 'shape') {
+        const pos = e.target.getStage().getRelativePointerPosition();
+        setSelectedId(null);
+        setSelectedIds([]);
+        setEditingTextId(null);
+        if (shapeSelectMode === 'rect') {
+          selectionStartRef.current = { x: pos.x, y: pos.y };
+          setSelectionRect({ x: pos.x, y: pos.y, width: 0, height: 0 });
+        } else {
+          setLassoPath([pos.x, pos.y]);
+          setIsLassoing(true);
+        }
+        return;
+      }
+
       const clickedOnEmpty = e.target === e.target.getStage();
       if (clickedOnEmpty) {
         setSelectedId(null);
         setSelectedIds([]);
         setEditingTextId(null);
-
-        if (activeTool === 'shape') {
-          const pos = e.target.getStage().getRelativePointerPosition();
-          if (shapeSelectMode === 'rect') {
-            selectionStartRef.current = { x: pos.x, y: pos.y };
-            setSelectionRect({ x: pos.x, y: pos.y, width: 0, height: 0 });
-          } else {
-            setLassoPath([pos.x, pos.y]);
-            setIsLassoing(true);
-          }
-          return;
-        }
       }
 
       if (activeTool !== 'pen' && activeTool !== 'eraser') {
@@ -560,16 +539,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       );
     };
 
-    const finishSelection = (ids: string[]) => {
-      if (ids.length === 1) {
-        setSelectedId(ids[0]);
-        setSelectedIds([]);
-      } else if (ids.length > 1) {
-        setSelectedId(null);
-        setSelectedIds(ids);
-      }
-    };
-
     const handleMouseUp = () => {
       if (activeTool === 'shape') {
         if (shapeSelectMode === 'rect' && selectionStartRef.current) {
@@ -579,27 +548,23 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
             selectionRect.width > 2 &&
             selectionRect.height > 2
           ) {
-            const ids: string[] = [];
-            shapes.forEach((shape) => {
-              if (
-                rectsOverlap(selectionRect, {
-                  x: shape.x,
-                  y: shape.y,
-                  width: shape.width,
-                  height: shape.height,
-                })
-              ) {
-                ids.push(shape.id);
-              }
-            });
-            texts.forEach((text) => {
-              const node = objectRefs.current[text.id];
-              if (node) {
-                const rect = node.getClientRect();
-                if (rectsOverlap(selectionRect, rect)) ids.push(text.id);
-              }
-            });
-            finishSelection(ids);
+            pushUndo();
+            const id = `shape_object_rect_${Date.now()}`;
+            setShapes((prev) => [
+              ...prev,
+              {
+                id,
+                type: 'object_rect',
+                x: selectionRect.x,
+                y: selectionRect.y,
+                width: selectionRect.width,
+                height: selectionRect.height,
+                fill: 'rgba(20, 71, 230, 0.18)',
+              },
+            ]);
+            setSelectedId(id);
+            setSelectedIds([]);
+            setActiveTool('mouse');
           }
           setSelectionRect(null);
           return;
@@ -608,22 +573,52 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         if (shapeSelectMode === 'lasso' && isLassoing) {
           setIsLassoing(false);
           if (lassoPath.length >= 6) {
-            const ids: string[] = [];
-            shapes.forEach((shape) => {
-              const cx = shape.x + shape.width / 2;
-              const cy = shape.y + shape.height / 2;
-              if (isPointInPolygon(cx, cy, lassoPath)) ids.push(shape.id);
-            });
-            texts.forEach((text) => {
-              const node = objectRefs.current[text.id];
-              if (node) {
-                const rect = node.getClientRect();
-                const cx = rect.x + rect.width / 2;
-                const cy = rect.y + rect.height / 2;
-                if (isPointInPolygon(cx, cy, lassoPath)) ids.push(text.id);
-              }
-            });
-            finishSelection(ids);
+            let minX = Number.POSITIVE_INFINITY;
+            let minY = Number.POSITIVE_INFINITY;
+            let maxX = Number.NEGATIVE_INFINITY;
+            let maxY = Number.NEGATIVE_INFINITY;
+
+            for (let i = 0; i < lassoPath.length; i += 2) {
+              const x = lassoPath[i];
+              const y = lassoPath[i + 1];
+              minX = Math.min(minX, x);
+              minY = Math.min(minY, y);
+              maxX = Math.max(maxX, x);
+              maxY = Math.max(maxY, y);
+            }
+
+            const width = Math.max(1, maxX - minX);
+            const height = Math.max(1, maxY - minY);
+            const normalizedPoints: number[] = [];
+            for (let i = 0; i < lassoPath.length; i += 2) {
+              normalizedPoints.push(
+                lassoPath[i] - minX,
+                lassoPath[i + 1] - minY,
+              );
+            }
+
+            if (width > 2 && height > 2) {
+              pushUndo();
+              const id = `shape_object_free_${Date.now()}`;
+              setShapes((prev) => [
+                ...prev,
+                {
+                  id,
+                  type: 'object_free',
+                  x: minX,
+                  y: minY,
+                  width,
+                  height,
+                  fill: 'rgba(20, 71, 230, 0.18)',
+                  points: normalizedPoints,
+                  pointsWidth: width,
+                  pointsHeight: height,
+                },
+              ]);
+              setSelectedId(id);
+              setSelectedIds([]);
+              setActiveTool('mouse');
+            }
           }
           setLassoPath([]);
           return;

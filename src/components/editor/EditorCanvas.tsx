@@ -30,6 +30,9 @@ export interface Shape {
   height: number;
   fill: string;
   imageUrl?: string;
+  points?: number[];
+  pointsWidth?: number;
+  pointsHeight?: number;
 }
 
 export interface TextObject {
@@ -110,6 +113,7 @@ const buildPolygonPoints = (sides: number, width: number, height: number) => {
 
 export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   stageSize,
+  activeTool,
   handleMouseDown,
   handleMouseMove,
   handleMouseUp,
@@ -257,6 +261,40 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
     };
 
     switch (shape.type) {
+      case 'object_rect':
+        return (
+          <Rect
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            fill="rgba(20, 71, 230, 0.18)"
+            stroke="#1447E6"
+            strokeWidth={1.5}
+            dash={[6, 4]}
+          />
+        );
+      case 'object_free': {
+        const baseW = Math.max(1, shape.pointsWidth ?? width);
+        const baseH = Math.max(1, shape.pointsHeight ?? height);
+        const source = shape.points ?? [];
+        const scaled: number[] = [];
+        for (let i = 0; i < source.length; i += 2) {
+          const sx = source[i];
+          const sy = source[i + 1];
+          scaled.push((sx / baseW) * width, (sy / baseH) * height);
+        }
+        return (
+          <Line
+            points={scaled}
+            closed
+            fill="rgba(20, 71, 230, 0.18)"
+            stroke="#1447E6"
+            strokeWidth={1.5}
+            dash={[6, 4]}
+          />
+        );
+      }
       case 'round_square':
         return (
           <Rect
@@ -491,7 +529,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               id={shape.id}
               x={shape.x}
               y={shape.y}
-              draggable
+              draggable={activeTool === 'mouse'}
               onClick={() => setSelectedId(shape.id)}
               onTap={() => setSelectedId(shape.id)}
               ref={(node) => {
@@ -550,7 +588,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
                   id={text.id}
                   x={text.x}
                   y={text.y}
-                  draggable
+                  draggable={activeTool === 'mouse'}
                   visible={text.id !== editingTextId}
                   onClick={() => setSelectedId(text.id)}
                   onTap={() => setSelectedId(text.id)}
@@ -625,7 +663,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
                 id={text.id}
                 x={text.x}
                 y={text.y}
-                draggable
+                draggable={activeTool === 'mouse'}
                 visible={text.id !== editingTextId}
                 onClick={() => setSelectedId(text.id)}
                 onTap={() => setSelectedId(text.id)}
