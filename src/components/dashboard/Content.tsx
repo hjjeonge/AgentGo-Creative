@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Template } from './Template';
 import {
@@ -7,31 +7,32 @@ import {
   TEMPLATE_CONFIGS,
 } from '../../constants/templateConfigs';
 import { useUserProfileQuery } from '../../queries/auth/useUserProfileQuery';
+import { useFavoriteTemplatesQuery } from '../../queries/template';
 import { postNewProject } from '../../services/project/api';
-import { getFavoriteTemplates } from '../../services/template/api';
 import type { FavoriteTemplateRes } from '../../services/template/type';
 
 export const Content: React.FC = () => {
   const navigate = useNavigate();
   const { data: userProfile } = useUserProfileQuery();
-  const [templates, setTemplates] = useState<FavoriteTemplateRes[]>([]);
+  const { data, isError } = useFavoriteTemplatesQuery();
+
+  // todo 즐겨찾는 템플릿 목록 조회 res 있다면 해당 코드 제거
+  const fallbackTemplates: FavoriteTemplateRes[] = TEMPLATE_CONFIGS.map(
+    (item) => ({
+      id: item.key,
+      imgUrl: item.icon,
+      title: item.title,
+      summary: item.comment,
+    }),
+  );
+
+  const templates = data && data.length > 0 ? data : fallbackTemplates;
 
   useEffect(() => {
-    getFavoriteTemplates()
-      .then(() => {
-        // todo api res 데이터를 templates 에 넣어야 함
-        const mapped: FavoriteTemplateRes[] = TEMPLATE_CONFIGS.map((item) => ({
-          id: item.key,
-          imgUrl: item.icon,
-          title: item.title,
-          summary: item.comment,
-        }));
-        setTemplates(mapped);
-      })
-      .catch(() => {
-        console.log('즐겨찾는 템플릿 조회에 실패했습니다.');
-      });
-  }, []);
+    if (isError) {
+      console.log('즐겨찾는 템플릿 조회에 실패했습니다.');
+    }
+  }, [isError]);
 
   const onClickCreateNewProject = async () => {
     const res = await postNewProject();
