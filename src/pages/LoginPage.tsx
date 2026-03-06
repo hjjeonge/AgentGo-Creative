@@ -2,15 +2,15 @@ import type React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../assets/logo.svg';
-import { postLogin } from '../services/auth/api';
+import { useLoginMutation } from '../queries/auth/useLoginMutation';
 import { setTokens } from '../utils/tokenManager';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { mutateAsync, isPending } = useLoginMutation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -21,10 +21,9 @@ export const LoginPage: React.FC = () => {
       return;
     }
 
-    setLoading(true);
     try {
-      const res = await postLogin({ email, password });
-      const { access_token, refresh_token } = res.data;
+      const res = await mutateAsync({ email, password });
+      const { access_token, refresh_token } = res;
       setTokens(access_token, refresh_token);
       navigate('/');
     } catch (err) {
@@ -33,8 +32,6 @@ export const LoginPage: React.FC = () => {
           ? err.message
           : '이메일 또는 비밀번호가 올바르지 않습니다.';
       setError(message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -81,10 +78,10 @@ export const LoginPage: React.FC = () => {
           {/* 로그인 버튼 */}
           <button
             type="submit"
-            disabled={loading}
+            disabled={isPending}
             className="mt-[8px] w-full bg-[linear-gradient(135deg,#0055E9_0%,#6A14D9_100%)] text-white py-[12px] rounded-[8px] text-[15px] font-bold disabled:opacity-60"
           >
-            {loading ? '로그인 중...' : '로그인'}
+            {isPending ? '로그인 중...' : '로그인'}
           </button>
         </form>
       </div>

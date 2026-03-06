@@ -6,17 +6,19 @@ import {
   DEFAULT_TEMPLATE_KEY,
   TEMPLATE_CONFIGS,
 } from '../../constants/templateConfigs';
+import { useUserProfileQuery } from '../../queries/auth/useUserProfileQuery';
 import { postNewProject } from '../../services/project/api';
 import { getFavoriteTemplates } from '../../services/template/api';
 import type { FavoriteTemplateRes } from '../../services/template/type';
 
 export const Content: React.FC = () => {
   const navigate = useNavigate();
+  const { data: userProfile } = useUserProfileQuery();
   const [templates, setTemplates] = useState<FavoriteTemplateRes[]>([]);
 
   useEffect(() => {
     getFavoriteTemplates()
-      .then((res) => {
+      .then(() => {
         // todo api res 데이터를 templates 에 넣어야 함
         const mapped: FavoriteTemplateRes[] = TEMPLATE_CONFIGS.map((item) => ({
           id: item.key,
@@ -42,8 +44,10 @@ export const Content: React.FC = () => {
       <div className="flex flex-col gap-[24px] items-center justify-center">
         <div className="flex flex-col gap-[14px] items-center justify-center">
           <span className="text-[#0F172B] text-[64px] font-medium leading-[85.12px]">
-            <span className="text-[#155DFC] font-bold">클로잇</span>님
-            안녕하세요
+            <span className="text-[#155DFC] font-bold">
+              {userProfile?.name ?? '클로잇'}
+            </span>
+            님 안녕하세요
           </span>
           <span className="text-[#0F172B] text-[36px] font-bold leading-[47.88px]">
             무엇을 도와드릴까요?
