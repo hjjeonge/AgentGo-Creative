@@ -171,7 +171,10 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
       (shape) => shape.type === 'uploaded_image' && shape.imageUrl,
     );
     if (imageShapes.length === 0) {
-      setShapeImages({});
+      setShapeImages((prev) => {
+        if (Object.keys(prev).length === 0) return prev;
+        return {};
+      });
       return;
     }
 
