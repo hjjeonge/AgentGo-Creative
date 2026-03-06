@@ -15,7 +15,7 @@ export const getRecentProjects = () => {
 
 // 최근 프로젝트 삭제
 export const deleteRecentProject = (projectId: string) => {
-  return axiosInstance.delete(`/api/projects/recent/${projectId}`);
+  return axiosInstance.delete(`/api/projects/${projectId}`);
 };
 
 // 프로젝트 상세 조회
