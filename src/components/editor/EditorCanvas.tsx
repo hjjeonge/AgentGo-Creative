@@ -29,6 +29,7 @@ export interface Shape {
   width: number;
   height: number;
   fill: string;
+  imageUrl?: string;
 }
 
 export interface TextObject {
@@ -133,6 +134,9 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   const [bgImagePos, setBgImagePos] = useState<{ x: number; y: number } | null>(
     null,
   );
+  const [shapeImages, setShapeImages] = useState<
+    Record<string, HTMLImageElement>
+  >({});
 
   useEffect(() => {
     if (backgroundImageUrl) {
@@ -157,6 +161,33 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
       textAreaRef.current.focus();
     }
   }, [editingTextId]);
+
+  useEffect(() => {
+    const imageShapes = shapes.filter(
+      (shape) => shape.type === 'uploaded_image' && shape.imageUrl,
+    );
+    if (imageShapes.length === 0) {
+      setShapeImages({});
+      return;
+    }
+
+    let disposed = false;
+    imageShapes.forEach((shape) => {
+      const key = shape.id;
+      const imageUrl = shape.imageUrl;
+      if (!imageUrl || shapeImages[key]) return;
+      const img = new window.Image();
+      img.src = imageUrl;
+      img.onload = () => {
+        if (disposed) return;
+        setShapeImages((prev) => ({ ...prev, [key]: img }));
+      };
+    });
+
+    return () => {
+      disposed = true;
+    };
+  }, [shapes, shapeImages]);
 
   const handleTextDblClick = (_e: any, text: TextObject) => {
     setSelectedId(null);
@@ -468,7 +499,17 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               }}
               onTransformEnd={handleTransformEnd}
             >
-              {renderDiagramShape(shape)}
+              {shape.type === 'uploaded_image' && shape.imageUrl ? (
+                <KonvaImage
+                  image={shapeImages[shape.id] ?? null}
+                  x={0}
+                  y={0}
+                  width={Math.max(1, shape.width)}
+                  height={Math.max(1, shape.height)}
+                />
+              ) : (
+                renderDiagramShape(shape)
+              )}
             </Group>
           ))}
           {texts.map((text) => {
