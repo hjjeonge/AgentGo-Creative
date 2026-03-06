@@ -1,19 +1,12 @@
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { TemplateFieldRenderer } from '../components/template/TemplateFieldRenderer';
-import { getImageJob, generateImage } from '../services/images';
-import { uploadFile } from '../services/files';
 import { DEFAULT_TEMPLATE_KEY } from '../constants/templateConfigs';
 import type { TemplateField } from '../types/template';
 import { getTemplateConfig } from '../utils/getTemplateConfig';
 import { useTemplateForm } from '../hooks/template/useTemplateForm';
-import { buildPrompt } from '../utils/template/buildPrompt';
-import {
-  buildTemplateInputs,
-  extractReferenceUrls,
-} from '../utils/template/buildTemplateInputs';
-import { resolveImageUrl } from '../utils/template/resolveImageUrl';
+import { useTemplateGenerate } from '../hooks/template/useTemplateGenerate';
 
 export const TemplatePage: React.FC = () => {
   const navigate = useNavigate();
@@ -36,100 +29,27 @@ export const TemplatePage: React.FC = () => {
     removeFile,
     canGenerate,
   } = useTemplateForm(template.fields);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { isSubmitting, errorMessage, generateFromTemplate } =
+    useTemplateGenerate({
+      template,
+      files,
+      getStringValue,
+      getTagsValue,
+    });
 
   const handleGenerate = async () => {
     if (!canGenerate || isSubmitting) return;
-    setIsSubmitting(true);
-    setErrorMessage(null);
 
-    try {
-      const uploadedByField: Record<string, string[]> = {};
+    const result = await generateFromTemplate();
+    if (!result) return;
 
-      for (const field of template.fields) {
-        if (field.type !== 'file' && field.type !== 'files') continue;
-
-        const selectedFiles = files[field.key] ?? [];
-        if (!selectedFiles.length) continue;
-
-        const urls = await Promise.all(
-          selectedFiles.map(async (file) => {
-            const uploaded = await uploadFile(file);
-            return uploaded.file_url;
-          }),
-        );
-        uploadedByField[field.key] = urls;
-      }
-
-      const templateInputs = buildTemplateInputs({
-        fields: template.fields,
-        uploadedByField,
-        getStringValue,
-        getTagsValue,
-      });
-
-      const allReferenceUrls = extractReferenceUrls(uploadedByField);
-      const prompt = buildPrompt(
+    navigate(
+      `/editor?image=${encodeURIComponent(result.imageUrl)}&prompt=${encodeURIComponent(
+        result.prompt,
+      )}&templateName=${encodeURIComponent(
         template.title,
-        template.fields,
-        templateInputs,
-      );
-      const sizeValue = getStringValue('size') || undefined;
-      const targets = getTagsValue('target_audience');
-
-      const res = await generateImage({
-        prompt,
-        concept: getStringValue('concept') || undefined,
-        size: sizeValue,
-        targets: targets.length > 0 ? targets : undefined,
-        reference_urls: allReferenceUrls,
-        template_key: template.key,
-        template_name: template.title,
-        template_inputs: templateInputs,
-      });
-
-      let job = res;
-      if (job.status !== 'completed') {
-        const maxAttempts = 30;
-        for (let i = 0; i < maxAttempts; i++) {
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-          job = await getImageJob(res.job_id);
-          if (job.status === 'completed' || job.status === 'failed') break;
-        }
-      }
-
-      if (job.status === 'completed' && job.result_url) {
-        const imageUrl = resolveImageUrl(job.result_url);
-        if (imageUrl) {
-          navigate(
-            `/editor?image=${encodeURIComponent(imageUrl)}&prompt=${encodeURIComponent(
-              prompt,
-            )}&templateName=${encodeURIComponent(
-              template.title,
-            )}&templatePath=${encodeURIComponent(`/template?template=${template.key}`)}`,
-          );
-          return;
-        }
-      }
-
-      if (job.status === 'failed') {
-        setErrorMessage('이미지 생성에 실패했습니다.');
-        return;
-      }
-
-      setErrorMessage(
-        '이미지 생성 시간이 초과되었습니다. 잠시 후 다시 시도해 주세요.',
-      );
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : '이미지 생성 요청에 실패했습니다.';
-      setErrorMessage(message);
-    } finally {
-      setIsSubmitting(false);
-    }
+      )}&templatePath=${encodeURIComponent(`/template?template=${template.key}`)}`,
+    );
   };
 
   const renderField = (field: TemplateField) => {
