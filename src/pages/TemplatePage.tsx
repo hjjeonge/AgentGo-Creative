@@ -1,9 +1,8 @@
 import type React from 'react';
 import { useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { TemplateFieldRenderer } from '../components/template/TemplateFieldRenderer';
+import { TemplateFieldsSection } from '../components/template/TemplateFieldsSection';
 import { DEFAULT_TEMPLATE_KEY } from '../constants/templateConfigs';
-import type { TemplateField } from '../types/template';
 import { getTemplateConfig } from '../utils/getTemplateConfig';
 import { useTemplateForm } from '../hooks/template/useTemplateForm';
 import { useTemplateGenerate } from '../hooks/template/useTemplateGenerate';
@@ -52,26 +51,6 @@ export const TemplatePage: React.FC = () => {
     );
   };
 
-  const renderField = (field: TemplateField) => {
-    return (
-      <TemplateFieldRenderer
-        key={field.key}
-        field={field}
-        stringValue={getStringValue(field.key)}
-        selectedTags={getTagsValue(field.key)}
-        selectedFiles={files[field.key] ?? []}
-        currentTagInput={tagInput[field.key] ?? ''}
-        onSetStringValue={(value) => setStringValue(field.key, value)}
-        onSetTagInput={(value) => setTagInputValue(field.key, value)}
-        onAddTag={(raw) => addTag(field, raw)}
-        onRemoveTag={(tag) => removeTag(field.key, tag)}
-        onSingleFileChange={(selected) => handleSingleFile(field.key, selected)}
-        onMultiFilesChange={(selected) => handleMultiFiles(field.key, selected)}
-        onRemoveFile={(index) => removeFile(field.key, index)}
-      />
-    );
-  };
-
   return (
     <div className="h-full overflow-y-auto bg-[#F8FAFC]">
       <div className="max-w-[1000px] mx-auto py-[40px] px-[20px] bg-white border-l border-r border-[#E2E8F0]">
@@ -92,9 +71,20 @@ export const TemplatePage: React.FC = () => {
             : 'AI 서버 미구현 템플릿입니다. 입력값은 현재 key-value 프롬프트로 조합되어 생성됩니다.'}
         </div>
 
-        <div className="flex flex-col gap-[32px]">
-          {template.fields.map((field) => renderField(field))}
-        </div>
+        <TemplateFieldsSection
+          fields={template.fields}
+          files={files}
+          tagInput={tagInput}
+          getStringValue={getStringValue}
+          getTagsValue={getTagsValue}
+          setStringValue={setStringValue}
+          setTagInputValue={setTagInputValue}
+          addTag={addTag}
+          removeTag={removeTag}
+          handleSingleFile={handleSingleFile}
+          handleMultiFiles={handleMultiFiles}
+          removeFile={removeFile}
+        />
 
         {errorMessage && (
           <div className="mt-[24px] rounded-[8px] border border-[#FCA5A5] bg-[#FEF2F2] px-[14px] py-[10px] text-[13px] text-[#991B1B]">
