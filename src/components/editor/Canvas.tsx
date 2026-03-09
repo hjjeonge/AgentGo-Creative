@@ -744,14 +744,15 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
                 selectedCandidate ?? intersections[intersections.length - 1];
 
               if (target) {
+                const safeWidth = Math.max(1, target.shape.width);
+                const safeHeight = Math.max(1, target.shape.height);
                 const localMaskPath: number[] = [];
                 for (let i = 0; i < lassoPath.length; i += 2) {
                   const stageX = lassoPath[i];
                   const stageY = lassoPath[i + 1];
-                  localMaskPath.push(
-                    stageX - target.shape.x,
-                    stageY - target.shape.y,
-                  );
+                  const localX = stageX - target.shape.x;
+                  const localY = stageY - target.shape.y;
+                  localMaskPath.push(localX / safeWidth, localY / safeHeight);
                 }
 
                 pushUndo();

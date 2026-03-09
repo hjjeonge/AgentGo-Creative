@@ -496,10 +496,12 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
                     clipFunc={(ctx) => {
                       const points = shape.maskPath ?? [];
                       if (points.length < 6) return;
+                      const width = Math.max(1, shape.width);
+                      const height = Math.max(1, shape.height);
                       ctx.beginPath();
-                      ctx.moveTo(points[0], points[1]);
+                      ctx.moveTo(points[0] * width, points[1] * height);
                       for (let i = 2; i < points.length; i += 2) {
-                        ctx.lineTo(points[i], points[i + 1]);
+                        ctx.lineTo(points[i] * width, points[i + 1] * height);
                       }
                       ctx.closePath();
                     }}
