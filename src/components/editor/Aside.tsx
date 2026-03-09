@@ -122,12 +122,10 @@ export const Aside: React.FC<Props> = ({
       )}
       {textClick && selectedTextObject && handleUpdateTextObject && (
         <div className="absolute left-[85px] top-0 bottom-0 z-[60] w-fit bg-white border-l border-r border-[#E2E8F0] shadow-[8px_0_8px_-6px_rgba(50,56,62,0.08),12px_0_12px_-6px_rgba(50,56,62,0.08)]">
-          <div className="relative h-full overflow-auto p-[20px]">
-            <TextEditor
-              selectedTextObject={selectedTextObject}
-              handleUpdateTextObject={handleUpdateTextObject}
-            />
-          </div>
+          <TextEditor
+            selectedTextObject={selectedTextObject}
+            handleUpdateTextObject={handleUpdateTextObject}
+          />
         </div>
       )}
     </>
