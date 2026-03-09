@@ -1,21 +1,18 @@
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
+import { useColorHistoryStore } from '../../store/colorHistoryStore';
 import { getPenColorImg, getPenStrokeWidthImg } from '../../utils/getImage';
 import { ColorPalette } from '../commons/ColorPalette';
 import { ColorPickerPopup } from '../commons/ColorPickerPopup';
-import { useColorHistoryStore } from '../../store/colorHistoryStore';
 import { ClickIcon } from '../icons/ClickIcon';
 import { DiagramIcon } from '../icons/DiagramIcon';
 import { EraserIcon } from '../icons/EraserIcon';
+import { LassoIcon } from '../icons/LassoIcon';
 import { PencilIcon } from '../icons/PencilIcon';
 import { ShapeIcon } from '../icons/ShapeIcon';
-import { TextIcon } from '../icons/TextIcon';
 import { DiagramPopup } from './DiagramPopup';
-import { TextEditor } from './TextEditor';
 import { ToolButton } from './ToolButton';
 import { ToolbarButton } from './ToolbarButton';
-import type { TextObject } from './EditorCanvas';
-import { LassoIcon } from '../icons/LassoIcon';
 
 interface Props {
   activeTool: string;
@@ -28,9 +25,6 @@ interface Props {
   setShapeType: (value: string) => void;
   shapeSelectMode: 'rect' | 'lasso';
   setShapeSelectMode: (mode: 'rect' | 'lasso') => void;
-  isTextEditorVisible: boolean;
-  selectedTextObject?: TextObject;
-  handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void;
 }
 
 export const Toolbar: React.FC<Props> = ({
@@ -44,9 +38,6 @@ export const Toolbar: React.FC<Props> = ({
   setShapeType,
   shapeSelectMode,
   setShapeSelectMode,
-  isTextEditorVisible,
-  selectedTextObject,
-  handleUpdateTextObject,
 }) => {
   const toolbarRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -88,7 +79,6 @@ export const Toolbar: React.FC<Props> = ({
     { tool: 'eraser', icon: <EraserIcon /> },
     { tool: 'diagram', icon: <DiagramIcon /> },
     { tool: 'shape', icon: <ShapeIcon /> },
-    { tool: 'text', icon: <TextIcon /> },
   ];
   const penStrokeWidths = [2, 3, 5, 6];
   const displayColors = ['#E7000B', '#155DFC', '#FFD230', 'empty'];
@@ -226,12 +216,6 @@ export const Toolbar: React.FC<Props> = ({
       )}
       {isToolPopupOpen && activeTool === 'diagram' && (
         <DiagramPopup shapeType={shapeType} setShapeType={setShapeType} />
-      )}
-      {isTextEditorVisible && selectedTextObject && (
-        <TextEditor
-          selectedTextObject={selectedTextObject}
-          handleUpdateTextObject={handleUpdateTextObject}
-        />
       )}
     </div>
   );

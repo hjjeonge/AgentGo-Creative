@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { Aside } from '../components/editor/Aside';
 import { Canvas } from '../components/editor/Canvas';
+import type { TextObject } from '../components/editor/EditorCanvas';
 import { HistoryPanel } from '../components/editor/HistoryPanel';
 import { getProjectDetail, getProjectHistory } from '../services/project/api';
 import type { HistoryItemRes } from '../services/project/type';
@@ -19,6 +20,9 @@ export const EditorPage: React.FC = () => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
   const [history, setHistory] = useState<HistoryItemRes[]>([]);
   const [hasCanvasImage, setHasCanvasImage] = useState(false);
+  const [selectedTextObject, setSelectedTextObject] = useState<
+    TextObject | undefined
+  >(undefined);
   const canvasRef = useRef<CanvasHandle>(null);
   const lastImageRef = useRef<string | null>(null);
 
@@ -61,6 +65,14 @@ export const EditorPage: React.FC = () => {
     canvasRef.current?.clearCanvas();
     setHasCanvasImage(false);
     setHistory([]);
+  };
+
+  const handleAddText = () => {
+    canvasRef.current?.addText();
+  };
+
+  const handleUpdateTextObject = (id: string, updates: Partial<TextObject>) => {
+    canvasRef.current?.updateTextObject(id, updates);
   };
 
   const addHistoryEntry = (prompt: string) => {
@@ -126,12 +138,16 @@ export const EditorPage: React.FC = () => {
         hasImage={hasCanvasImage}
         onUpload={handleUpload}
         onNewProject={handleNewProject}
+        onAddText={handleAddText}
+        selectedTextObject={selectedTextObject}
+        handleUpdateTextObject={handleUpdateTextObject}
       />
       <Canvas
         ref={canvasRef}
         onGenerate={handleGenerate}
         breadcrumbLabel={breadcrumbLabel}
         breadcrumbPath={breadcrumbPath}
+        onSelectedTextObjectChange={setSelectedTextObject}
       />
       <HistoryPanel
         handleWorkHistory={handleWorkHistory}

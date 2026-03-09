@@ -28,13 +28,17 @@ interface Props {
   onGenerate?: (prompt: string) => void;
   breadcrumbLabel?: string | null;
   breadcrumbPath?: string | null;
+  onSelectedTextObjectChange?: (textObject?: TextObject) => void;
 }
 
 const DEFAULT_PLACEHOLDER_TEXT = '텍스트를 입력하세요';
 const UPLOADED_IMAGE_SHAPE_PREFIX = 'shape_uploaded_image_';
 
 export const Canvas = forwardRef<CanvasHandle, Props>(
-  ({ onGenerate, breadcrumbLabel, breadcrumbPath }, ref) => {
+  (
+    { onGenerate, breadcrumbLabel, breadcrumbPath, onSelectedTextObjectChange },
+    ref,
+  ) => {
     const navigate = useNavigate();
     const [activeTool, setActiveTool] = useState<string>('mouse');
     const containerRef = useRef<HTMLDivElement>(null);
@@ -138,6 +142,12 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     const selectSingleId = (id: string | null) => {
       setSelectedId(id);
       setSelectedIds([]);
+    };
+
+    const handleSelectObject = (id: string | null) => {
+      selectSingleId(id);
+      setEditingTextId(null);
+      setActiveTool('mouse');
     };
 
     // Delete / Undo / Redo 핸들러
@@ -302,6 +312,12 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       hasImage: () =>
         backgroundImageRef.current !== null ||
         shapesRef.current.some((shape) => shape.type === 'uploaded_image'),
+      addText: () => {
+        handleAddText();
+      },
+      updateTextObject: (id: string, updates: Partial<TextObject>) => {
+        handleUpdateTextObject(id, updates);
+      },
       clearCanvas: () => {
         setLines([]);
         setShapes([]);
@@ -707,6 +723,10 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       ? texts.find((t) => t.id === selectedId)
       : undefined;
 
+    useEffect(() => {
+      onSelectedTextObjectChange?.(selectedTextObject);
+    }, [onSelectedTextObjectChange, selectedTextObject]);
+
     return (
       <section className="h-full flex-1 min-w-0 bg-[#E2E8F0] relative flex flex-col items-center overflow-auto">
         {/* 브레드크럼 */}
@@ -744,9 +764,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           setShapeType={handleAddShape}
           shapeSelectMode={shapeSelectMode}
           setShapeSelectMode={setShapeSelectMode}
-          isTextEditorVisible={!!isTextSelected}
-          selectedTextObject={selectedTextObject}
-          handleUpdateTextObject={handleUpdateTextObject}
         />
 
         {/* Konva canvas container */}
@@ -783,7 +800,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
               currentLine={currentLine}
               shapes={shapes}
               texts={texts}
-              setSelectedId={selectSingleId}
+              setSelectedId={handleSelectObject}
               objectRefs={objectRefs}
               trRef={trRef}
               handleTransformEnd={handleTransformEnd}

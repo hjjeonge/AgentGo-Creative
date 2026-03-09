@@ -7,24 +7,41 @@ import AI from './../../assets/ai.svg';
 import Home from './../../assets/home.svg';
 import { useState } from 'react';
 import { AiToolPanel } from './AiToolPanel';
+import type { TextObject } from './EditorCanvas';
+import { TextIcon } from '../icons/TextIcon';
+import { TextEditor } from './TextEditor';
 
 interface Props {
   hasImage: boolean;
   onUpload: (url: string) => void;
   onNewProject: () => void;
+  onAddText?: () => void;
+  selectedTextObject?: TextObject;
+  handleUpdateTextObject?: (id: string, updates: Partial<TextObject>) => void;
 }
 
 export const Aside: React.FC<Props> = ({
   hasImage,
   onUpload,
   onNewProject,
+  onAddText,
+  selectedTextObject,
+  handleUpdateTextObject,
 }) => {
   const navigate = useNavigate();
   const [aiClick, setAiClick] = useState(false);
+  const [textClick, setTextClick] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAiTool = () => {
+    setTextClick(false);
     setAiClick((prev) => !prev);
+  };
+
+  const handleTextTool = () => {
+    onAddText?.();
+    setAiClick(false);
+    setTextClick(true);
   };
 
   const handleUploadClick = () => {
@@ -70,6 +87,15 @@ export const Aside: React.FC<Props> = ({
               AI 도구
             </span>
           </button>
+          <button
+            className="flex flex-col gap-[4px] items-center hover:opacity-70"
+            onClick={handleTextTool}
+          >
+            <TextIcon />
+            <span className="text-[#0F172B] text-[13px] leading-[19.88px]">
+              텍스트
+            </span>
+          </button>
         </div>
         <button
           onClick={() => navigate('/')}
@@ -92,6 +118,14 @@ export const Aside: React.FC<Props> = ({
       {aiClick && (
         <div className="absolute left-[85px] top-0 bottom-0 z-[60] w-fit bg-white border-l border-r border-[#E2E8F0] shadow-[8px_0_8px_-6px_rgba(50,56,62,0.08),12px_0_12px_-6px_rgba(50,56,62,0.08)]">
           <AiToolPanel hasImage={hasImage} />
+        </div>
+      )}
+      {textClick && selectedTextObject && handleUpdateTextObject && (
+        <div className="absolute left-[85px] top-0 bottom-0 z-[60] w-fit bg-white border-l border-r border-[#E2E8F0] shadow-[8px_0_8px_-6px_rgba(50,56,62,0.08),12px_0_12px_-6px_rgba(50,56,62,0.08)]">
+          <TextEditor
+            selectedTextObject={selectedTextObject}
+            handleUpdateTextObject={handleUpdateTextObject}
+          />
         </div>
       )}
     </>

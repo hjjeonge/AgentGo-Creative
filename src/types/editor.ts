@@ -20,6 +20,8 @@ export interface HistoryEntry {
 
 export interface CanvasHandle {
   setBackgroundImage: (url: string | null) => void;
+  addText: () => void;
+  updateTextObject: (id: string, updates: Partial<TextObject>) => void;
   getSnapshot: () => CanvasSnapshot;
   restoreSnapshot: (snapshot: CanvasSnapshot) => void;
   hasImage: () => boolean;
