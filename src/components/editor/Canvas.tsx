@@ -715,7 +715,62 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
             const width = Math.max(1, maxX - minX);
             const height = Math.max(1, maxY - minY);
             if (width > 2 && height > 2) {
-              cropByRect({ x: minX, y: minY, width, height });
+              const maskRect = { x: minX, y: minY, width, height };
+              const uploadedShapes = shapesRef.current.filter(
+                (shape) => shape.type === 'uploaded_image',
+              );
+              const intersections = uploadedShapes
+                .map((shape) => {
+                  const ix = Math.max(maskRect.x, shape.x);
+                  const iy = Math.max(maskRect.y, shape.y);
+                  const ix2 = Math.min(
+                    maskRect.x + maskRect.width,
+                    shape.x + shape.width,
+                  );
+                  const iy2 = Math.min(
+                    maskRect.y + maskRect.height,
+                    shape.y + shape.height,
+                  );
+                  const iWidth = Math.max(0, ix2 - ix);
+                  const iHeight = Math.max(0, iy2 - iy);
+                  return {
+                    shape,
+                    area: iWidth * iHeight,
+                  };
+                })
+                .filter((candidate) => candidate.area > 4);
+
+              const selectedCandidate = selectedId
+                ? intersections.find(
+                    (candidate) => candidate.shape.id === selectedId,
+                  )
+                : undefined;
+              const target =
+                selectedCandidate ?? intersections[intersections.length - 1];
+
+              if (target) {
+                const localMaskPath: number[] = [];
+                for (let i = 0; i < lassoPath.length; i += 2) {
+                  const stageX = lassoPath[i];
+                  const stageY = lassoPath[i + 1];
+                  localMaskPath.push(
+                    stageX - target.shape.x,
+                    stageY - target.shape.y,
+                  );
+                }
+
+                pushUndo();
+                setShapes((prev) =>
+                  prev.map((shape) =>
+                    shape.id === target.shape.id
+                      ? { ...shape, maskPath: localMaskPath }
+                      : shape,
+                  ),
+                );
+                setSelectedId(target.shape.id);
+                setSelectedIds([]);
+                setActiveTool('mouse');
+              }
             }
           }
           setLassoPath([]);

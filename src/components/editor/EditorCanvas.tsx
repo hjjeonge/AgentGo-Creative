@@ -551,23 +551,57 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               onDragEnd={handleDragEnd}
             >
               {shape.type === 'uploaded_image' && shape.imageUrl ? (
-                <KonvaImage
-                  image={shapeImages[shape.id] ?? null}
-                  x={0}
-                  y={0}
-                  width={Math.max(1, shape.width)}
-                  height={Math.max(1, shape.height)}
-                  crop={
-                    (shape.cropWidth ?? 0) > 0 && (shape.cropHeight ?? 0) > 0
-                      ? {
-                          x: shape.cropX ?? 0,
-                          y: shape.cropY ?? 0,
-                          width: shape.cropWidth ?? 0,
-                          height: shape.cropHeight ?? 0,
-                        }
-                      : undefined
-                  }
-                />
+                (shape.maskPath?.length ?? 0) >= 6 ? (
+                  <Group
+                    clipFunc={(ctx) => {
+                      const points = shape.maskPath ?? [];
+                      if (points.length < 6) return;
+                      ctx.beginPath();
+                      ctx.moveTo(points[0], points[1]);
+                      for (let i = 2; i < points.length; i += 2) {
+                        ctx.lineTo(points[i], points[i + 1]);
+                      }
+                      ctx.closePath();
+                    }}
+                  >
+                    <KonvaImage
+                      image={shapeImages[shape.id] ?? null}
+                      x={0}
+                      y={0}
+                      width={Math.max(1, shape.width)}
+                      height={Math.max(1, shape.height)}
+                      crop={
+                        (shape.cropWidth ?? 0) > 0 &&
+                        (shape.cropHeight ?? 0) > 0
+                          ? {
+                              x: shape.cropX ?? 0,
+                              y: shape.cropY ?? 0,
+                              width: shape.cropWidth ?? 0,
+                              height: shape.cropHeight ?? 0,
+                            }
+                          : undefined
+                      }
+                    />
+                  </Group>
+                ) : (
+                  <KonvaImage
+                    image={shapeImages[shape.id] ?? null}
+                    x={0}
+                    y={0}
+                    width={Math.max(1, shape.width)}
+                    height={Math.max(1, shape.height)}
+                    crop={
+                      (shape.cropWidth ?? 0) > 0 && (shape.cropHeight ?? 0) > 0
+                        ? {
+                            x: shape.cropX ?? 0,
+                            y: shape.cropY ?? 0,
+                            width: shape.cropWidth ?? 0,
+                            height: shape.cropHeight ?? 0,
+                          }
+                        : undefined
+                    }
+                  />
+                )
               ) : (
                 renderDiagramShape(shape)
               )}
