@@ -7,11 +7,15 @@ import AI from './../../assets/ai.svg';
 import Home from './../../assets/home.svg';
 import { useState } from 'react';
 import { AiToolPanel } from './AiToolPanel';
+import type { TextObject } from './EditorCanvas';
 
 interface Props {
   hasImage: boolean;
   onUpload: (url: string) => void;
   onNewProject: () => void;
+  onAddText?: () => void;
+  selectedTextObject?: TextObject;
+  handleUpdateTextObject?: (id: string, updates: Partial<TextObject>) => void;
 }
 
 export const Aside: React.FC<Props> = ({
