@@ -98,3 +98,10 @@ export interface ShapeIntersection {
   iHeight: number;
   area: number;
 }
+
+export interface HistoryState {
+  lines: DrawLine[];
+  shapes: Shape[];
+  texts: TextObject[];
+  backgroundImage: string | null;
+}
