@@ -13,67 +13,7 @@ import {
   Text,
   Transformer,
 } from 'react-konva';
-
-export interface DrawLine {
-  points: number[];
-  tool: string;
-  strokeWidth: number;
-  stroke: string;
-}
-
-export interface Shape {
-  id: string;
-  type: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  fill: string;
-  imageUrl?: string;
-  points?: number[];
-  pointsWidth?: number;
-  pointsHeight?: number;
-  sourceWidth?: number;
-  sourceHeight?: number;
-  cropX?: number;
-  cropY?: number;
-  cropWidth?: number;
-  cropHeight?: number;
-  maskPath?: number[];
-}
-
-export interface TextObject {
-  id: string;
-  x: number;
-  y: number;
-  text: string;
-  width?: number;
-  fontSize: number;
-  fill: string;
-  fontFamily?: string;
-  fontStyle?: string;
-  textDecoration?: string;
-  align?: 'left' | 'center' | 'right' | 'justify';
-  verticalAlign?: 'top' | 'middle' | 'bottom';
-  letterSpacing?: number;
-  lineHeight?: number;
-  scaleX?: number;
-  listFormat?: 'none' | 'unordered' | 'ordered';
-  stroke?: string;
-  strokeWidth?: number;
-  strokeEnabled?: boolean;
-  shadowColor?: string;
-  shadowBlur?: number;
-  shadowOpacity?: number;
-  shadowOffsetX?: number;
-  shadowOffsetY?: number;
-  shadowDirection?: number;
-  shadowDistance?: number;
-  shadowEnabled?: boolean;
-  verticalWriting?: boolean;
-  backgroundColor?: string;
-  backgroundEnabled?: boolean;
-}
+import type { DrawLine, Shape, TextObject } from '../../types/editor';
 
 interface EditorCanvasProps {
   stageSize: { width: number; height: number };

@@ -17,7 +17,6 @@ import Underlined from './../../assets/format_underlined.svg';
 import Remove from './../../assets/remove.svg';
 import Satisfied from './../../assets/sentiment_satisfied.svg';
 import VerticalTop from './../../assets/vertical_align_top.svg';
-import type { TextObject } from './EditorCanvas'; // Import TextObject
 import { FontFamilySelect } from './FontFamilySelect';
 import { ListFOrmatPopover } from './ListFormatPopover';
 import { TextAlignPopover } from './TextAlignPopver';
@@ -27,6 +26,7 @@ import { VerticalAlignPopover } from './VerticalAlignPopover';
 import { StrokeContent } from './StrokeContent';
 import { ShadowContent } from './ShadowContent';
 import { SpecialCharPopup } from './SpecialCharPopup';
+import type { TextObject } from '../../types/editor';
 
 const fontStyle = [
   { name: 'bold', img: Bold, tooltip: '굵게' },

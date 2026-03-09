@@ -7,9 +7,9 @@ import AI from './../../assets/ai.svg';
 import Home from './../../assets/home.svg';
 import { useState } from 'react';
 import { AiToolPanel } from './AiToolPanel';
-import type { TextObject } from './EditorCanvas';
 import { TextIcon } from '../icons/TextIcon';
 import { TextEditor } from './TextEditor';
+import type { TextObject } from '../../types/editor';
 
 interface Props {
   hasImage: boolean;

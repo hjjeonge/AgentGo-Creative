@@ -3,11 +3,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { Aside } from '../components/editor/Aside';
 import { Canvas } from '../components/editor/Canvas';
-import type { TextObject } from '../components/editor/EditorCanvas';
 import { HistoryPanel } from '../components/editor/HistoryPanel';
 import { getProjectDetail, getProjectHistory } from '../services/project/api';
 import type { HistoryItemRes } from '../services/project/type';
-import type { CanvasHandle } from '../types/editor';
+import type { CanvasHandle, TextObject } from '../types/editor';
 
 const MAX_HISTORY = 20;
 

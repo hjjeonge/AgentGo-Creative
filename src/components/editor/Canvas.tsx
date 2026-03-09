@@ -6,23 +6,18 @@
   useState,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  EditorCanvas,
-  type DrawLine,
-  type Shape,
-  type TextObject,
-} from './EditorCanvas';
+import { EditorCanvas } from './EditorCanvas';
 import { loadGoogleFont } from '../../utils/fontLoader';
 import { Toolbar } from './Toolbar';
 import { Prompt } from './Prompt';
-import type { CanvasHandle, CanvasSnapshot } from '../../types/editor';
-
-interface Rect {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
+import type {
+  CanvasHandle,
+  CanvasSnapshot,
+  DrawLine,
+  Rect,
+  Shape,
+  TextObject,
+} from '../../types/editor';
 
 interface Props {
   onGenerate?: (prompt: string) => void;
