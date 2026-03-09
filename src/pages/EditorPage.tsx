@@ -29,7 +29,6 @@ export const EditorPage: React.FC = () => {
     // 프로젝트 상세 조회
     getProjectDetail(projectId)
       .then((res) => {
-        console.log('project id is ', projectId, ', detail res is ', res);
         const snapshot = res.data.snapshot;
         if (snapshot) {
           canvasRef.current?.restoreSnapshot(snapshot);
@@ -42,7 +41,6 @@ export const EditorPage: React.FC = () => {
     getProjectHistory(projectId)
       .then((res) => {
         setHistory(res.data);
-        console.log('history res :', res.data);
       })
       .catch((err) => console.error('get history list error ', err));
   }, []);
