@@ -3,11 +3,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { Aside } from '../components/editor/Aside';
 import { Canvas } from '../components/editor/Canvas';
-import type { TextObject } from '../components/editor/EditorCanvas';
 import { HistoryPanel } from '../components/editor/HistoryPanel';
 import { getProjectDetail, getProjectHistory } from '../services/project/api';
 import type { HistoryItemRes } from '../services/project/type';
-import type { CanvasHandle } from '../types/editor';
+import type { CanvasHandle, TextObject } from '../types/editor';
 
 const MAX_HISTORY = 20;
 
@@ -30,7 +29,6 @@ export const EditorPage: React.FC = () => {
     // 프로젝트 상세 조회
     getProjectDetail(projectId)
       .then((res) => {
-        console.log('project id is ', projectId, ', detail res is ', res);
         const snapshot = res.data.snapshot;
         if (snapshot) {
           canvasRef.current?.restoreSnapshot(snapshot);
@@ -43,7 +41,6 @@ export const EditorPage: React.FC = () => {
     getProjectHistory(projectId)
       .then((res) => {
         setHistory(res.data);
-        console.log('history res :', res.data);
       })
       .catch((err) => console.error('get history list error ', err));
   }, []);

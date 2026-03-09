@@ -6,23 +6,21 @@
   useState,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  EditorCanvas,
-  type DrawLine,
-  type Shape,
-  type TextObject,
-} from './EditorCanvas';
+import { EditorCanvas } from './EditorCanvas';
 import { loadGoogleFont } from '../../utils/fontLoader';
 import { Toolbar } from './Toolbar';
 import { Prompt } from './Prompt';
-import type { CanvasHandle, CanvasSnapshot } from '../../types/editor';
-
-interface Rect {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
+import { useCanvasState } from '../../hooks/editor/useCanvasState';
+import { useCrop } from '../../hooks/editor/useCrop';
+import { useDrawing } from '../../hooks/editor/useDrawing';
+import { useSelection } from '../../hooks/editor/useSelection';
+import { useUndoRedo } from '../../hooks/editor/useUndoRedo';
+import type {
+  CanvasHandle,
+  CanvasSnapshot,
+  Shape,
+  TextObject,
+} from '../../types/editor';
 
 interface Props {
   onGenerate?: (prompt: string) => void;
@@ -42,7 +40,52 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     const navigate = useNavigate();
     const [activeTool, setActiveTool] = useState<string>('mouse');
     const containerRef = useRef<HTMLDivElement>(null);
-    const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
+    const {
+      stageSize,
+      setStageSize,
+      setBackgroundImageState,
+      lines,
+      setLines,
+      shapes,
+      setShapes,
+      texts,
+      setTexts,
+      currentLine,
+      setCurrentLine,
+      isDrawing,
+      setIsDrawing,
+      shapeType,
+      setShapeType,
+      penStrokeWidth,
+      setPenStrokeWidth,
+      penStrokeColor,
+      setPenStrokeColor,
+      brushPreview,
+      setBrushPreview,
+      selectedId,
+      setSelectedId,
+      selectedIds,
+      setSelectedIds,
+      editingTextId,
+      setEditingTextId,
+      selectionRect,
+      setSelectionRect,
+      shapeSelectMode,
+      setShapeSelectMode,
+      lassoPath,
+      setLassoPath,
+      isLassoing,
+      setIsLassoing,
+      linesRef,
+      shapesRef,
+      textsRef,
+      backgroundImageRef,
+      lastPointerRef,
+      previewTimeoutRef,
+      selectionStartRef,
+      objectRefs,
+      trRef,
+    } = useCanvasState();
 
     useEffect(() => {
       const container = containerRef.current;
@@ -61,39 +104,67 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         container.removeEventListener('mousemove', handlePointerMove);
     }, []);
 
-    const [backgroundImage, setBackgroundImageState] = useState<string | null>(
-      null,
-    );
-    const [lines, setLines] = useState<DrawLine[]>([]);
-    const [shapes, setShapes] = useState<Shape[]>([]);
-    const [texts, setTexts] = useState<TextObject[]>([]);
-    const [currentLine, setCurrentLine] = useState<DrawLine | null>(null);
-    const [isDrawing, setIsDrawing] = useState(false);
-    const [shapeType, setShapeType] = useState('square');
-
-    const [penStrokeWidth, setPenStrokeWidth] = useState(2);
-    const [brushPreview, setBrushPreview] = useState({
-      x: 0,
-      y: 0,
-      size: 2,
-      visible: false,
+    const { pushUndo, undo, redo } = useUndoRedo({
+      linesRef,
+      shapesRef,
+      textsRef,
+      backgroundImageRef,
+      setLines,
+      setShapes,
+      setTexts,
+      setBackgroundImageState,
+      setSelectedId,
+      setSelectedIds,
+      setEditingTextId,
     });
-    const lastPointerRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-    const previewTimeoutRef = useRef<number | null>(null);
-    const [penStrokeColor, setPenStrokeColor] = useState('#E7000B');
 
-    const [selectedId, setSelectedId] = useState<string | null>(null);
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    const [editingTextId, setEditingTextId] = useState<string | null>(null);
-    const [selectionRect, setSelectionRect] = useState<Rect | null>(null);
-    const selectionStartRef = useRef<{ x: number; y: number } | null>(null);
-    const [shapeSelectMode, setShapeSelectMode] = useState<'rect' | 'lasso'>(
-      'rect',
-    );
-    const [lassoPath, setLassoPath] = useState<number[]>([]);
-    const [isLassoing, setIsLassoing] = useState(false);
-    const objectRefs = useRef<Record<string, any>>({});
-    const trRef = useRef<any>(null);
+    const { handleSelectObject, handleTransformEnd, handleDragEnd } =
+      useSelection({
+        selectedId,
+        selectedIds,
+        editingTextId,
+        shapes,
+        texts,
+        objectRefs,
+        trRef,
+        pushUndo,
+        setSelectedId,
+        setSelectedIds,
+        setEditingTextId,
+        setActiveTool,
+        setShapes,
+        setTexts,
+      });
+
+    const { cropByRect, cropByLasso } = useCrop({
+      shapesRef,
+      selectedId,
+      setShapes,
+      setSelectedId,
+      setSelectedIds,
+      setActiveTool,
+      pushUndo,
+    });
+
+    const {
+      showBrushPreview,
+      handleMouseDownDrawing,
+      handleMouseMoveDrawing,
+      handleMouseUpDrawing,
+    } = useDrawing({
+      activeTool,
+      isDrawing,
+      currentLine,
+      penStrokeWidth,
+      penStrokeColor,
+      setIsDrawing,
+      setCurrentLine,
+      setLines,
+      setBrushPreview,
+      lastPointerRef,
+      previewTimeoutRef,
+      pushUndo,
+    });
 
     const addUploadedImageShape = (url: string) => {
       const image = new window.Image();
@@ -128,6 +199,12 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
             height: targetHeight,
             fill: 'transparent',
             imageUrl: url,
+            sourceWidth: naturalWidth,
+            sourceHeight: naturalHeight,
+            cropX: 0,
+            cropY: 0,
+            cropWidth: naturalWidth,
+            cropHeight: naturalHeight,
           });
           return next;
         });
@@ -138,33 +215,13 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       image.src = url;
     };
 
-    // 단일 선택 후 selectedIds 초기화
-    const selectSingleId = (id: string | null) => {
-      setSelectedId(id);
-      setSelectedIds([]);
-    };
-
-    const handleSelectObject = (id: string | null) => {
-      selectSingleId(id);
-      setEditingTextId(null);
-      setActiveTool('mouse');
-    };
-
     // Delete / Undo / Redo 핸들러
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
         // Ctrl+Z: Undo
         if (e.key === 'z' && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
           e.preventDefault();
-          const prev = undoStack.current.pop();
-          if (!prev) return;
-          redoStack.current.push({
-            lines: linesRef.current,
-            shapes: shapesRef.current,
-            texts: textsRef.current,
-            backgroundImage: backgroundImageRef.current,
-          });
-          applyHistory(prev);
+          undo();
           return;
         }
         // Ctrl+Y or Ctrl+Shift+Z: Redo
@@ -173,15 +230,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           (e.key === 'z' && (e.ctrlKey || e.metaKey) && e.shiftKey)
         ) {
           e.preventDefault();
-          const next = redoStack.current.pop();
-          if (!next) return;
-          undoStack.current.push({
-            lines: linesRef.current,
-            shapes: shapesRef.current,
-            texts: textsRef.current,
-            backgroundImage: backgroundImageRef.current,
-          });
-          applyHistory(next);
+          redo();
           return;
         }
         // Brush size ([ / ])
@@ -225,55 +274,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
     }, [selectedId, selectedIds, editingTextId, penStrokeWidth]);
-
-    // Refs for snapshot (always up-to-date)
-    const linesRef = useRef(lines);
-    const shapesRef = useRef(shapes);
-    const textsRef = useRef(texts);
-    const backgroundImageRef = useRef(backgroundImage);
-
-    useEffect(() => {
-      linesRef.current = lines;
-    }, [lines]);
-    useEffect(() => {
-      shapesRef.current = shapes;
-    }, [shapes]);
-    useEffect(() => {
-      textsRef.current = texts;
-    }, [texts]);
-    useEffect(() => {
-      backgroundImageRef.current = backgroundImage;
-    }, [backgroundImage]);
-
-    // Undo / Redo 스택
-    type HistoryState = {
-      lines: DrawLine[];
-      shapes: Shape[];
-      texts: TextObject[];
-      backgroundImage: string | null;
-    };
-    const undoStack = useRef<HistoryState[]>([]);
-    const redoStack = useRef<HistoryState[]>([]);
-
-    const pushUndo = () => {
-      undoStack.current.push({
-        lines: linesRef.current,
-        shapes: shapesRef.current,
-        texts: textsRef.current,
-        backgroundImage: backgroundImageRef.current,
-      });
-      redoStack.current = [];
-    };
-
-    const applyHistory = (state: HistoryState) => {
-      setLines(state.lines);
-      setShapes(state.shapes);
-      setTexts(state.texts);
-      setBackgroundImageState(state.backgroundImage);
-      setSelectedId(null);
-      setSelectedIds([]);
-      setEditingTextId(null);
-    };
 
     useImperativeHandle(ref, () => ({
       setBackgroundImage: (url: string | null) => {
@@ -328,27 +328,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         setEditingTextId(null);
       },
     }));
-
-    useEffect(() => {
-      if (trRef.current) {
-        if (!editingTextId) {
-          if (selectedIds.length > 1) {
-            const nodes = selectedIds
-              .map((id) => objectRefs.current[id])
-              .filter(Boolean);
-            trRef.current.nodes(nodes);
-          } else if (selectedId) {
-            const node = objectRefs.current[selectedId];
-            if (node) trRef.current.nodes([node]);
-          } else {
-            trRef.current.nodes([]);
-          }
-        } else {
-          trRef.current.nodes([]);
-        }
-        trRef.current.getLayer()?.batchDraw();
-      }
-    }, [selectedId, selectedIds, shapes, texts, editingTextId]);
 
     const handleAddText = () => {
       pushUndo();
@@ -439,25 +418,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       );
     };
 
-    const showBrushPreview = (size: number) => {
-      if (previewTimeoutRef.current) {
-        window.clearTimeout(previewTimeoutRef.current);
-      }
-      const { x, y } = lastPointerRef.current;
-      setBrushPreview({ x, y, size, visible: true });
-      previewTimeoutRef.current = window.setTimeout(() => {
-        setBrushPreview((prev) => ({ ...prev, visible: false }));
-      }, 800);
-    };
-
-    useEffect(() => {
-      return () => {
-        if (previewTimeoutRef.current) {
-          window.clearTimeout(previewTimeoutRef.current);
-        }
-      };
-    }, []);
-
     const handlePenStrokeWidth = (value: number) => {
       setPenStrokeWidth(value);
     };
@@ -506,18 +466,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         setEditingTextId(null);
       }
 
-      if (activeTool !== 'pen' && activeTool !== 'eraser') {
-        return;
-      }
-
-      setIsDrawing(true);
-      const pos = e.target.getStage().getRelativePointerPosition();
-      setCurrentLine({
-        points: [pos.x, pos.y],
-        tool: activeTool,
-        strokeWidth: penStrokeWidth,
-        stroke: penStrokeColor,
-      });
+      handleMouseDownDrawing(e);
     };
 
     const handleMouseMove = (e: any) => {
@@ -539,48 +488,28 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         }
       }
 
-      if (!isDrawing || (activeTool !== 'pen' && activeTool !== 'eraser'))
-        return;
-
-      const stage = e.target.getStage();
-      const point = stage.getRelativePointerPosition();
-
-      setCurrentLine((prev) =>
-        prev
-          ? {
-              ...prev,
-              points: [...prev.points, point.x, point.y],
-            }
-          : null,
-      );
+      handleMouseMoveDrawing(e);
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (e: any) => {
       if (activeTool === 'shape') {
         if (shapeSelectMode === 'rect' && selectionStartRef.current) {
+          const start = selectionStartRef.current;
+          const pos = e?.target?.getStage()?.getRelativePointerPosition?.() as {
+            x: number;
+            y: number;
+          } | null;
+          const finalRect = pos
+            ? {
+                x: Math.min(pos.x, start.x),
+                y: Math.min(pos.y, start.y),
+                width: Math.abs(pos.x - start.x),
+                height: Math.abs(pos.y - start.y),
+              }
+            : selectionRect;
           selectionStartRef.current = null;
-          if (
-            selectionRect &&
-            selectionRect.width > 2 &&
-            selectionRect.height > 2
-          ) {
-            pushUndo();
-            const id = `shape_object_rect_${Date.now()}`;
-            setShapes((prev) => [
-              ...prev,
-              {
-                id,
-                type: 'object_rect',
-                x: selectionRect.x,
-                y: selectionRect.y,
-                width: selectionRect.width,
-                height: selectionRect.height,
-                fill: 'rgba(20, 71, 230, 0.18)',
-              },
-            ]);
-            setSelectedId(id);
-            setSelectedIds([]);
-            setActiveTool('mouse');
+          if (finalRect && finalRect.width > 2 && finalRect.height > 2) {
+            cropByRect(finalRect);
           }
           setSelectionRect(null);
           return;
@@ -588,65 +517,13 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 
         if (shapeSelectMode === 'lasso' && isLassoing) {
           setIsLassoing(false);
-          if (lassoPath.length >= 6) {
-            let minX = Number.POSITIVE_INFINITY;
-            let minY = Number.POSITIVE_INFINITY;
-            let maxX = Number.NEGATIVE_INFINITY;
-            let maxY = Number.NEGATIVE_INFINITY;
-
-            for (let i = 0; i < lassoPath.length; i += 2) {
-              const x = lassoPath[i];
-              const y = lassoPath[i + 1];
-              minX = Math.min(minX, x);
-              minY = Math.min(minY, y);
-              maxX = Math.max(maxX, x);
-              maxY = Math.max(maxY, y);
-            }
-
-            const width = Math.max(1, maxX - minX);
-            const height = Math.max(1, maxY - minY);
-            const normalizedPoints: number[] = [];
-            for (let i = 0; i < lassoPath.length; i += 2) {
-              normalizedPoints.push(
-                lassoPath[i] - minX,
-                lassoPath[i + 1] - minY,
-              );
-            }
-
-            if (width > 2 && height > 2) {
-              pushUndo();
-              const id = `shape_object_free_${Date.now()}`;
-              setShapes((prev) => [
-                ...prev,
-                {
-                  id,
-                  type: 'object_free',
-                  x: minX,
-                  y: minY,
-                  width,
-                  height,
-                  fill: 'rgba(20, 71, 230, 0.18)',
-                  points: normalizedPoints,
-                  pointsWidth: width,
-                  pointsHeight: height,
-                },
-              ]);
-              setSelectedId(id);
-              setSelectedIds([]);
-              setActiveTool('mouse');
-            }
-          }
+          cropByLasso(lassoPath);
           setLassoPath([]);
           return;
         }
       }
 
-      if (!currentLine) return;
-
-      pushUndo();
-      setLines((prev) => [...prev, currentLine]);
-      setCurrentLine(null);
-      setIsDrawing(false);
+      handleMouseUpDrawing();
     };
 
     const handleAddShape = (shapeType: string) => {
@@ -676,46 +553,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         fill: '#EF4444',
       };
       setShapes((prev) => [...prev, newShape]);
-    };
-
-    const handleTransformEnd = (e: any) => {
-      pushUndo();
-      const node = e.target;
-      const scaleX = node.scaleX();
-      const scaleY = node.scaleY();
-      const id = node.id();
-
-      node.scaleX(1);
-      node.scaleY(1);
-
-      setTexts((prev) =>
-        prev.map((text) => {
-          if (text.id !== id) return text;
-          const baseScaleX = text.scaleX ?? 1;
-          const effectiveScaleX = scaleX / baseScaleX;
-          return {
-            ...text,
-            x: node.x(),
-            y: node.y(),
-            width: Math.max(5, (text.width ?? node.width()) * effectiveScaleX),
-            fontSize: Math.max(5, text.fontSize * scaleY),
-          };
-        }),
-      );
-
-      setShapes((prev) =>
-        prev.map((s) =>
-          s.id === id
-            ? {
-                ...s,
-                x: node.x(),
-                y: node.y(),
-                width: Math.max(5, s.width * scaleX),
-                height: Math.max(5, s.height * scaleY),
-              }
-            : s,
-        ),
-      );
     };
 
     const isTextSelected = selectedId?.startsWith('text_') && !editingTextId;
@@ -769,7 +606,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         {/* Konva canvas container */}
         <div
           ref={containerRef}
-          className="relative w-[480px] h-[600px] mt-[20px] mb-[16px] shrink-0 flex items-center justify-center overflow-hidden rounded-[12px] border border-[#CBD5E1] bg-white"
+          className="relative w-full h-[600px] mt-[20px] mb-[16px] shrink-0 flex items-center justify-center overflow-hidden rounded-[12px] border border-[#CBD5E1] bg-white"
         >
           {brushPreview.visible && (
             <div
@@ -804,6 +641,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
               objectRefs={objectRefs}
               trRef={trRef}
               handleTransformEnd={handleTransformEnd}
+              handleDragEnd={handleDragEnd}
               editingTextId={editingTextId}
               setEditingTextId={setEditingTextId}
               handleUpdateTextObject={handleUpdateTextObject}

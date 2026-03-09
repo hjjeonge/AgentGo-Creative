@@ -13,60 +13,7 @@ import {
   Text,
   Transformer,
 } from 'react-konva';
-
-export interface DrawLine {
-  points: number[];
-  tool: string;
-  strokeWidth: number;
-  stroke: string;
-}
-
-export interface Shape {
-  id: string;
-  type: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  fill: string;
-  imageUrl?: string;
-  points?: number[];
-  pointsWidth?: number;
-  pointsHeight?: number;
-}
-
-export interface TextObject {
-  id: string;
-  x: number;
-  y: number;
-  text: string;
-  width?: number;
-  fontSize: number;
-  fill: string;
-  fontFamily?: string;
-  fontStyle?: string;
-  textDecoration?: string;
-  align?: 'left' | 'center' | 'right' | 'justify';
-  verticalAlign?: 'top' | 'middle' | 'bottom';
-  letterSpacing?: number;
-  lineHeight?: number;
-  scaleX?: number;
-  listFormat?: 'none' | 'unordered' | 'ordered';
-  stroke?: string;
-  strokeWidth?: number;
-  strokeEnabled?: boolean;
-  shadowColor?: string;
-  shadowBlur?: number;
-  shadowOpacity?: number;
-  shadowOffsetX?: number;
-  shadowOffsetY?: number;
-  shadowDirection?: number;
-  shadowDistance?: number;
-  shadowEnabled?: boolean;
-  verticalWriting?: boolean;
-  backgroundColor?: string;
-  backgroundEnabled?: boolean;
-}
+import type { DrawLine, Shape, TextObject } from '../../types/editor';
 
 interface EditorCanvasProps {
   stageSize: { width: number; height: number };
@@ -82,6 +29,7 @@ interface EditorCanvasProps {
   objectRefs: React.MutableRefObject<Record<string, any>>;
   trRef: React.MutableRefObject<any>;
   handleTransformEnd: (e: any) => void;
+  handleDragEnd: (e: any) => void;
   editingTextId: string | null;
   setEditingTextId: (id: string | null) => void;
   handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void;
@@ -125,6 +73,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   objectRefs,
   trRef,
   handleTransformEnd,
+  handleDragEnd,
   editingTextId,
   setEditingTextId,
   handleUpdateTextObject,
@@ -539,15 +488,62 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
                 if (node) objectRefs.current[shape.id] = node;
               }}
               onTransformEnd={handleTransformEnd}
+              onDragEnd={handleDragEnd}
             >
               {shape.type === 'uploaded_image' && shape.imageUrl ? (
-                <KonvaImage
-                  image={shapeImages[shape.id] ?? null}
-                  x={0}
-                  y={0}
-                  width={Math.max(1, shape.width)}
-                  height={Math.max(1, shape.height)}
-                />
+                (shape.maskPath?.length ?? 0) >= 6 ? (
+                  <Group
+                    clipFunc={(ctx) => {
+                      const points = shape.maskPath ?? [];
+                      if (points.length < 6) return;
+                      const width = Math.max(1, shape.width);
+                      const height = Math.max(1, shape.height);
+                      ctx.beginPath();
+                      ctx.moveTo(points[0] * width, points[1] * height);
+                      for (let i = 2; i < points.length; i += 2) {
+                        ctx.lineTo(points[i] * width, points[i + 1] * height);
+                      }
+                      ctx.closePath();
+                    }}
+                  >
+                    <KonvaImage
+                      image={shapeImages[shape.id] ?? null}
+                      x={0}
+                      y={0}
+                      width={Math.max(1, shape.width)}
+                      height={Math.max(1, shape.height)}
+                      crop={
+                        (shape.cropWidth ?? 0) > 0 &&
+                        (shape.cropHeight ?? 0) > 0
+                          ? {
+                              x: shape.cropX ?? 0,
+                              y: shape.cropY ?? 0,
+                              width: shape.cropWidth ?? 0,
+                              height: shape.cropHeight ?? 0,
+                            }
+                          : undefined
+                      }
+                    />
+                  </Group>
+                ) : (
+                  <KonvaImage
+                    image={shapeImages[shape.id] ?? null}
+                    x={0}
+                    y={0}
+                    width={Math.max(1, shape.width)}
+                    height={Math.max(1, shape.height)}
+                    crop={
+                      (shape.cropWidth ?? 0) > 0 && (shape.cropHeight ?? 0) > 0
+                        ? {
+                            x: shape.cropX ?? 0,
+                            y: shape.cropY ?? 0,
+                            width: shape.cropWidth ?? 0,
+                            height: shape.cropHeight ?? 0,
+                          }
+                        : undefined
+                    }
+                  />
+                )
               ) : (
                 renderDiagramShape(shape)
               )}

@@ -1,8 +1,4 @@
-import type {
-  DrawLine,
-  Shape,
-  TextObject,
-} from '../../components/editor/EditorCanvas';
+import type { DrawLine, Shape, TextObject } from '../../types/editor';
 
 export interface RecentProjectItem {
   id: string;

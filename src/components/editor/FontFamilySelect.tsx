@@ -7,8 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
-import type { TextObject } from './EditorCanvas';
 import { loadGoogleFont } from '../../utils/fontLoader';
+import type { TextObject } from '../../types/editor';
 
 interface FontFamilySelectProps {
   selectedTextObject?: TextObject;
