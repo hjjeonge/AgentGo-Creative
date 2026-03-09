@@ -144,6 +144,12 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       setSelectedIds([]);
     };
 
+    const handleSelectObject = (id: string | null) => {
+      selectSingleId(id);
+      setEditingTextId(null);
+      setActiveTool('mouse');
+    };
+
     // Delete / Undo / Redo 핸들러
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
@@ -794,7 +800,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
               currentLine={currentLine}
               shapes={shapes}
               texts={texts}
-              setSelectedId={selectSingleId}
+              setSelectedId={handleSelectObject}
               objectRefs={objectRefs}
               trRef={trRef}
               handleTransformEnd={handleTransformEnd}
