@@ -769,7 +769,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         {/* Konva canvas container */}
         <div
           ref={containerRef}
-          className="relative w-[480px] h-[600px] mt-[20px] mb-[16px] shrink-0 flex items-center justify-center overflow-hidden rounded-[12px] border border-[#CBD5E1] bg-white"
+          className="relative w-full h-[600px] mt-[20px] mb-[16px] shrink-0 flex items-center justify-center overflow-hidden rounded-[12px] border border-[#CBD5E1] bg-white"
         >
           {brushPreview.visible && (
             <div
