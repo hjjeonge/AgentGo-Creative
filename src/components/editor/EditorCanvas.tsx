@@ -33,6 +33,13 @@ export interface Shape {
   points?: number[];
   pointsWidth?: number;
   pointsHeight?: number;
+  sourceWidth?: number;
+  sourceHeight?: number;
+  cropX?: number;
+  cropY?: number;
+  cropWidth?: number;
+  cropHeight?: number;
+  maskPath?: number[];
 }
 
 export interface TextObject {
@@ -82,6 +89,7 @@ interface EditorCanvasProps {
   objectRefs: React.MutableRefObject<Record<string, any>>;
   trRef: React.MutableRefObject<any>;
   handleTransformEnd: (e: any) => void;
+  handleDragEnd: (e: any) => void;
   editingTextId: string | null;
   setEditingTextId: (id: string | null) => void;
   handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void;
@@ -125,6 +133,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   objectRefs,
   trRef,
   handleTransformEnd,
+  handleDragEnd,
   editingTextId,
   setEditingTextId,
   handleUpdateTextObject,
@@ -539,6 +548,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
                 if (node) objectRefs.current[shape.id] = node;
               }}
               onTransformEnd={handleTransformEnd}
+              onDragEnd={handleDragEnd}
             >
               {shape.type === 'uploaded_image' && shape.imageUrl ? (
                 <KonvaImage
@@ -547,6 +557,16 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
                   y={0}
                   width={Math.max(1, shape.width)}
                   height={Math.max(1, shape.height)}
+                  crop={
+                    (shape.cropWidth ?? 0) > 0 && (shape.cropHeight ?? 0) > 0
+                      ? {
+                          x: shape.cropX ?? 0,
+                          y: shape.cropY ?? 0,
+                          width: shape.cropWidth ?? 0,
+                          height: shape.cropHeight ?? 0,
+                        }
+                      : undefined
+                  }
                 />
               ) : (
                 renderDiagramShape(shape)

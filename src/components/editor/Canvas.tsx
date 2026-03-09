@@ -128,6 +128,12 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
             height: targetHeight,
             fill: 'transparent',
             imageUrl: url,
+            sourceWidth: naturalWidth,
+            sourceHeight: naturalHeight,
+            cropX: 0,
+            cropY: 0,
+            cropWidth: naturalWidth,
+            cropHeight: naturalHeight,
           });
           return next;
         });
@@ -555,32 +561,135 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       );
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (e: any) => {
       if (activeTool === 'shape') {
-        if (shapeSelectMode === 'rect' && selectionStartRef.current) {
-          selectionStartRef.current = null;
-          if (
-            selectionRect &&
-            selectionRect.width > 2 &&
-            selectionRect.height > 2
-          ) {
+        const cropByRect = (rect: Rect) => {
+          const uploadedShapes = shapesRef.current.filter(
+            (shape) => shape.type === 'uploaded_image',
+          );
+          if (uploadedShapes.length === 0) return false;
+
+          const intersections = uploadedShapes
+            .map((shape) => {
+              const ix = Math.max(rect.x, shape.x);
+              const iy = Math.max(rect.y, shape.y);
+              const ix2 = Math.min(rect.x + rect.width, shape.x + shape.width);
+              const iy2 = Math.min(
+                rect.y + rect.height,
+                shape.y + shape.height,
+              );
+              const iWidth = Math.max(0, ix2 - ix);
+              const iHeight = Math.max(0, iy2 - iy);
+              return {
+                shape,
+                ix,
+                iy,
+                iWidth,
+                iHeight,
+                area: iWidth * iHeight,
+              };
+            })
+            .filter((candidate) => candidate.area > 4);
+          if (intersections.length === 0) return false;
+
+          const selectedCandidate = selectedId
+            ? intersections.find(
+                (candidate) => candidate.shape.id === selectedId,
+              )
+            : undefined;
+          const target =
+            selectedCandidate ?? intersections[intersections.length - 1];
+          if (!target) return false;
+
+          const applyCrop = (sourceWidth: number, sourceHeight: number) => {
+            const safeSourceWidth = Math.max(1, sourceWidth);
+            const safeSourceHeight = Math.max(1, sourceHeight);
+            const currentCropX = target.shape.cropX ?? 0;
+            const currentCropY = target.shape.cropY ?? 0;
+            const currentCropWidth = Math.max(
+              1,
+              target.shape.cropWidth ?? safeSourceWidth,
+            );
+            const currentCropHeight = Math.max(
+              1,
+              target.shape.cropHeight ?? safeSourceHeight,
+            );
+            const scaleX = currentCropWidth / Math.max(1, target.shape.width);
+            const scaleY = currentCropHeight / Math.max(1, target.shape.height);
+
+            const nextCropX =
+              currentCropX + (target.ix - target.shape.x) * scaleX;
+            const nextCropY =
+              currentCropY + (target.iy - target.shape.y) * scaleY;
+            const nextCropWidth = target.iWidth * scaleX;
+            const nextCropHeight = target.iHeight * scaleY;
+
             pushUndo();
-            const id = `shape_object_rect_${Date.now()}`;
-            setShapes((prev) => [
-              ...prev,
-              {
-                id,
-                type: 'object_rect',
-                x: selectionRect.x,
-                y: selectionRect.y,
-                width: selectionRect.width,
-                height: selectionRect.height,
-                fill: 'rgba(20, 71, 230, 0.18)',
-              },
-            ]);
-            setSelectedId(id);
+            setShapes((prev) =>
+              prev.map((shape) =>
+                shape.id === target.shape.id
+                  ? {
+                      ...shape,
+                      x: target.ix,
+                      y: target.iy,
+                      width: target.iWidth,
+                      height: target.iHeight,
+                      sourceWidth: safeSourceWidth,
+                      sourceHeight: safeSourceHeight,
+                      cropX: nextCropX,
+                      cropY: nextCropY,
+                      cropWidth: nextCropWidth,
+                      cropHeight: nextCropHeight,
+                    }
+                  : shape,
+              ),
+            );
+            setSelectedId(target.shape.id);
             setSelectedIds([]);
             setActiveTool('mouse');
+          };
+
+          if (
+            (target.shape.sourceWidth ?? 0) <= 0 ||
+            (target.shape.sourceHeight ?? 0) <= 0
+          ) {
+            const url = target.shape.imageUrl;
+            if (url) {
+              const image = new window.Image();
+              image.onload = () =>
+                applyCrop(
+                  Math.max(1, image.naturalWidth || image.width),
+                  Math.max(1, image.naturalHeight || image.height),
+                );
+              image.src = url;
+              return true;
+            }
+          }
+
+          applyCrop(
+            Math.max(1, target.shape.sourceWidth ?? target.shape.width),
+            Math.max(1, target.shape.sourceHeight ?? target.shape.height),
+          );
+          return true;
+        };
+
+        if (shapeSelectMode === 'rect' && selectionStartRef.current) {
+          const start = selectionStartRef.current;
+          const pos = e?.target?.getStage()?.getRelativePointerPosition?.() as {
+            x: number;
+            y: number;
+          } | null;
+          const finalRect = pos
+            ? {
+                x: Math.min(pos.x, start.x),
+                y: Math.min(pos.y, start.y),
+                width: Math.abs(pos.x - start.x),
+                height: Math.abs(pos.y - start.y),
+              }
+            : selectionRect;
+          selectionStartRef.current = null;
+          if (finalRect && finalRect.width > 2 && finalRect.height > 2) {
+            cropByRect(finalRect);
           }
           setSelectionRect(null);
           return;
@@ -605,35 +714,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 
             const width = Math.max(1, maxX - minX);
             const height = Math.max(1, maxY - minY);
-            const normalizedPoints: number[] = [];
-            for (let i = 0; i < lassoPath.length; i += 2) {
-              normalizedPoints.push(
-                lassoPath[i] - minX,
-                lassoPath[i + 1] - minY,
-              );
-            }
-
             if (width > 2 && height > 2) {
-              pushUndo();
-              const id = `shape_object_free_${Date.now()}`;
-              setShapes((prev) => [
-                ...prev,
-                {
-                  id,
-                  type: 'object_free',
-                  x: minX,
-                  y: minY,
-                  width,
-                  height,
-                  fill: 'rgba(20, 71, 230, 0.18)',
-                  points: normalizedPoints,
-                  pointsWidth: width,
-                  pointsHeight: height,
-                },
-              ]);
-              setSelectedId(id);
-              setSelectedIds([]);
-              setActiveTool('mouse');
+              cropByRect({ x: minX, y: minY, width, height });
             }
           }
           setLassoPath([]);
@@ -716,6 +798,25 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
             : s,
         ),
       );
+    };
+
+    const handleDragEnd = (e: any) => {
+      const node = e.target;
+      const id = node.id?.();
+      if (!id) return;
+      const nextX = node.x();
+      const nextY = node.y();
+
+      setShapes((prev) => {
+        let changed = false;
+        const next = prev.map((shape) => {
+          if (shape.id !== id) return shape;
+          changed = true;
+          return { ...shape, x: nextX, y: nextY };
+        });
+        if (changed) pushUndo();
+        return next;
+      });
     };
 
     const isTextSelected = selectedId?.startsWith('text_') && !editingTextId;
@@ -804,6 +905,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
               objectRefs={objectRefs}
               trRef={trRef}
               handleTransformEnd={handleTransformEnd}
+              handleDragEnd={handleDragEnd}
               editingTextId={editingTextId}
               setEditingTextId={setEditingTextId}
               handleUpdateTextObject={handleUpdateTextObject}
