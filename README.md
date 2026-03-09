@@ -238,6 +238,12 @@ src/
 - 401 응답 시 토큰 초기화 후 `/login`으로 자동 리다이렉트
 - FormData 기반 파일 업로드
 
+### React Query 규칙
+
+- Query Hook은 `src/queries/<domain>/` 구조로 관리합니다. (예: `auth`, `project`, `template`)
+- Query Key는 도메인 prefix를 사용합니다. (예: `['project', 'recent']`)
+- 신규 Query/Mutation은 `axiosInstance` 기반 서비스 함수와 연결합니다.
+
 ### 캔버스 구현
 
 - Konva Stage + 멀티 레이어 (선, 도형, 텍스트, 배경)

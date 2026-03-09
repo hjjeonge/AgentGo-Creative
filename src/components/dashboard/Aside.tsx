@@ -4,10 +4,8 @@ import Arrow from './../../assets/arrow_down.svg';
 import Collapse from './../../assets/Collapse.svg';
 import { RecentProjectItem, type RecentProject } from './RecentProjectItem';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
-import {
-  deleteRecentProject,
-  getRecentProjects,
-} from '../../services/project/api';
+import { useDeleteRecentProjectMutation } from '../../queries/project/useDeleteRecentProjectMutation';
+import { useRecentProjectsQuery } from '../../queries/project/useRecentProjectsQuery';
 import { useNavigate } from 'react-router-dom';
 
 const MOCK_PROJECTS: RecentProject[] = [
@@ -61,24 +59,27 @@ interface Props {
 }
 
 export const Aside: React.FC<Props> = ({ asideOpen, handleAside }: Props) => {
+  const { data, isError } = useRecentProjectsQuery();
+  const { mutateAsync } = useDeleteRecentProjectMutation();
   const [projects, setProjects] = useState<RecentProject[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<RecentProject | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    getRecentProjects()
-      .then((res) => {
-        if (!res.data.length) {
-          setProjects(MOCK_PROJECTS); // todo mockdata 삽입 부분 제거해야 함
-          return;
-        }
-        setProjects(res.data);
-      })
-      .catch(() => {
-        console.log('최근 프로젝트 목록 조회에 실패했습니다.');
-        setProjects(MOCK_PROJECTS); // todo mockdata 삽입 부분 제거해야 함
-      });
-  }, []);
+    if (isError) {
+      console.log('최근 프로젝트 목록 조회에 실패했습니다.');
+      setProjects(MOCK_PROJECTS); // todo mockdata 삽입 부분 제거해야 함
+      return;
+    }
+
+    if (!data) return;
+    if (!data.length) {
+      setProjects(MOCK_PROJECTS); // todo mockdata 삽입 부분 제거해야 함
+      return;
+    }
+
+    setProjects(data);
+  }, [isError, data]);
 
   const handleDeleteRequest = (id: string) => {
     const target = projects.find((p) => p.id === id) ?? null;
@@ -87,11 +88,9 @@ export const Aside: React.FC<Props> = ({ asideOpen, handleAside }: Props) => {
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
-    if (deleteTarget) {
-      setProjects((prev) => prev.filter((p) => p.id !== deleteTarget.id));
-    }
+    setProjects((prev) => prev.filter((p) => p.id !== deleteTarget.id));
     setDeleteTarget(null);
-    await deleteRecentProject(deleteTarget?.id);
+    await mutateAsync(deleteTarget.id);
   };
 
   const onClickRecentProjectItem = (projectId: string) => {

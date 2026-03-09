@@ -1,42 +1,49 @@
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authStorage } from '../../services/apiClient';
-import { getUserProfile, postLogout } from '../../services/auth/api';
 import { clearTokens, getAccessToken } from '../../utils/tokenManager';
+import { useLogoutMutation } from '../../queries/auth/useLogoutMutation';
+import { useUserProfileQuery } from '../../queries/auth/useUserProfileQuery';
 import Dots from './../../assets/dots.svg';
 
 export const UserCard: React.FC = () => {
   const navigate = useNavigate();
+  const { mutateAsync: logoutMutateAsync } = useLogoutMutation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [name, setName] = useState('User');
   const [email, setEmail] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAuthed, setIsAuthed] = useState(!!getAccessToken());
   const wrapRef = useRef<HTMLDivElement>(null);
+  const token = getAccessToken();
+  const isDevToken = import.meta.env.DEV && token === 'dev-token';
+
+  const { data: userProfile, isError } = useUserProfileQuery({
+    enabled: Boolean(token) && !isDevToken,
+  });
 
   useEffect(() => {
-    if (!authStorage.getAccessToken()) return;
-
-    if (import.meta.env.DEV && authStorage.getAccessToken() === 'dev-token') {
+    if (!token) return;
+    if (isDevToken) {
       setName('테스트');
       setEmail('test@itcen.com');
       setIsAdmin(true);
-      return;
     }
+  }, [isDevToken, token]);
 
-    getUserProfile()
-      .then((res) => {
-        setName(res.data.name);
-        setEmail(res.data.email);
-        setIsAdmin(!!res.data.is_admin);
-      })
-      .catch(() => {
-        authStorage.clear();
-        setIsAuthed(false);
-        navigate('/login');
-      });
-  }, []);
+  useEffect(() => {
+    if (!userProfile) return;
+    setName(userProfile.name);
+    setEmail(userProfile.email);
+    setIsAdmin(!!userProfile.is_admin);
+  }, [userProfile]);
+
+  useEffect(() => {
+    if (!isError) return;
+    clearTokens();
+    setIsAuthed(false);
+    navigate('/login');
+  }, [isError, navigate]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -49,7 +56,7 @@ export const UserCard: React.FC = () => {
   const handleAction = async (action: string) => {
     setMenuOpen(false);
     if (action === 'logout') {
-      await postLogout();
+      await logoutMutateAsync();
       clearTokens();
       setIsAuthed(false);
       navigate('/login');
@@ -71,7 +78,6 @@ export const UserCard: React.FC = () => {
   const menuItems = [
     ...(isAdmin ? [{ label: '관리자', action: 'admin' }] : []),
     { label: '로그아웃', action: 'logout' },
-    { label: 'DAM', action: 'dam' },
   ];
 
   return (
