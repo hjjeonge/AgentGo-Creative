@@ -758,9 +758,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           setShapeType={handleAddShape}
           shapeSelectMode={shapeSelectMode}
           setShapeSelectMode={setShapeSelectMode}
-          isTextEditorVisible={!!isTextSelected}
-          selectedTextObject={selectedTextObject}
-          handleUpdateTextObject={handleUpdateTextObject}
         />
 
         {/* Konva canvas container */}
