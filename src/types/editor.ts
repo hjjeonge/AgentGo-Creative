@@ -89,3 +89,12 @@ export interface CanvasHandle {
   hasImage: () => boolean;
   clearCanvas: () => void;
 }
+
+export interface ShapeIntersection {
+  shape: Shape;
+  ix: number;
+  iy: number;
+  iWidth: number;
+  iHeight: number;
+  area: number;
+}

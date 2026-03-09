@@ -10,6 +10,11 @@ import { EditorCanvas } from './EditorCanvas';
 import { loadGoogleFont } from '../../utils/fontLoader';
 import { Toolbar } from './Toolbar';
 import { Prompt } from './Prompt';
+import {
+  getRectImageIntersections,
+  pickTargetIntersection,
+} from '../../utils/editor/cropUtils';
+import { getPathBoundingRect } from '../../utils/editor/geometry';
 import type {
   CanvasHandle,
   CanvasSnapshot,
@@ -564,36 +569,10 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           );
           if (uploadedShapes.length === 0) return false;
 
-          const intersections = uploadedShapes
-            .map((shape) => {
-              const ix = Math.max(rect.x, shape.x);
-              const iy = Math.max(rect.y, shape.y);
-              const ix2 = Math.min(rect.x + rect.width, shape.x + shape.width);
-              const iy2 = Math.min(
-                rect.y + rect.height,
-                shape.y + shape.height,
-              );
-              const iWidth = Math.max(0, ix2 - ix);
-              const iHeight = Math.max(0, iy2 - iy);
-              return {
-                shape,
-                ix,
-                iy,
-                iWidth,
-                iHeight,
-                area: iWidth * iHeight,
-              };
-            })
-            .filter((candidate) => candidate.area > 4);
+          const intersections = getRectImageIntersections(rect, uploadedShapes);
           if (intersections.length === 0) return false;
 
-          const selectedCandidate = selectedId
-            ? intersections.find(
-                (candidate) => candidate.shape.id === selectedId,
-              )
-            : undefined;
-          const target =
-            selectedCandidate ?? intersections[intersections.length - 1];
+          const target = pickTargetIntersection(intersections, selectedId);
           if (!target) return false;
 
           const applyCrop = (sourceWidth: number, sourceHeight: number) => {
@@ -693,55 +672,16 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         if (shapeSelectMode === 'lasso' && isLassoing) {
           setIsLassoing(false);
           if (lassoPath.length >= 6) {
-            let minX = Number.POSITIVE_INFINITY;
-            let minY = Number.POSITIVE_INFINITY;
-            let maxX = Number.NEGATIVE_INFINITY;
-            let maxY = Number.NEGATIVE_INFINITY;
-
-            for (let i = 0; i < lassoPath.length; i += 2) {
-              const x = lassoPath[i];
-              const y = lassoPath[i + 1];
-              minX = Math.min(minX, x);
-              minY = Math.min(minY, y);
-              maxX = Math.max(maxX, x);
-              maxY = Math.max(maxY, y);
-            }
-
-            const width = Math.max(1, maxX - minX);
-            const height = Math.max(1, maxY - minY);
-            if (width > 2 && height > 2) {
-              const maskRect = { x: minX, y: minY, width, height };
+            const maskRect = getPathBoundingRect(lassoPath);
+            if (maskRect && maskRect.width > 2 && maskRect.height > 2) {
               const uploadedShapes = shapesRef.current.filter(
                 (shape) => shape.type === 'uploaded_image',
               );
-              const intersections = uploadedShapes
-                .map((shape) => {
-                  const ix = Math.max(maskRect.x, shape.x);
-                  const iy = Math.max(maskRect.y, shape.y);
-                  const ix2 = Math.min(
-                    maskRect.x + maskRect.width,
-                    shape.x + shape.width,
-                  );
-                  const iy2 = Math.min(
-                    maskRect.y + maskRect.height,
-                    shape.y + shape.height,
-                  );
-                  const iWidth = Math.max(0, ix2 - ix);
-                  const iHeight = Math.max(0, iy2 - iy);
-                  return {
-                    shape,
-                    area: iWidth * iHeight,
-                  };
-                })
-                .filter((candidate) => candidate.area > 4);
-
-              const selectedCandidate = selectedId
-                ? intersections.find(
-                    (candidate) => candidate.shape.id === selectedId,
-                  )
-                : undefined;
-              const target =
-                selectedCandidate ?? intersections[intersections.length - 1];
+              const intersections = getRectImageIntersections(
+                maskRect,
+                uploadedShapes,
+              );
+              const target = pickTargetIntersection(intersections, selectedId);
 
               if (target) {
                 const safeWidth = Math.max(1, target.shape.width);
