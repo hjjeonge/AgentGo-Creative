@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { uploadFile } from '../../services/files';
-import { generateImage, getImageJob } from '../../services/images';
 import type { TemplateConfig } from '../../types/template';
 import { buildPrompt } from '../../utils/template/buildPrompt';
 import {
@@ -8,6 +7,7 @@ import {
   extractReferenceUrls,
 } from '../../utils/template/buildTemplateInputs';
 import { resolveImageUrl } from '../../utils/template/resolveImageUrl';
+import { generateImage, getImageJob } from '../../services/image/api';
 
 type FormFiles = Record<string, File[]>;
 
@@ -85,13 +85,17 @@ export const useTemplateGenerate = ({
         template_inputs: templateInputs,
       });
 
-      let job = res;
+      let job = res.data;
       if (job.status !== 'completed') {
         const maxAttempts = 30;
         for (let i = 0; i < maxAttempts; i++) {
           await wait(2000);
-          job = await getImageJob(res.job_id);
-          if (job.status === 'completed' || job.status === 'failed') break;
+          const response = await getImageJob(job.job_id);
+          if (
+            response.data.status === 'completed' ||
+            response.data.status === 'failed'
+          )
+            break;
         }
       }
 
