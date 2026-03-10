@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { uploadFile } from '../../services/files';
+import { uploadFile } from '../../services/file/api';
 import type { TemplateConfig } from '../../types/template';
 import { buildPrompt } from '../../utils/template/buildPrompt';
 import {
