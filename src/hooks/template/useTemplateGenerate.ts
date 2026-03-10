@@ -52,7 +52,7 @@ export const useTemplateGenerate = ({
         const urls = await Promise.all(
           selectedFiles.map(async (file) => {
             const uploaded = await uploadFile(file);
-            return uploaded.file_url;
+            return uploaded.data.file_url;
           }),
         );
         uploadedByField[field.key] = urls;
@@ -91,11 +91,8 @@ export const useTemplateGenerate = ({
         for (let i = 0; i < maxAttempts; i++) {
           await wait(2000);
           const response = await getImageJob(job.job_id);
-          if (
-            response.data.status === 'completed' ||
-            response.data.status === 'failed'
-          )
-            break;
+          job = response.data;
+          if (job.status === 'completed' || job.status === 'failed') break;
         }
       }
 

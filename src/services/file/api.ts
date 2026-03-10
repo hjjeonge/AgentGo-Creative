@@ -1,12 +1,8 @@
 import axiosInstance from '../axiosInstance';
 import type { FileUploadResponse } from './type';
 
-export const uploadFile = async (file: File): Promise<FileUploadResponse> => {
+export const uploadFile = (file: File) => {
   const formData = new FormData();
   formData.append('file', file);
-  const res = await axiosInstance.post<FileUploadResponse>(
-    '/api/files/upload',
-    formData,
-  );
-  return res.data;
+  return axiosInstance.post<FileUploadResponse>('/api/files/upload', formData);
 };

@@ -9,9 +9,7 @@ import type {
   MultilingualResult,
 } from './type';
 
-export async function generateKeyVisual(
-  params: KeyVisualParams,
-): Promise<AIProxyResponse<KeyVisualResult>> {
+export const generateKeyVisual = (params: KeyVisualParams) => {
   const form = new FormData();
   form.append('file', params.file);
   form.append('feedback', params.feedback);
@@ -22,59 +20,51 @@ export async function generateKeyVisual(
     form.append('system_prompt', params.system_prompt);
   }
 
-  const res = await axiosInstance.post<AIProxyResponse<KeyVisualResult>>(
+  return axiosInstance.post<AIProxyResponse<KeyVisualResult>>(
     '/api/ai/key-visual',
     form,
   );
-  return res.data;
-}
+};
 
-export async function translateMultilingual(
+export const translateMultilingual = (
   file: File,
   source_lang = 'Korean',
   target_lang = 'English',
-): Promise<AIProxyResponse<MultilingualResult>> {
+) => {
   const form = new FormData();
   form.append('file', file);
   form.append('source_lang', source_lang);
   form.append('target_lang', target_lang);
 
-  const res = await axiosInstance.post<AIProxyResponse<MultilingualResult>>(
+  return axiosInstance.post<AIProxyResponse<MultilingualResult>>(
     '/api/ai/multilingual/translate',
     form,
   );
-  return res.data;
-}
+};
 
-export async function submitMultilingualJob(
+export const submitMultilingualJob = (
   file: File,
   source_lang = 'Korean',
   target_lang = 'English',
-): Promise<AIProxyResponse<MultilingualJobResult>> {
+) => {
   const form = new FormData();
   form.append('file', file);
   form.append('source_lang', source_lang);
   form.append('target_lang', target_lang);
 
-  const res = await axiosInstance.post<AIProxyResponse<MultilingualJobResult>>(
+  return axiosInstance.post<AIProxyResponse<MultilingualJobResult>>(
     '/api/ai/multilingual/translate/jobs',
     form,
   );
-  return res.data;
-}
+};
 
-export async function getMultilingualJobStatus(
-  jobId: string,
-): Promise<AIProxyResponse<MultilingualJobResult>> {
-  const res = await axiosInstance.get<AIProxyResponse<MultilingualJobResult>>(
+export const getMultilingualJobStatus = (jobId: string) => {
+  return axiosInstance.get<AIProxyResponse<MultilingualJobResult>>(
     `/api/ai/multilingual/translate/jobs/${jobId}`,
   );
-  return res.data;
-}
+};
 
-export async function renderDetailCut(
-  params: DetailCutParams,
-): Promise<AIProxyResponse<DetailCutResult>> {
+export const renderDetailCut = (params: DetailCutParams) => {
   const form = new FormData();
   params.files.forEach((file) => form.append('files', file));
   form.append('product_name', params.product_name);
@@ -83,9 +73,8 @@ export async function renderDetailCut(
     form.append('source_angles', JSON.stringify(params.source_angles));
   }
 
-  const res = await axiosInstance.post<AIProxyResponse<DetailCutResult>>(
+  return axiosInstance.post<AIProxyResponse<DetailCutResult>>(
     '/api/ai/detail-cut/render',
     form,
   );
-  return res.data;
-}
+};

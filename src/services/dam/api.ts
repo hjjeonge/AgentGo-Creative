@@ -1,84 +1,19 @@
-import { del, download, get, patch, post, upload } from './apiClient';
-
-export interface UploaderInfo {
-  id: string;
-  name: string;
-  email: string;
-}
-
-export interface FolderNode {
-  id: string;
-  name: string;
-  is_fixed?: boolean;
-  children?: FolderNode[];
-}
-
-export interface AssetSummary {
-  id: string;
-  name: string;
-  file_type: string;
-  file_size: string;
-  thumbnail_url?: string | null;
-  uploaded_by: string;
-  updated_at: string;
-  metadata?: Record<string, unknown> | null;
-}
-
-export interface AssetDetail {
-  id: string;
-  name: string;
-  file_type: string;
-  file_url: string;
-  file_size: string;
-  uploaded_by: string;
-  metadata?: Record<string, unknown> | null;
-  reference_images?: string[] | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface AssetListResponse {
-  items: AssetSummary[];
-  total: number;
-}
-
-export interface AssetPermission {
-  id: string;
-  name: string;
-  email: string;
-  access_level: 'owner' | 'change-permissions' | 'can-edit' | 'can-view';
-}
-
-export interface WorkspaceTask {
-  id: string;
-  title: string;
-  description: string;
-  status: 'todo' | 'in-progress' | 'review' | 'done';
-  priority: 'low' | 'medium' | 'high';
-  creator: {
-    name: string;
-    avatar?: string;
-  };
-  created_at: string;
-  due_date: string;
-  assignee?: string;
-  linked_asset_id?: string;
-}
-
-export interface CollectionItem {
-  id: string;
-  name: string;
-  description?: string;
-  asset_ids: string[];
-  share_token?: string;
-}
+import axiosInstance from '../axiosInstance';
+import type {
+  AssetDetail,
+  AssetListResponse,
+  AssetPermission,
+  AssetSummary,
+  CollectionItem,
+  DevAsset,
+  FolderNode,
+  ListAssetsParams,
+  UploaderInfo,
+  WorkspaceTask,
+} from './type';
 
 const USE_DEV_DUMMY =
   import.meta.env.DEV && import.meta.env.VITE_DAM_USE_DEV_DUMMY !== 'false';
-
-type DevAsset = AssetDetail & {
-  folder_id?: string;
-};
 
 const DEV_FOLDERS: FolderNode[] = [
   {
@@ -199,7 +134,7 @@ const createDevAssets = (): DevAsset[] => {
 };
 
 let devAssets: DevAsset[] = createDevAssets();
-let devPermissionsByAsset: Record<string, AssetPermission[]> = {
+const devPermissionsByAsset: Record<string, AssetPermission[]> = {
   'dev-asset-1': [
     {
       id: 'perm-1',
@@ -222,7 +157,7 @@ let devPermissionsByAsset: Record<string, AssetPermission[]> = {
   ],
 };
 
-let devTasks: WorkspaceTask[] = [
+const devTasks: WorkspaceTask[] = [
   {
     id: 'task-1',
     title: 'Spring hero metadata review',
@@ -261,7 +196,7 @@ let devTasks: WorkspaceTask[] = [
   },
 ];
 
-let devCollections: CollectionItem[] = [
+const devCollections: CollectionItem[] = [
   {
     id: 'coll-summer',
     name: 'Summer Campaign',
@@ -312,21 +247,17 @@ const toSummary = (asset: DevAsset): AssetSummary => ({
 const includesIgnoreCase = (value: string, query: string): boolean =>
   value.toLowerCase().includes(query.toLowerCase());
 
-export async function getFolderTree(): Promise<FolderNode[]> {
+export const getFolderTree = async (): Promise<FolderNode[]> => {
   if (USE_DEV_DUMMY) {
     return DEV_FOLDERS;
   }
-  return get<FolderNode[]>('/api/dam/folders');
-}
+  const res = await axiosInstance.get<FolderNode[]>('/api/dam/folders');
+  return res.data;
+};
 
-export async function listAssets(params?: {
-  keyword?: string;
-  file_type?: string;
-  user_name?: string;
-  date_from?: string;
-  date_to?: string;
-  folder_id?: string;
-}): Promise<AssetListResponse> {
+export const listAssets = async (
+  params?: ListAssetsParams,
+): Promise<AssetListResponse> => {
   if (USE_DEV_DUMMY) {
     const {
       keyword,
@@ -369,10 +300,13 @@ export async function listAssets(params?: {
         ][],
       ).toString()
     : '';
-  return get<AssetListResponse>(`/api/dam/assets${query}`);
-}
+  const res = await axiosInstance.get<AssetListResponse>(
+    `/api/dam/assets${query}`,
+  );
+  return res.data;
+};
 
-export async function getAssetDetail(assetId: string): Promise<AssetDetail> {
+export const getAssetDetail = async (assetId: string): Promise<AssetDetail> => {
   if (USE_DEV_DUMMY) {
     const found = devAssets.find((asset) => asset.id === assetId);
     if (!found) {
@@ -380,13 +314,16 @@ export async function getAssetDetail(assetId: string): Promise<AssetDetail> {
     }
     return found;
   }
-  return get<AssetDetail>(`/api/dam/assets/${assetId}`);
-}
+  const res = await axiosInstance.get<AssetDetail>(
+    `/api/dam/assets/${assetId}`,
+  );
+  return res.data;
+};
 
-export async function renameAsset(
+export const renameAsset = async (
   assetId: string,
   name: string,
-): Promise<AssetSummary> {
+): Promise<AssetSummary> => {
   if (USE_DEV_DUMMY) {
     const target = devAssets.find((asset) => asset.id === assetId);
     if (!target) throw new Error('Asset not found');
@@ -394,10 +331,16 @@ export async function renameAsset(
     target.updated_at = new Date().toISOString();
     return toSummary(target);
   }
-  return patch<AssetSummary>(`/api/dam/assets/${assetId}`, { name });
-}
+  const res = await axiosInstance.patch<AssetSummary>(
+    `/api/dam/assets/${assetId}`,
+    {
+      name,
+    },
+  );
+  return res.data;
+};
 
-export async function copyAsset(assetId: string): Promise<AssetDetail> {
+export const copyAsset = async (assetId: string): Promise<AssetDetail> => {
   if (USE_DEV_DUMMY) {
     const target = devAssets.find((asset) => asset.id === assetId);
     if (!target) throw new Error('Asset not found');
@@ -415,22 +358,25 @@ export async function copyAsset(assetId: string): Promise<AssetDetail> {
     devAssets = [copied, ...devAssets];
     return copied;
   }
-  return post<AssetDetail>(`/api/dam/assets/${assetId}/copy`);
-}
+  const res = await axiosInstance.post<AssetDetail>(
+    `/api/dam/assets/${assetId}/copy`,
+  );
+  return res.data;
+};
 
-export async function deleteAsset(assetId: string): Promise<void> {
+export const deleteAsset = async (assetId: string): Promise<void> => {
   if (USE_DEV_DUMMY) {
     devAssets = devAssets.filter((asset) => asset.id !== assetId);
     return;
   }
-  await del<void>(`/api/dam/assets/${assetId}`);
-}
+  await axiosInstance.delete(`/api/dam/assets/${assetId}`);
+};
 
-export function downloadAssetUrl(assetId: string): string {
+export const downloadAssetUrl = (assetId: string): string => {
   return `/api/dam/assets/${assetId}/download`;
-}
+};
 
-export async function downloadAsset(assetId: string): Promise<Blob> {
+export const downloadAsset = async (assetId: string): Promise<Blob> => {
   if (USE_DEV_DUMMY) {
     const file = devAssets.find((asset) => asset.id === assetId);
     const fileName = file?.name || 'asset';
@@ -438,15 +384,18 @@ export async function downloadAsset(assetId: string): Promise<Blob> {
       type: 'text/plain',
     });
   }
-  return download(downloadAssetUrl(assetId));
-}
+  const res = await axiosInstance.get<Blob>(downloadAssetUrl(assetId), {
+    responseType: 'blob',
+  });
+  return res.data;
+};
 
-export async function uploadAsset(
+export const uploadAsset = async (
   file: File,
   name: string,
   metadata?: Record<string, unknown>,
   folderId?: string,
-): Promise<AssetDetail> {
+): Promise<AssetDetail> => {
   if (USE_DEV_DUMMY) {
     const now = new Date().toISOString();
     const next: DevAsset = {
@@ -485,13 +434,17 @@ export async function uploadAsset(
     query.set('folder_id', folderId);
   }
 
-  return upload<AssetDetail>(`/api/dam/assets?${query.toString()}`, formData);
-}
+  const res = await axiosInstance.post<AssetDetail>(
+    `/api/dam/assets?${query.toString()}`,
+    formData,
+  );
+  return res.data;
+};
 
-export async function updateAssetMetadata(
+export const updateAssetMetadata = async (
   assetId: string,
   metadata: Record<string, unknown>,
-): Promise<AssetDetail> {
+): Promise<AssetDetail> => {
   if (USE_DEV_DUMMY) {
     const target = devAssets.find((asset) => asset.id === assetId);
     if (!target) throw new Error('Asset not found');
@@ -502,12 +455,14 @@ export async function updateAssetMetadata(
     target.updated_at = new Date().toISOString();
     return target;
   }
-  return patch<AssetDetail>(`/api/dam/assets/${assetId}/metadata`, {
-    metadata,
-  });
-}
+  const res = await axiosInstance.patch<AssetDetail>(
+    `/api/dam/assets/${assetId}/metadata`,
+    { metadata },
+  );
+  return res.data;
+};
 
-export async function listUploaders(): Promise<UploaderInfo[]> {
+export const listUploaders = async (): Promise<UploaderInfo[]> => {
   if (USE_DEV_DUMMY) {
     const map = new Map<string, UploaderInfo>();
     devAssets.forEach((asset) => {
@@ -522,12 +477,15 @@ export async function listUploaders(): Promise<UploaderInfo[]> {
     });
     return [...map.values()];
   }
-  return get<UploaderInfo[]>('/api/dam/assets/uploaders');
-}
+  const res = await axiosInstance.get<UploaderInfo[]>(
+    '/api/dam/assets/uploaders',
+  );
+  return res.data;
+};
 
-export async function listAssetPermissions(
+export const listAssetPermissions = async (
   assetId: string,
-): Promise<AssetPermission[]> {
+): Promise<AssetPermission[]> => {
   if (USE_DEV_DUMMY) {
     return (
       devPermissionsByAsset[assetId] || [
@@ -540,52 +498,65 @@ export async function listAssetPermissions(
       ]
     );
   }
-  return get<AssetPermission[]>(`/api/dam/assets/${assetId}/permissions`);
-}
+  const res = await axiosInstance.get<AssetPermission[]>(
+    `/api/dam/assets/${assetId}/permissions`,
+  );
+  return res.data;
+};
 
-export async function saveAssetPermissions(
+export const saveAssetPermissions = async (
   assetId: string,
   permissions: AssetPermission[],
-): Promise<AssetPermission[]> {
+): Promise<AssetPermission[]> => {
   if (USE_DEV_DUMMY) {
     devPermissionsByAsset[assetId] = permissions;
     return permissions;
   }
-  return post<AssetPermission[]>(`/api/dam/assets/${assetId}/permissions`, {
-    permissions,
-  });
-}
+  const res = await axiosInstance.post<AssetPermission[]>(
+    `/api/dam/assets/${assetId}/permissions`,
+    { permissions },
+  );
+  return res.data;
+};
 
-export async function listWorkspaceTasks(): Promise<WorkspaceTask[]> {
+export const listWorkspaceTasks = async (): Promise<WorkspaceTask[]> => {
   if (USE_DEV_DUMMY) {
     return devTasks;
   }
-  return get<WorkspaceTask[]>('/api/dam/workspace/tasks');
-}
+  const res = await axiosInstance.get<WorkspaceTask[]>(
+    '/api/dam/workspace/tasks',
+  );
+  return res.data;
+};
 
-export async function updateWorkspaceTask(
+export const updateWorkspaceTask = async (
   taskId: string,
   payload: Partial<WorkspaceTask>,
-): Promise<WorkspaceTask> {
+): Promise<WorkspaceTask> => {
   if (USE_DEV_DUMMY) {
     const target = devTasks.find((task) => task.id === taskId);
     if (!target) throw new Error('Task not found');
     Object.assign(target, payload);
     return target;
   }
-  return patch<WorkspaceTask>(`/api/dam/workspace/tasks/${taskId}`, payload);
-}
+  const res = await axiosInstance.patch<WorkspaceTask>(
+    `/api/dam/workspace/tasks/${taskId}`,
+    payload,
+  );
+  return res.data;
+};
 
-export async function listCollections(): Promise<CollectionItem[]> {
+export const listCollections = async (): Promise<CollectionItem[]> => {
   if (USE_DEV_DUMMY) {
     return devCollections;
   }
-  return get<CollectionItem[]>('/api/dam/collections');
-}
+  const res = await axiosInstance.get<CollectionItem[]>('/api/dam/collections');
+  return res.data;
+};
 
-export async function createCollectionShareLink(
+export const createCollectionShareLink = async (
   collectionId: string,
-): Promise<{ url: string }> {
+): Promise<{ url: string }> => {
   if (USE_DEV_DUMMY) {
     const collection = devCollections.find((item) => item.id === collectionId);
     if (!collection) throw new Error('Collection not found');
@@ -594,13 +565,16 @@ export async function createCollectionShareLink(
     collection.share_token = token;
     return { url: `${window.location.origin}/dam/share/${token}` };
   }
-  return post<{ url: string }>(`/api/dam/collections/${collectionId}/share`);
-}
+  const res = await axiosInstance.post<{ url: string }>(
+    `/api/dam/collections/${collectionId}/share`,
+  );
+  return res.data;
+};
 
-export async function addAssetToCollection(
+export const addAssetToCollection = async (
   collectionId: string,
   assetId: string,
-): Promise<CollectionItem> {
+): Promise<CollectionItem> => {
   if (USE_DEV_DUMMY) {
     const collection = devCollections.find((item) => item.id === collectionId);
     if (!collection) throw new Error('Collection not found');
@@ -609,22 +583,25 @@ export async function addAssetToCollection(
     }
     return collection;
   }
-  return post<CollectionItem>(`/api/dam/collections/${collectionId}/assets`, {
-    asset_id: assetId,
-  });
-}
+  const res = await axiosInstance.post<CollectionItem>(
+    `/api/dam/collections/${collectionId}/assets`,
+    { asset_id: assetId },
+  );
+  return res.data;
+};
 
-export async function removeAssetFromCollection(
+export const removeAssetFromCollection = async (
   collectionId: string,
   assetId: string,
-): Promise<CollectionItem> {
+): Promise<CollectionItem> => {
   if (USE_DEV_DUMMY) {
     const collection = devCollections.find((item) => item.id === collectionId);
     if (!collection) throw new Error('Collection not found');
     collection.asset_ids = collection.asset_ids.filter((id) => id !== assetId);
     return collection;
   }
-  return del<CollectionItem>(
+  const res = await axiosInstance.delete<CollectionItem>(
     `/api/dam/collections/${collectionId}/assets/${assetId}`,
   );
-}
+  return res.data;
+};
