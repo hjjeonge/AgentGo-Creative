@@ -9,9 +9,17 @@ export interface LoginRes {
   token_type?: string;
 }
 
+export interface LogoutReq {
+  refresh_token: string;
+}
+
 export interface UserProfileRes {
   id: string;
   email: string;
   name: string;
   is_admin?: boolean;
+}
+
+export interface RefreshTokenReq {
+  refresh_token: string;
 }
