@@ -1,5 +1,5 @@
-import React, { forwardRef } from "react";
-import { CustomTooltip } from "../commons/CustomTooltip";
+import React, { forwardRef } from 'react';
+import { CustomTooltip } from '../commons/CustomTooltip';
 
 interface ToolbarButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: string;
@@ -9,7 +9,7 @@ interface ToolbarButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 export const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
   ({ icon, tooltip, isActive, className, ...props }, ref) => {
-    const activeClass = isActive ? "bg-[#CAD5E2]" : "";
+    const activeClass = isActive ? 'bg-[#CAD5E2]' : '';
 
     return (
       <CustomTooltip content={tooltip}>
@@ -25,4 +25,4 @@ export const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(
   },
 );
 
-ToolbarButton.displayName = "ToolbarButton";
+ToolbarButton.displayName = 'ToolbarButton';

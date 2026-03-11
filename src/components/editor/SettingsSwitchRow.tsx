@@ -7,7 +7,9 @@ interface SettingsSwitchRowProps {
   // onToggle, initialState 등 추후 확장 가능
 }
 
-export const SettingsSwitchRow: React.FC<SettingsSwitchRowProps> = ({ label }) => {
+export const SettingsSwitchRow: React.FC<SettingsSwitchRowProps> = ({
+  label,
+}) => {
   return (
     <div className="flex items-center justify-between p-[7px]">
       <div className="flex items-center justify-center gap-[4px]">

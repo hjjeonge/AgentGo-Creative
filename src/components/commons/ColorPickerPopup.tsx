@@ -1,52 +1,52 @@
-import type React from "react";
-import { useEffect, useMemo, useState } from "react";
-import NONE_COLOR from "./../../assets/none.svg";
-import Close from "./../../assets/close-line.svg";
-import Picker from "./../../assets/colorize.svg";
+import type React from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import NONE_COLOR from './../../assets/none.svg';
+import Close from './../../assets/close-line.svg';
+import Picker from './../../assets/colorize.svg';
 
 const DEFAULT_COLOR_LIST = [
-  "#000000",
-  "#595959",
-  "#787878",
-  "#9E9E9E",
-  "#C2C2C2",
-  "#EEEEEE",
-  "#FFFFFF",
-  "#FFCABC",
-  "#FFEFC0",
-  "#E1F0D3",
-  "#ACE7E0",
-  "#AAEBFF",
-  "#CBD2F4",
-  "#E7BDEA",
-  "#FF8261",
-  "#FFCB19",
-  "#A6D57C",
-  "#6ACDC4",
-  "#00D0FF",
-  "#9DA9DC",
-  "#C766CB",
-  "#FF3D13",
-  "#FF9A00",
-  "#6EB435",
-  "#00A899",
-  "#00ACF8",
-  "#596FC5",
-  "#A823B5",
-  "#EB3A07",
-  "#FF6400",
-  "#438C24",
-  "#008B7A",
-  "#008AD5",
-  "#354EAE",
-  "#721E9F",
-  "#BD2D09",
-  "#DA5000",
-  "#376F1D",
-  "#007062",
-  "#006FAB",
-  "#2A3E8C",
-  "#5D1980",
+  '#000000',
+  '#595959',
+  '#787878',
+  '#9E9E9E',
+  '#C2C2C2',
+  '#EEEEEE',
+  '#FFFFFF',
+  '#FFCABC',
+  '#FFEFC0',
+  '#E1F0D3',
+  '#ACE7E0',
+  '#AAEBFF',
+  '#CBD2F4',
+  '#E7BDEA',
+  '#FF8261',
+  '#FFCB19',
+  '#A6D57C',
+  '#6ACDC4',
+  '#00D0FF',
+  '#9DA9DC',
+  '#C766CB',
+  '#FF3D13',
+  '#FF9A00',
+  '#6EB435',
+  '#00A899',
+  '#00ACF8',
+  '#596FC5',
+  '#A823B5',
+  '#EB3A07',
+  '#FF6400',
+  '#438C24',
+  '#008B7A',
+  '#008AD5',
+  '#354EAE',
+  '#721E9F',
+  '#BD2D09',
+  '#DA5000',
+  '#376F1D',
+  '#007062',
+  '#006FAB',
+  '#2A3E8C',
+  '#5D1980',
 ];
 
 interface Props {
@@ -65,25 +65,25 @@ export const ColorPickerPopup: React.FC<Props> = ({
   onOpenPalette,
 }: Props) => {
   const normalizeHex = (value: string) => {
-    if (!value) return "#000000";
-    if (value === "transparent") return "transparent";
-    return value.startsWith("#")
+    if (!value) return '#000000';
+    if (value === 'transparent') return 'transparent';
+    return value.startsWith('#')
       ? value.toUpperCase()
       : `#${value}`.toUpperCase();
   };
 
-  const [hexInput, setHexInput] = useState<string>("");
+  const [hexInput, setHexInput] = useState<string>('');
   const normalizedCurrent = useMemo(
     () => normalizeHex(currentColor),
     [currentColor],
   );
 
   useEffect(() => {
-    if (normalizedCurrent === "transparent") {
-      setHexInput("");
+    if (normalizedCurrent === 'transparent') {
+      setHexInput('');
       return;
     }
-    setHexInput(normalizedCurrent.replace("#", ""));
+    setHexInput(normalizedCurrent.replace('#', ''));
   }, [normalizedCurrent]);
 
   const handleSelect = (value: string) => {
@@ -105,7 +105,7 @@ export const ColorPickerPopup: React.FC<Props> = ({
           {recentlyUseColorList?.slice(0, 7)?.map((el) => (
             <button
               key={el}
-              className={`border rounded-[4px] overflow-hidden box-border w-[20px] h-[20px] ${isActive(el) ? "border-[#0F172B]" : "border-[#90A1B9]"}`}
+              className={`border rounded-[4px] overflow-hidden box-border w-[20px] h-[20px] ${isActive(el) ? 'border-[#0F172B]' : 'border-[#90A1B9]'}`}
               onClick={() => handleSelect(el)}
             >
               <div className="w-full h-full" style={{ backgroundColor: el }} />
@@ -119,8 +119,8 @@ export const ColorPickerPopup: React.FC<Props> = ({
         </div>
         <div className="flex flex-col gap-[14px] px-[4px]">
           <button
-            className={`border rounded-[5px] box-border w-[20px] h-[20px] ${normalizedCurrent === "transparent" ? "border-[#0F172B]" : "border-[#90A1B9]"}`}
-            onClick={() => handleSelect("transparent")}
+            className={`border rounded-[5px] box-border w-[20px] h-[20px] ${normalizedCurrent === 'transparent' ? 'border-[#0F172B]' : 'border-[#90A1B9]'}`}
+            onClick={() => handleSelect('transparent')}
           >
             <img src={NONE_COLOR} />
           </button>
@@ -128,7 +128,7 @@ export const ColorPickerPopup: React.FC<Props> = ({
             {DEFAULT_COLOR_LIST.map((el) => (
               <button
                 key={el}
-                className={`border rounded-[4px] overflow-hidden box-border w-[20px] h-[20px] ${isActive(el) ? "border-[#0F172B]" : "border-[#90A1B9]"}`}
+                className={`border rounded-[4px] overflow-hidden box-border w-[20px] h-[20px] ${isActive(el) ? 'border-[#0F172B]' : 'border-[#90A1B9]'}`}
                 onClick={() => handleSelect(el)}
               >
                 <div
@@ -152,7 +152,7 @@ export const ColorPickerPopup: React.FC<Props> = ({
               maxLength={6}
               value={hexInput}
               onChange={(e) => {
-                const next = e.target.value.replace(/[^0-9a-fA-F]/g, "");
+                const next = e.target.value.replace(/[^0-9a-fA-F]/g, '');
                 setHexInput(next);
                 if (next.length === 6) handleSelect(next);
               }}

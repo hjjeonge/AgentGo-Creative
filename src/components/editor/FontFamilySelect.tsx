@@ -1,4 +1,4 @@
-import type React from "react";
+import type React from 'react';
 import {
   Select,
   SelectContent,
@@ -6,9 +6,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import type { TextObject } from "./EditorCanvas";
-import { loadGoogleFont } from "../../utils/fontLoader";
+} from '../ui/select';
+import { loadGoogleFont } from '../../utils/fontLoader';
+import type { TextObject } from '../../types/editor';
 
 interface FontFamilySelectProps {
   selectedTextObject?: TextObject;
@@ -16,16 +16,16 @@ interface FontFamilySelectProps {
 }
 
 const googleFonts = [
-  "Roboto",
-  "Open Sans",
-  "Lato",
-  "Montserrat",
-  "Oswald",
-  "Source Sans Pro",
-  "Raleway",
-  "PT Sans",
-  "Merriweather",
-  "Noto Sans KR",
+  'Roboto',
+  'Open Sans',
+  'Lato',
+  'Montserrat',
+  'Oswald',
+  'Source Sans Pro',
+  'Raleway',
+  'PT Sans',
+  'Merriweather',
+  'Noto Sans KR',
 ];
 
 export const FontFamilySelect: React.FC<FontFamilySelectProps> = ({
@@ -44,7 +44,7 @@ export const FontFamilySelect: React.FC<FontFamilySelectProps> = ({
 
   return (
     <Select
-      value={selectedTextObject?.fontFamily || "Noto Sans KR"}
+      value={selectedTextObject?.fontFamily || 'Noto Sans KR'}
       onValueChange={handleFontChange}
     >
       <SelectTrigger className="border border-[#90A1B9] rounded-[6px] w-full focus:outline-0 p-[14px] h-[52px]">
