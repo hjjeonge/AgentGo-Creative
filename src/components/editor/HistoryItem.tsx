@@ -1,5 +1,6 @@
 import type React from 'react';
 import type { HistoryItemRes } from '../../services/project/type';
+import { resolveImageUrl } from '../../utils/template/resolveImageUrl';
 
 interface Props {
   entry: HistoryItemRes;
@@ -7,6 +8,13 @@ interface Props {
 }
 
 export const HistoryItem: React.FC<Props> = ({ entry, onClick }) => {
+  const uploadedImageShape = entry.snapshot.shapes.find(
+    (shape) => shape.type === 'uploaded_image' && shape.imageUrl,
+  );
+  const previewUrl = resolveImageUrl(
+    entry.snapshot.backgroundImage || uploadedImageShape?.imageUrl,
+  );
+
   return (
     <div
       className="overflow-hidden rounded-[10px] flex items-center justify-center p-[1px] bg-[linear-gradient(135deg,rgba(86,157,255,0.3)_0%,rgba(0,85,233,0.2)_50%,rgba(106,20,217,0.25)_100%)] box-border cursor-pointer hover:opacity-80"
@@ -14,9 +22,9 @@ export const HistoryItem: React.FC<Props> = ({ entry, onClick }) => {
     >
       <div className="bg-[#F8FAFF] p-[12px] flex items-center gap-[12px] w-full rounded-[9px]">
         <div className="w-[64px] h-[48px] rounded-[8px] bg-[#E2E8F0] shrink-0 overflow-hidden flex items-center justify-center">
-          {entry.snapshot.backgroundImage ? (
+          {previewUrl ? (
             <img
-              src={entry.snapshot.backgroundImage}
+              src={previewUrl}
               className="w-full h-full object-cover"
               alt={entry.title}
             />

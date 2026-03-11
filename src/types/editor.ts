@@ -85,6 +85,7 @@ export interface CanvasHandle {
   addText: () => void;
   updateTextObject: (id: string, updates: Partial<TextObject>) => void;
   getSnapshot: () => CanvasSnapshot;
+  exportAsBlob: () => Promise<Blob | null>;
   restoreSnapshot: (snapshot: CanvasSnapshot) => void;
   hasImage: () => boolean;
   clearCanvas: () => void;

@@ -3,8 +3,8 @@ import type { DrawLine, Shape, TextObject } from '../../types/editor';
 export interface RecentProjectItem {
   id: string;
   title: string;
-  date: string;
-  thumbnail?: string | null;
+  updated_at: string;
+  thumbnail_url?: string | null;
 }
 
 export interface CreateProjectRes {
@@ -29,7 +29,7 @@ export interface ProjectDetailRes {
 
 export interface SaveProjectReq {
   title: string;
-  snapshot: Record<string, unknown>;
+  snapshot: CanvasSnapshot;
   thumbnail_url?: string | null;
 }
 

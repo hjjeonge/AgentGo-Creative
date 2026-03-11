@@ -52,7 +52,7 @@ export const useTemplateGenerate = ({
         const urls = await Promise.all(
           selectedFiles.map(async (file) => {
             const uploaded = await uploadFile(file);
-            return uploaded.data.file_url;
+            return uploaded.file_url;
           }),
         );
         uploadedByField[field.key] = urls;

@@ -42,6 +42,7 @@ interface EditorCanvasProps {
   } | null;
   lassoPath?: number[];
   selectedIds?: string[];
+  onStageReady?: (stage: Konva.Stage | null) => void;
 }
 
 const buildPolygonPoints = (sides: number, width: number, height: number) => {
@@ -81,6 +82,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   selectionRect,
   lassoPath = [],
   selectedIds = [],
+  onStageReady,
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [bgImage, setBgImage] = useState<HTMLImageElement | null>(null);
@@ -168,6 +170,11 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
 
   const editingText = texts.find((t) => t.id === editingTextId);
   const stageRef = useRef<any>(null);
+
+  useEffect(() => {
+    onStageReady?.(stageRef.current);
+  }, [onStageReady, stageSize.width, stageSize.height]);
+
   const toVerticalText = (value: string) => {
     return value
       .split('\n')

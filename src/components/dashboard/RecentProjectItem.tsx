@@ -1,15 +1,11 @@
 import type React from 'react';
 import RemoveIcon from '../../assets/remove.svg';
-
-export interface RecentProject {
-  id: string;
-  title: string;
-  date: string;
-  thumbnail?: string | null;
-}
+import type { RecentProjectItem as RecentProjectItemType } from '../../services/project/type';
+import dayjs from 'dayjs';
+import { resolveImageUrl } from '../../utils/template/resolveImageUrl';
 
 interface Props {
-  project: RecentProject;
+  project: RecentProjectItemType;
   onDelete: (id: string) => void;
   onClick: () => void;
 }
@@ -19,16 +15,18 @@ export const RecentProjectItem: React.FC<Props> = ({
   onDelete,
   onClick,
 }: Props) => {
+  const thumbnailUrl = resolveImageUrl(project.thumbnail_url);
+
   return (
     <div
       onClick={onClick}
       className="group overflow-hidden rounded-[10px] flex items-center justify-center p-[1px] bg-[linear-gradient(135deg,rgba(86,157,255,0.3)_0%,rgba(0,85,233,0.2)_50%,rgba(106,20,217,0.25)_100%)] box-border cursor-pointer"
     >
       <div className="relative bg-[#F8FAFF] p-[12px] flex items-center gap-[12px] w-full rounded-[9px]">
-        {project.thumbnail ? (
+        {thumbnailUrl ? (
           <img
             className="w-[58px] h-[58px] rounded-[8px] object-cover shrink-0"
-            src={project.thumbnail}
+            src={thumbnailUrl}
             alt={project.title}
           />
         ) : (
@@ -41,7 +39,7 @@ export const RecentProjectItem: React.FC<Props> = ({
             {project.title}
           </span>
           <span className="text-[#90A1B9] text-[12px] leading-[18px]">
-            {project.date}
+            {dayjs(project.updated_at).format('YYYY/MM/DD hh:mm:ss')}
           </span>
         </div>
         {/* 마우스 오버 시 삭제 버튼 */}

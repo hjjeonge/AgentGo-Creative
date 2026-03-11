@@ -2,6 +2,7 @@
   forwardRef,
   useEffect,
   useImperativeHandle,
+  useCallback,
   useRef,
   useState,
 } from 'react';
@@ -40,6 +41,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     const navigate = useNavigate();
     const [activeTool, setActiveTool] = useState<string>('mouse');
     const containerRef = useRef<HTMLDivElement>(null);
+    const stageRef = useRef<any>(null);
     const {
       stageSize,
       setStageSize,
@@ -86,6 +88,10 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       objectRefs,
       trRef,
     } = useCanvasState();
+
+    const handleStageReady = useCallback((stage: any | null) => {
+      stageRef.current = stage;
+    }, []);
 
     useEffect(() => {
       const container = containerRef.current;
@@ -294,6 +300,14 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         texts: textsRef.current,
         backgroundImage: backgroundImageRef.current,
       }),
+      exportAsBlob: async (): Promise<Blob | null> => {
+        const stage = stageRef.current;
+        if (!stage) return null;
+
+        const dataUrl = stage.toDataURL({ pixelRatio: 1 });
+        const res = await fetch(dataUrl);
+        return res.blob();
+      },
       restoreSnapshot: (snapshot: CanvasSnapshot) => {
         setLines(snapshot.lines);
         setShapes(snapshot.shapes);
@@ -649,6 +663,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
               selectionRect={selectionRect}
               lassoPath={lassoPath}
               selectedIds={selectedIds}
+              onStageReady={handleStageReady}
             />
           ) : (
             <div className="flex flex-col items-center gap-[8px] text-[#94A3B8] select-none">

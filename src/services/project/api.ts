@@ -30,7 +30,7 @@ export const postNewProject = () => {
 
 // 프로젝트 수정
 export const putProject = (projectId: string, data: SaveProjectReq) => {
-  return axiosInstance.post<SaveProjectRes>(`/api/projects/${projectId}`, data);
+  return axiosInstance.put<SaveProjectRes>(`/api/projects/${projectId}`, data);
 };
 
 // 작업이력 조회
