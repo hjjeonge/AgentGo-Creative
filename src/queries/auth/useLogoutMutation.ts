@@ -4,6 +4,7 @@ import {
   type UseMutationResult,
 } from '@tanstack/react-query';
 import { postLogout } from '../../services/auth/api';
+import { getRefreshToken } from '../../utils/tokenManager';
 
 type LogoutMutationOptions = UseMutationOptions<void, Error, void>;
 
@@ -12,7 +13,10 @@ export const useLogoutMutation = (
 ): UseMutationResult<void, Error, void> => {
   return useMutation({
     mutationFn: async () => {
-      await postLogout();
+      const refreshToken = getRefreshToken();
+      if (!refreshToken) return;
+
+      await postLogout({ refresh_token: refreshToken });
     },
     ...options,
   });

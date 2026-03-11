@@ -1,5 +1,5 @@
 ﻿import Konva from 'konva';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Arrow,
   Ellipse,
@@ -26,8 +26,8 @@ interface EditorCanvasProps {
   shapes: Shape[];
   texts: TextObject[];
   setSelectedId: (id: string | null) => void;
-  objectRefs: React.MutableRefObject<Record<string, any>>;
-  trRef: React.MutableRefObject<any>;
+  objectRefs: React.RefObject<Record<string, any>>;
+  trRef: React.RefObject<any>;
   handleTransformEnd: (e: any) => void;
   handleDragEnd: (e: any) => void;
   editingTextId: string | null;
@@ -42,6 +42,7 @@ interface EditorCanvasProps {
   } | null;
   lassoPath?: number[];
   selectedIds?: string[];
+  onStageReady?: (stage: Konva.Stage | null) => void;
 }
 
 const buildPolygonPoints = (sides: number, width: number, height: number) => {
@@ -81,12 +82,14 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   selectionRect,
   lassoPath = [],
   selectedIds = [],
+  onStageReady,
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [bgImage, setBgImage] = useState<HTMLImageElement | null>(null);
-  const [bgImagePos, setBgImagePos] = useState<{ x: number; y: number } | null>(
-    null,
-  );
+  const [bgImageNaturalSize, setBgImageNaturalSize] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
   const [shapeImages, setShapeImages] = useState<
     Record<string, HTMLImageElement>
   >({});
@@ -94,20 +97,37 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   useEffect(() => {
     if (backgroundImageUrl) {
       const img = new window.Image();
+      img.crossOrigin = 'anonymous';
       img.src = backgroundImageUrl;
       img.onload = () => {
         setBgImage(img);
-        // Fix position at load time to avoid shifting on resize/zoom
-        setBgImagePos({
-          x: Math.round((stageSize.width - img.width) / 2),
-          y: Math.round((stageSize.height - img.height) / 2),
+        setBgImageNaturalSize({
+          width: Math.max(1, img.naturalWidth || img.width),
+          height: Math.max(1, img.naturalHeight || img.height),
         });
       };
     } else {
       setBgImage(null);
-      setBgImagePos(null);
+      setBgImageNaturalSize(null);
     }
   }, [backgroundImageUrl]);
+
+  const bgImageRect = useMemo(() => {
+    if (!bgImageNaturalSize) return null;
+    const { width: imageWidth, height: imageHeight } = bgImageNaturalSize;
+    const ratio = Math.min(
+      stageSize.width / imageWidth,
+      stageSize.height / imageHeight,
+    );
+    const width = Math.max(1, Math.round(imageWidth * ratio));
+    const height = Math.max(1, Math.round(imageHeight * ratio));
+    return {
+      x: Math.round((stageSize.width - width) / 2),
+      y: Math.round((stageSize.height - height) / 2),
+      width,
+      height,
+    };
+  }, [bgImageNaturalSize, stageSize.height, stageSize.width]);
 
   useEffect(() => {
     if (editingTextId && textAreaRef.current) {
@@ -133,6 +153,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
       const imageUrl = shape.imageUrl;
       if (!imageUrl || shapeImages[key]) return;
       const img = new window.Image();
+      img.crossOrigin = 'anonymous';
       img.src = imageUrl;
       img.onload = () => {
         if (disposed) return;
@@ -168,6 +189,11 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
 
   const editingText = texts.find((t) => t.id === editingTextId);
   const stageRef = useRef<any>(null);
+
+  useEffect(() => {
+    onStageReady?.(stageRef.current);
+  }, [onStageReady, stageSize.width, stageSize.height]);
+
   const toVerticalText = (value: string) => {
     return value
       .split('\n')
@@ -424,6 +450,13 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
     }
   };
 
+  const backgroundShapes = shapes.filter(
+    (shape) => shape.type === 'uploaded_image',
+  );
+  const overlayShapes = shapes.filter(
+    (shape) => shape.type !== 'uploaded_image',
+  );
+
   return (
     <div style={{ position: 'relative', cursor: 'default' }}>
       <Stage
@@ -436,46 +469,19 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
         onMouseUp={handleMouseUp}
       >
         <Layer>
-          {bgImage && (
+          {bgImage && bgImageRect && (
             <KonvaImage
               image={bgImage}
-              x={bgImagePos?.x ?? 0}
-              y={bgImagePos?.y ?? 0}
-              width={bgImage.width}
-              height={bgImage.height}
+              x={bgImageRect.x}
+              y={bgImageRect.y}
+              width={bgImageRect.width}
+              height={bgImageRect.height}
               listening={false}
             />
           )}
         </Layer>
         <Layer>
-          {lines.map((line, i) => (
-            <Line
-              key={i}
-              points={line.points}
-              stroke={line.stroke}
-              strokeWidth={line.strokeWidth}
-              tension={0.5}
-              lineCap="round"
-              globalCompositeOperation={
-                line.tool === 'eraser' ? 'destination-out' : 'source-over'
-              }
-            />
-          ))}
-          {currentLine && (
-            <Line
-              points={currentLine.points}
-              stroke={currentLine.stroke}
-              strokeWidth={currentLine.strokeWidth}
-              tension={0.5}
-              lineCap="round"
-              globalCompositeOperation={
-                currentLine.tool === 'eraser'
-                  ? 'destination-out'
-                  : 'source-over'
-              }
-            />
-          )}
-          {shapes.map((shape) => (
+          {backgroundShapes.map((shape) => (
             <Group
               key={shape.id}
               id={shape.id}
@@ -490,42 +496,21 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               onTransformEnd={handleTransformEnd}
               onDragEnd={handleDragEnd}
             >
-              {shape.type === 'uploaded_image' && shape.imageUrl ? (
-                (shape.maskPath?.length ?? 0) >= 6 ? (
-                  <Group
-                    clipFunc={(ctx) => {
-                      const points = shape.maskPath ?? [];
-                      if (points.length < 6) return;
-                      const width = Math.max(1, shape.width);
-                      const height = Math.max(1, shape.height);
-                      ctx.beginPath();
-                      ctx.moveTo(points[0] * width, points[1] * height);
-                      for (let i = 2; i < points.length; i += 2) {
-                        ctx.lineTo(points[i] * width, points[i + 1] * height);
-                      }
-                      ctx.closePath();
-                    }}
-                  >
-                    <KonvaImage
-                      image={shapeImages[shape.id] ?? null}
-                      x={0}
-                      y={0}
-                      width={Math.max(1, shape.width)}
-                      height={Math.max(1, shape.height)}
-                      crop={
-                        (shape.cropWidth ?? 0) > 0 &&
-                        (shape.cropHeight ?? 0) > 0
-                          ? {
-                              x: shape.cropX ?? 0,
-                              y: shape.cropY ?? 0,
-                              width: shape.cropWidth ?? 0,
-                              height: shape.cropHeight ?? 0,
-                            }
-                          : undefined
-                      }
-                    />
-                  </Group>
-                ) : (
+              {(shape.maskPath?.length ?? 0) >= 6 ? (
+                <Group
+                  clipFunc={(ctx) => {
+                    const points = shape.maskPath ?? [];
+                    if (points.length < 6) return;
+                    const width = Math.max(1, shape.width);
+                    const height = Math.max(1, shape.height);
+                    ctx.beginPath();
+                    ctx.moveTo(points[0] * width, points[1] * height);
+                    for (let i = 2; i < points.length; i += 2) {
+                      ctx.lineTo(points[i] * width, points[i + 1] * height);
+                    }
+                    ctx.closePath();
+                  }}
+                >
                   <KonvaImage
                     image={shapeImages[shape.id] ?? null}
                     x={0}
@@ -543,10 +528,44 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
                         : undefined
                     }
                   />
-                )
+                </Group>
               ) : (
-                renderDiagramShape(shape)
+                <KonvaImage
+                  image={shapeImages[shape.id] ?? null}
+                  x={0}
+                  y={0}
+                  width={Math.max(1, shape.width)}
+                  height={Math.max(1, shape.height)}
+                  crop={
+                    (shape.cropWidth ?? 0) > 0 && (shape.cropHeight ?? 0) > 0
+                      ? {
+                          x: shape.cropX ?? 0,
+                          y: shape.cropY ?? 0,
+                          width: shape.cropWidth ?? 0,
+                          height: shape.cropHeight ?? 0,
+                        }
+                      : undefined
+                  }
+                />
               )}
+            </Group>
+          ))}
+          {overlayShapes.map((shape) => (
+            <Group
+              key={shape.id}
+              id={shape.id}
+              x={shape.x}
+              y={shape.y}
+              draggable={activeTool === 'mouse'}
+              onClick={() => setSelectedId(shape.id)}
+              onTap={() => setSelectedId(shape.id)}
+              ref={(node) => {
+                if (node) objectRefs.current[shape.id] = node;
+              }}
+              onTransformEnd={handleTransformEnd}
+              onDragEnd={handleDragEnd}
+            >
+              {renderDiagramShape(shape)}
             </Group>
           ))}
           {texts.map((text) => {
@@ -741,6 +760,37 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               'bottom-right',
             ]}
           />
+        </Layer>
+        <Layer>
+          {lines.map((line, i) => (
+            <Line
+              key={i}
+              points={line.points}
+              stroke={line.stroke}
+              strokeWidth={line.strokeWidth}
+              tension={0.5}
+              lineCap="round"
+              listening={false}
+              globalCompositeOperation={
+                line.tool === 'eraser' ? 'destination-out' : 'source-over'
+              }
+            />
+          ))}
+          {currentLine && (
+            <Line
+              points={currentLine.points}
+              stroke={currentLine.stroke}
+              strokeWidth={currentLine.strokeWidth}
+              tension={0.5}
+              lineCap="round"
+              listening={false}
+              globalCompositeOperation={
+                currentLine.tool === 'eraser'
+                  ? 'destination-out'
+                  : 'source-over'
+              }
+            />
+          )}
         </Layer>
       </Stage>
       {editingText && (
