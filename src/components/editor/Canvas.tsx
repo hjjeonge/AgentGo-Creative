@@ -45,6 +45,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     const {
       stageSize,
       setStageSize,
+      backgroundImage,
       setBackgroundImageState,
       lines,
       setLines,
@@ -172,55 +173,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       pushUndo,
     });
 
-    const addUploadedImageShape = (url: string) => {
-      const image = new window.Image();
-      image.onload = () => {
-        const naturalWidth = Math.max(1, image.naturalWidth || image.width);
-        const naturalHeight = Math.max(1, image.naturalHeight || image.height);
-        const canvasWidth = stageSize.width > 0 ? stageSize.width : 480;
-        const canvasHeight = stageSize.height > 0 ? stageSize.height : 600;
-        const targetWidth = Math.max(1, Math.round(canvasWidth * 0.5));
-        const targetHeight = Math.max(
-          1,
-          Math.round((targetWidth * naturalHeight) / naturalWidth),
-        );
-        const targetX = Math.max(
-          0,
-          Math.round((canvasWidth - targetWidth) / 2),
-        );
-        const targetY = Math.max(
-          0,
-          Math.round((canvasHeight - targetHeight) / 2),
-        );
-        const imageShapeId = `${UPLOADED_IMAGE_SHAPE_PREFIX}${Date.now()}_${Math.floor(Math.random() * 10000)}`;
-
-        setShapes((prev) => {
-          const next = [...prev];
-          next.push({
-            id: imageShapeId,
-            type: 'uploaded_image',
-            x: targetX,
-            y: targetY,
-            width: targetWidth,
-            height: targetHeight,
-            fill: 'transparent',
-            imageUrl: url,
-            sourceWidth: naturalWidth,
-            sourceHeight: naturalHeight,
-            cropX: 0,
-            cropY: 0,
-            cropWidth: naturalWidth,
-            cropHeight: naturalHeight,
-          });
-          return next;
-        });
-        setSelectedId(imageShapeId);
-        setSelectedIds([]);
-        setActiveTool('mouse');
-      };
-      image.src = url;
-    };
-
     // Delete / Undo / Redo 핸들러
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
@@ -281,13 +233,77 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       return () => window.removeEventListener('keydown', handleKeyDown);
     }, [selectedId, selectedIds, editingTextId, penStrokeWidth]);
 
+    const addUploadedImageShape = (
+      url: string,
+      options?: { replaceExisting?: boolean; selectImage?: boolean },
+    ) => {
+      const { replaceExisting = true, selectImage = true } = options ?? {};
+      const image = new window.Image();
+      image.crossOrigin = 'anonymous';
+      image.onload = () => {
+        const naturalWidth = Math.max(1, image.naturalWidth || image.width);
+        const naturalHeight = Math.max(1, image.naturalHeight || image.height);
+        const canvasWidth = stageSize.width > 0 ? stageSize.width : 480;
+        const canvasHeight = stageSize.height > 0 ? stageSize.height : 600;
+        const ratio = Math.min(
+          canvasWidth / naturalWidth,
+          canvasHeight / naturalHeight,
+        );
+        const targetWidth = Math.max(1, Math.round(naturalWidth * ratio));
+        const targetHeight = Math.max(1, Math.round(naturalHeight * ratio));
+        const targetX = Math.max(
+          0,
+          Math.round((canvasWidth - targetWidth) / 2),
+        );
+        const targetY = Math.max(
+          0,
+          Math.round((canvasHeight - targetHeight) / 2),
+        );
+        const imageShapeId = `${UPLOADED_IMAGE_SHAPE_PREFIX}${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+
+        setShapes((prev) => {
+          const base = replaceExisting
+            ? prev.filter((shape) => shape.type !== 'uploaded_image')
+            : prev;
+          return [
+            ...base,
+            {
+              id: imageShapeId,
+              type: 'uploaded_image',
+              x: targetX,
+              y: targetY,
+              width: targetWidth,
+              height: targetHeight,
+              fill: 'transparent',
+              imageUrl: url,
+              sourceWidth: naturalWidth,
+              sourceHeight: naturalHeight,
+              cropX: 0,
+              cropY: 0,
+              cropWidth: naturalWidth,
+              cropHeight: naturalHeight,
+            },
+          ];
+        });
+        if (selectImage) {
+          setSelectedId(imageShapeId);
+          setSelectedIds([]);
+          setActiveTool('mouse');
+        }
+      };
+      image.src = url;
+    };
+
     useImperativeHandle(ref, () => ({
       setBackgroundImage: (url: string | null) => {
+        pushUndo();
         backgroundImageRef.current = url;
         setBackgroundImageState(url);
         if (url) {
-          pushUndo();
-          addUploadedImageShape(url);
+          addUploadedImageShape(url, {
+            replaceExisting: true,
+            selectImage: true,
+          });
         } else {
           setShapes((prev) =>
             prev.filter((shape) => shape.type !== 'uploaded_image'),
@@ -309,15 +325,21 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         return res.blob();
       },
       restoreSnapshot: (snapshot: CanvasSnapshot) => {
+        const uploadedImageShape = snapshot.shapes.find(
+          (shape) => shape.type === 'uploaded_image' && shape.imageUrl,
+        );
+        const nextBackgroundImage =
+          snapshot.backgroundImage || uploadedImageShape?.imageUrl || null;
+
         setLines(snapshot.lines);
         setShapes(snapshot.shapes);
         setTexts(snapshot.texts);
-        setBackgroundImageState(snapshot.backgroundImage);
-        if (
-          snapshot.backgroundImage &&
-          !snapshot.shapes.some((shape) => shape.type === 'uploaded_image')
-        ) {
-          addUploadedImageShape(snapshot.backgroundImage);
+        setBackgroundImageState(nextBackgroundImage);
+        if (!uploadedImageShape && nextBackgroundImage) {
+          addUploadedImageShape(nextBackgroundImage, {
+            replaceExisting: false,
+            selectImage: false,
+          });
         }
         setSelectedId(null);
         setSelectedIds([]);
@@ -578,6 +600,10 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       onSelectedTextObjectChange?.(selectedTextObject);
     }, [onSelectedTextObjectChange, selectedTextObject]);
 
+    const hasBaseImage =
+      backgroundImage !== null ||
+      shapes.some((shape) => shape.type === 'uploaded_image');
+
     return (
       <section className="h-full flex-1 min-w-0 bg-[#E2E8F0] relative flex flex-col items-center overflow-auto">
         {/* 브레드크럼 */}
@@ -640,7 +666,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
             />
           )}
 
-          {stageSize.width > 0 && stageSize.height > 0 ? (
+          {stageSize.width > 0 && stageSize.height > 0 && hasBaseImage ? (
             <EditorCanvas
               stageSize={stageSize}
               activeTool={activeTool}
@@ -679,7 +705,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
                 <path d="M3 9h18M9 21V9" />
               </svg>
               <span className="text-[14px]">
-                사이드바에서 이미지를 업로드해 주세요
+                이미지를 업로드하거나 템플릿에서 생성해 주세요
               </span>
             </div>
           )}

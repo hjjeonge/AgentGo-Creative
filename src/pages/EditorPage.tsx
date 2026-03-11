@@ -53,13 +53,23 @@ export const EditorPage: React.FC = () => {
         imageUrl: normalize(shape.imageUrl) || undefined,
       };
     });
+    const shapeBackground =
+      normalizedShapes.find(
+        (shape) => shape.type === 'uploaded_image' && shape.imageUrl,
+      )?.imageUrl || null;
 
     return {
       ...snapshot,
-      backgroundImage: normalizedBackground,
+      backgroundImage: normalizedBackground || shapeBackground,
       shapes: normalizedShapes,
     };
   };
+
+  const snapshotHasImage = (snapshot: CanvasSnapshot) =>
+    snapshot.backgroundImage !== null ||
+    snapshot.shapes.some(
+      (shape) => shape.type === 'uploaded_image' && !!shape.imageUrl,
+    );
 
   const fetchAndSetHistory = async (fallbackImageUrl?: string | null) => {
     const historyRes = await getProjectHistory(projectId);
@@ -81,7 +91,7 @@ export const EditorPage: React.FC = () => {
         if (snapshot) {
           const normalized = normalizeSnapshotForRender(snapshot, thumbnailUrl);
           canvasRef.current?.restoreSnapshot(normalized);
-          setHasCanvasImage(normalized.backgroundImage !== null);
+          setHasCanvasImage(snapshotHasImage(normalized));
         }
 
         setHistory(
@@ -189,8 +199,10 @@ export const EditorPage: React.FC = () => {
     };
 
     const nextBackgroundImage =
-      (await persistUrl(snapshot.backgroundImage ?? undefined, 'snapshot-bg')) ||
-      null;
+      (await persistUrl(
+        snapshot.backgroundImage ?? undefined,
+        'snapshot-bg',
+      )) || null;
 
     const nextShapes = await Promise.all(
       snapshot.shapes.map(async (shape) => {
@@ -268,7 +280,7 @@ export const EditorPage: React.FC = () => {
     );
     if (!confirmed) return;
     canvasRef.current?.restoreSnapshot(entry.snapshot);
-    setHasCanvasImage(entry.snapshot.backgroundImage !== null);
+    setHasCanvasImage(snapshotHasImage(entry.snapshot));
   };
 
   return (
