@@ -16,14 +16,10 @@ import { useCrop } from '@/features/editor/hooks/useCrop';
 import { useDrawing } from '@/features/editor/hooks/useDrawing';
 import { useSelection } from '@/features/editor/hooks/useSelection';
 import { useUndoRedo } from '@/features/editor/hooks/useUndoRedo';
-import {
-  partitionCanvasElements,
-  toCanvasElements,
-} from '@/features/editor/utils/elementAdapters';
 import type {
+  CanvasElement,
   CanvasHandle,
   CanvasSnapshot,
-  Shape,
   TextObject,
 } from '@/features/editor/types';
 
@@ -53,11 +49,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       setBackgroundImageState,
       elements,
       setElements,
-      setLines,
-      shapes,
-      setShapes,
-      texts,
-      setTexts,
       currentLine,
       setCurrentLine,
       isDrawing,
@@ -85,9 +76,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       isLassoing,
       setIsLassoing,
       elementsRef,
-      linesRef,
-      shapesRef,
-      textsRef,
       backgroundImageRef,
       lastPointerRef,
       previewTimeoutRef,
@@ -119,14 +107,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 
     const { pushUndo, undo, redo } = useUndoRedo({
       elementsRef,
-      linesRef,
-      shapesRef,
-      textsRef,
       backgroundImageRef,
       setElements,
-      setLines,
-      setShapes,
-      setTexts,
       setBackgroundImageState,
       setSelectedId,
       setSelectedIds,
@@ -159,6 +141,13 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       pushUndo,
     });
 
+    const updateElements = useCallback(
+      (updater: (prev: CanvasElement[]) => CanvasElement[]) => {
+        setElements((prev) => updater(prev));
+      },
+      [setElements],
+    );
+
     const {
       showBrushPreview,
       handleMouseDownDrawing,
@@ -172,7 +161,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       penStrokeColor,
       setIsDrawing,
       setCurrentLine,
-      setLines,
+      setElements,
       setBrushPreview,
       lastPointerRef,
       previewTimeoutRef,
@@ -219,11 +208,12 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
                 : [];
           if (toDelete.length === 0) return;
           pushUndo();
-          setTexts((prev) => prev.filter((t) => !toDelete.includes(t.id)));
-          setShapes((prev) => {
-            const next = prev.filter((shape) => !toDelete.includes(shape.id));
+          updateElements((prev) => {
+            const next = prev.filter(
+              (element) => !toDelete.includes(element.id),
+            );
             const hasUploadedImage = next.some(
-              (shape) => shape.type === 'uploaded_image',
+              (element) => element.kind === 'image',
             );
             if (!hasUploadedImage) {
               backgroundImageRef.current = null;
@@ -267,20 +257,19 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         );
         const imageShapeId = `${UPLOADED_IMAGE_SHAPE_PREFIX}${Date.now()}_${Math.floor(Math.random() * 10000)}`;
 
-        setShapes((prev) => {
+        updateElements((prev) => {
           const base = replaceExisting
-            ? prev.filter((shape) => shape.type !== 'uploaded_image')
+            ? prev.filter((element) => element.kind !== 'image')
             : prev;
           return [
             ...base,
             {
               id: imageShapeId,
-              type: 'uploaded_image',
+              kind: 'image',
               x: targetX,
               y: targetY,
               width: targetWidth,
               height: targetHeight,
-              fill: 'transparent',
               imageUrl: url,
               sourceWidth: naturalWidth,
               sourceHeight: naturalHeight,
@@ -311,21 +300,14 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
             selectImage: true,
           });
         } else {
-          setShapes((prev) =>
-            prev.filter((shape) => shape.type !== 'uploaded_image'),
+          updateElements((prev) =>
+            prev.filter((element) => element.kind !== 'image'),
           );
         }
       },
       getSnapshot: (): CanvasSnapshot => ({
-        lines: linesRef.current,
-        shapes: shapesRef.current,
-        texts: textsRef.current,
         backgroundImage: backgroundImageRef.current,
-        elements: toCanvasElements({
-          lines: linesRef.current,
-          shapes: shapesRef.current,
-          texts: textsRef.current,
-        }),
+        elements: elementsRef.current,
       }),
       exportAsBlob: async (): Promise<Blob | null> => {
         const stage = stageRef.current;
@@ -336,24 +318,17 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         return res.blob();
       },
       restoreSnapshot: (snapshot: CanvasSnapshot) => {
-        const legacyCollections = snapshot.elements
-          ? partitionCanvasElements(snapshot.elements)
-          : {
-              lines: snapshot.lines,
-              shapes: snapshot.shapes,
-              texts: snapshot.texts,
-            };
-        const uploadedImageShape = legacyCollections.shapes.find(
-          (shape) => shape.type === 'uploaded_image' && shape.imageUrl,
+        const uploadedImage = snapshot.elements.find(
+          (element) => element.kind === 'image',
         );
         const nextBackgroundImage =
-          snapshot.backgroundImage || uploadedImageShape?.imageUrl || null;
+          snapshot.backgroundImage ||
+          (uploadedImage?.kind === 'image' ? uploadedImage.imageUrl : null) ||
+          null;
 
-        setLines(legacyCollections.lines);
-        setShapes(legacyCollections.shapes);
-        setTexts(legacyCollections.texts);
+        setElements(snapshot.elements);
         setBackgroundImageState(nextBackgroundImage);
-        if (!uploadedImageShape && nextBackgroundImage) {
+        if (!uploadedImage && nextBackgroundImage) {
           addUploadedImageShape(nextBackgroundImage, {
             replaceExisting: false,
             selectImage: false,
@@ -365,7 +340,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       },
       hasImage: () =>
         backgroundImageRef.current !== null ||
-        shapesRef.current.some((shape) => shape.type === 'uploaded_image'),
+        elementsRef.current.some((element) => element.kind === 'image'),
       addText: () => {
         handleAddText();
       },
@@ -373,9 +348,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         handleUpdateTextObject(id, updates);
       },
       clearCanvas: () => {
-        setLines([]);
-        setShapes([]);
-        setTexts([]);
+        setElements([]);
         setBackgroundImageState(null);
         setSelectedId(null);
         setSelectedIds([]);
@@ -389,7 +362,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       loadGoogleFont(defaultFont);
 
       const newText: TextObject = {
-        id: `text_${texts.length}`,
+        id: `text_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
         text: DEFAULT_PLACEHOLDER_TEXT,
         x: 150,
         y: 150,
@@ -420,25 +393,41 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         backgroundColor: '#FFFF00',
         backgroundEnabled: false,
       };
-      setTexts((prev) => [...prev, newText]);
+      updateElements((prev) => [
+        ...prev,
+        {
+          ...newText,
+          kind: 'text',
+        },
+      ]);
       setSelectedId(newText.id);
       setActiveTool('mouse');
     };
 
     const removeUneditedPlaceholderTexts = (candidateIds: string[]) => {
-      const targetIds = candidateIds.filter((id) => id.startsWith('text_'));
+      const targetIds = candidateIds.filter((id) =>
+        elementsRef.current.some(
+          (element) => element.id === id && element.kind === 'text',
+        ),
+      );
       if (targetIds.length === 0) return;
 
       const removableIds = targetIds.filter((id) => {
-        const textObj = textsRef.current.find((item) => item.id === id);
-        return !!textObj && textObj.text.trim() === DEFAULT_PLACEHOLDER_TEXT;
+        const textObj = elementsRef.current.find(
+          (element) => element.id === id && element.kind === 'text',
+        );
+        return (
+          !!textObj &&
+          textObj.kind === 'text' &&
+          textObj.text.trim() === DEFAULT_PLACEHOLDER_TEXT
+        );
       });
 
       if (removableIds.length === 0) return;
 
       pushUndo();
-      setTexts((prev) =>
-        prev.filter((item) => !removableIds.includes(item.id)),
+      updateElements((prev) =>
+        prev.filter((element) => !removableIds.includes(element.id)),
       );
     };
 
@@ -467,8 +456,12 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       id: string,
       updates: Partial<TextObject>,
     ) => {
-      setTexts((prev) =>
-        prev.map((text) => (text.id === id ? { ...text, ...updates } : text)),
+      updateElements((prev) =>
+        prev.map((element) =>
+          element.id === id && element.kind === 'text'
+            ? { ...element, ...updates }
+            : element,
+        ),
       );
     };
 
@@ -597,21 +590,32 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 
       const size = getDefaultSize(shapeType);
       pushUndo();
-      const newShape: Shape = {
-        id: `shape_${shapes.length}`,
-        type: shapeType,
+      const newShape = {
+        id: `shape_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+        kind: 'shape' as const,
+        shapeType,
         x: 100,
         y: 100,
         width: size.width,
         height: size.height,
         fill: '#EF4444',
       };
-      setShapes((prev) => [...prev, newShape]);
+      updateElements((prev) => [...prev, newShape]);
     };
 
-    const isTextSelected = selectedId?.startsWith('text_') && !editingTextId;
+    const isTextSelected =
+      !!selectedId &&
+      !editingTextId &&
+      elements.some(
+        (element) => element.id === selectedId && element.kind === 'text',
+      );
     const selectedTextObject = isTextSelected
-      ? texts.find((t) => t.id === selectedId)
+      ? (() => {
+          const selectedElement = elements.find(
+            (element) => element.id === selectedId && element.kind === 'text',
+          );
+          return selectedElement?.kind === 'text' ? selectedElement : undefined;
+        })()
       : undefined;
 
     useEffect(() => {
@@ -620,7 +624,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 
     const hasBaseImage =
       backgroundImage !== null ||
-      shapes.some((shape) => shape.type === 'uploaded_image');
+      elements.some((element) => element.kind === 'image');
 
     return (
       <section className="h-full flex-1 min-w-0 bg-[#E2E8F0] relative flex flex-col items-center overflow-auto">

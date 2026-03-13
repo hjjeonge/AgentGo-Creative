@@ -1,7 +1,10 @@
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { DAMSidebar } from '@/features/dam/components/DAMSidebar';
-import { DAMFilters, type FilterState } from '@/features/dam/components/DAMFilters';
+import {
+  DAMFilters,
+  type FilterState,
+} from '@/features/dam/components/DAMFilters';
 import { DAMAdvancedFilters } from '@/features/dam/components/DAMAdvancedFilters';
 import { DAMWorkspaceView } from '@/features/dam/components/DAMWorkspaceView';
 import { DAMCollectionsView } from '@/features/dam/components/DAMCollectionsView';

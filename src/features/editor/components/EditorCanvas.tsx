@@ -835,7 +835,9 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             lineHeight: editingText.lineHeight,
             transform:
               [
-                editingText.rotation ? `rotate(${editingText.rotation}deg)` : '',
+                editingText.rotation
+                  ? `rotate(${editingText.rotation}deg)`
+                  : '',
                 editingText.scaleX && editingText.scaleX !== 1
                   ? `scaleX(${editingText.scaleX})`
                   : '',

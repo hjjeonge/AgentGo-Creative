@@ -46,13 +46,7 @@ export const EditorPage: React.FC = () => {
     snapshot: CanvasSnapshot,
     fallbackImageUrl?: string | null,
   ): CanvasSnapshot => {
-    const legacyCollections = snapshot.elements
-      ? partitionCanvasElements(snapshot.elements)
-      : {
-          lines: snapshot.lines,
-          shapes: snapshot.shapes,
-          texts: snapshot.texts,
-        };
+    const legacyCollections = partitionCanvasElements(snapshot.elements);
     const normalizedFallback = resolveImageUrl(fallbackImageUrl);
     const normalize = (url: string | null | undefined): string | null => {
       if (!url) return null;
@@ -74,11 +68,7 @@ export const EditorPage: React.FC = () => {
       )?.imageUrl || null;
 
     return {
-      ...snapshot,
-      lines: legacyCollections.lines,
       backgroundImage: normalizedBackground || shapeBackground,
-      shapes: normalizedShapes,
-      texts: legacyCollections.texts,
       elements: toCanvasElements({
         lines: legacyCollections.lines,
         shapes: normalizedShapes,
@@ -89,11 +79,7 @@ export const EditorPage: React.FC = () => {
 
   const snapshotHasImage = (snapshot: CanvasSnapshot) =>
     snapshot.backgroundImage !== null ||
-    (
-      snapshot.elements
-        ? partitionCanvasElements(snapshot.elements).shapes
-        : snapshot.shapes
-    ).some(
+    partitionCanvasElements(snapshot.elements).shapes.some(
       (shape) => shape.type === 'uploaded_image' && !!shape.imageUrl,
     );
 
@@ -210,13 +196,7 @@ export const EditorPage: React.FC = () => {
   const persistSnapshotAssetUrls = async (
     snapshot: CanvasSnapshot,
   ): Promise<CanvasSnapshot> => {
-    const legacyCollections = snapshot.elements
-      ? partitionCanvasElements(snapshot.elements)
-      : {
-          lines: snapshot.lines,
-          shapes: snapshot.shapes,
-          texts: snapshot.texts,
-        };
+    const legacyCollections = partitionCanvasElements(snapshot.elements);
     const urlCache = new Map<string, string>();
     const persistUrl = async (
       url: string | undefined,
@@ -246,11 +226,7 @@ export const EditorPage: React.FC = () => {
     );
 
     return {
-      ...snapshot,
-      lines: legacyCollections.lines,
       backgroundImage: nextBackgroundImage,
-      shapes: nextShapes,
-      texts: legacyCollections.texts,
       elements: toCanvasElements({
         lines: legacyCollections.lines,
         shapes: nextShapes,
@@ -319,8 +295,9 @@ export const EditorPage: React.FC = () => {
       `"${entry.title}" 작업으로 돌아가시겠습니까?\n현재 작업 내용은 사라집니다.`,
     );
     if (!confirmed) return;
-    canvasRef.current?.restoreSnapshot(entry.snapshot);
-    setHasCanvasImage(snapshotHasImage(entry.snapshot));
+    const normalizedSnapshot = normalizeSnapshotForRender(entry.snapshot);
+    canvasRef.current?.restoreSnapshot(normalizedSnapshot);
+    setHasCanvasImage(snapshotHasImage(normalizedSnapshot));
   };
 
   return (

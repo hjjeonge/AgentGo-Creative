@@ -1,5 +1,9 @@
 import type React from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import ListBulleted from '@/assets/format_list_bulleted.svg';
 import NumberedList from '@/assets/format_list_numbered.svg';
 

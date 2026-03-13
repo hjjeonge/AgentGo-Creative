@@ -1,8 +1,5 @@
 import axiosInstance from '@/services/axiosInstance';
-import type {
-  ImageGenerateRequest,
-  ImageGenerateResponse,
-} from './image.type';
+import type { ImageGenerateRequest, ImageGenerateResponse } from './image.type';
 
 export const generateImage = (data: ImageGenerateRequest) => {
   return axiosInstance.post<ImageGenerateResponse>(

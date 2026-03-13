@@ -1,5 +1,6 @@
 import type React from 'react';
 import type { HistoryItemRes } from '@/features/project/types';
+import { partitionCanvasElements } from '@/features/editor/utils/elementAdapters';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
 
 interface Props {
@@ -8,9 +9,11 @@ interface Props {
 }
 
 export const HistoryItem: React.FC<Props> = ({ entry, onClick }) => {
-  const uploadedImageShape = entry.snapshot.shapes.find(
-    (shape) => shape.type === 'uploaded_image' && shape.imageUrl,
-  );
+  const uploadedImageShape = partitionCanvasElements(
+    'elements' in entry.snapshot && Array.isArray(entry.snapshot.elements)
+      ? entry.snapshot.elements
+      : [],
+  ).shapes.find((shape) => shape.type === 'uploaded_image' && shape.imageUrl);
   const previewUrl = resolveImageUrl(
     entry.snapshot.backgroundImage || uploadedImageShape?.imageUrl,
   );

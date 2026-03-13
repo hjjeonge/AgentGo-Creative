@@ -1,23 +1,11 @@
 import { useRef } from 'react';
 import type { Dispatch, RefObject, SetStateAction } from 'react';
-import type {
-  CanvasElement,
-  DrawLine,
-  HistoryState,
-  Shape,
-  TextObject,
-} from '@/features/editor/types';
+import type { CanvasElement, HistoryState } from '@/features/editor/types';
 
 interface Params {
   elementsRef: RefObject<CanvasElement[]>;
-  linesRef: RefObject<DrawLine[]>;
-  shapesRef: RefObject<Shape[]>;
-  textsRef: RefObject<TextObject[]>;
   backgroundImageRef: RefObject<string | null>;
   setElements: Dispatch<SetStateAction<CanvasElement[]>>;
-  setLines: Dispatch<SetStateAction<DrawLine[]>>;
-  setShapes: Dispatch<SetStateAction<Shape[]>>;
-  setTexts: Dispatch<SetStateAction<TextObject[]>>;
   setBackgroundImageState: Dispatch<SetStateAction<string | null>>;
   setSelectedId: Dispatch<SetStateAction<string | null>>;
   setSelectedIds: Dispatch<SetStateAction<string[]>>;
@@ -26,14 +14,8 @@ interface Params {
 
 export const useUndoRedo = ({
   elementsRef,
-  linesRef,
-  shapesRef,
-  textsRef,
   backgroundImageRef,
   setElements,
-  setLines,
-  setShapes,
-  setTexts,
   setBackgroundImageState,
   setSelectedId,
   setSelectedIds,
@@ -42,13 +24,12 @@ export const useUndoRedo = ({
   const undoStack = useRef<HistoryState[]>([]);
   const redoStack = useRef<HistoryState[]>([]);
 
-  const createHistoryState = (): HistoryState => ({
-    lines: linesRef.current,
-    shapes: shapesRef.current,
-    texts: textsRef.current,
-    backgroundImage: backgroundImageRef.current,
-    elements: elementsRef.current,
-  });
+  const createHistoryState = (): HistoryState => {
+    return {
+      backgroundImage: backgroundImageRef.current,
+      elements: elementsRef.current,
+    };
+  };
 
   const pushUndo = () => {
     undoStack.current.push(createHistoryState());
@@ -56,13 +37,7 @@ export const useUndoRedo = ({
   };
 
   const applyHistory = (state: HistoryState) => {
-    if (state.elements) {
-      setElements(state.elements);
-    } else {
-      setLines(state.lines);
-      setShapes(state.shapes);
-      setTexts(state.texts);
-    }
+    setElements(state.elements);
     setBackgroundImageState(state.backgroundImage);
     setSelectedId(null);
     setSelectedIds([]);

@@ -1,9 +1,4 @@
-import type {
-  CanvasElement,
-  DrawLine,
-  Shape,
-  TextObject,
-} from '@/features/editor/types';
+import type { CanvasSnapshot } from '@/features/editor/types';
 
 export interface RecentProjectItem {
   id: string;
@@ -14,14 +9,6 @@ export interface RecentProjectItem {
 
 export interface CreateProjectRes {
   projectId: string;
-}
-
-export interface CanvasSnapshot {
-  lines: DrawLine[];
-  shapes: Shape[];
-  texts: TextObject[];
-  backgroundImage: string | null;
-  elements?: CanvasElement[];
 }
 
 export interface ProjectDetailRes {

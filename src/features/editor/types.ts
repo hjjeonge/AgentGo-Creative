@@ -155,11 +155,8 @@ export interface Rect {
 }
 
 export interface CanvasSnapshot {
-  lines: DrawLine[];
-  shapes: Shape[];
-  texts: TextObject[];
   backgroundImage: string | null;
-  elements?: CanvasElement[];
+  elements: CanvasElement[];
 }
 
 export interface HistoryEntry {
@@ -190,9 +187,6 @@ export interface ShapeIntersection {
 }
 
 export interface HistoryState {
-  lines: DrawLine[];
-  shapes: Shape[];
-  texts: TextObject[];
   backgroundImage: string | null;
-  elements?: CanvasElement[];
+  elements: CanvasElement[];
 }

@@ -1,5 +1,9 @@
 import type React from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import Center from '@/assets/format_align_center.svg';
 import Justify from '@/assets/format_align_justify.svg';
 import Left from '@/assets/format_align_left.svg';

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import type { Dispatch, RefObject, SetStateAction } from 'react';
-import type { DrawLine } from '@/features/editor/types';
+import type { CanvasElement, DrawLine } from '@/features/editor/types';
 
 interface Params {
   activeTool: string;
@@ -10,7 +10,7 @@ interface Params {
   penStrokeColor: string;
   setIsDrawing: Dispatch<SetStateAction<boolean>>;
   setCurrentLine: Dispatch<SetStateAction<DrawLine | null>>;
-  setLines: Dispatch<SetStateAction<DrawLine[]>>;
+  setElements: Dispatch<SetStateAction<CanvasElement[]>>;
   setBrushPreview: Dispatch<
     SetStateAction<{ x: number; y: number; size: number; visible: boolean }>
   >;
@@ -27,7 +27,7 @@ export const useDrawing = ({
   penStrokeColor,
   setIsDrawing,
   setCurrentLine,
-  setLines,
+  setElements,
   setBrushPreview,
   lastPointerRef,
   previewTimeoutRef,
@@ -87,7 +87,17 @@ export const useDrawing = ({
   const handleMouseUpDrawing = () => {
     if (!currentLine) return;
     pushUndo();
-    setLines((prev) => [...prev, currentLine]);
+    setElements((prev) => [
+      ...prev,
+      {
+        id: `line_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+        kind: 'line',
+        points: [...currentLine.points],
+        tool: currentLine.tool,
+        strokeWidth: currentLine.strokeWidth,
+        stroke: currentLine.stroke,
+      },
+    ]);
     setCurrentLine(null);
     setIsDrawing(false);
   };

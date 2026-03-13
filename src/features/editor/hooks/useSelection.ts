@@ -69,6 +69,11 @@ export const useSelection = ({
     const scaleX = node.scaleX();
     const scaleY = node.scaleY();
     const rotation = node.rotation?.() ?? 0;
+    const nodeRect = node.getClientRect?.({
+      skipTransform: true,
+      skipShadow: true,
+      skipStroke: false,
+    });
     const id = node.id();
 
     node.scaleX(1);
@@ -81,12 +86,16 @@ export const useSelection = ({
         if (element.kind === 'text') {
           const baseScaleX = element.scaleX ?? 1;
           const effectiveScaleX = scaleX / baseScaleX;
+          const baseWidth = Math.max(
+            5,
+            element.width ?? nodeRect?.width ?? node.width(),
+          );
           return {
             ...element,
             x: node.x(),
             y: node.y(),
             rotation,
-            width: Math.max(5, (element.width ?? node.width()) * effectiveScaleX),
+            width: Math.max(5, baseWidth * effectiveScaleX),
             fontSize: Math.max(5, element.fontSize * scaleY),
           };
         }
