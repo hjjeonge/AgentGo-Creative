@@ -1,14 +1,23 @@
-import { useEffect, useRef, useState } from 'react';
-import type { DrawLine, Rect, Shape, TextObject } from '@/features/editor/types';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import {
+  partitionCanvasElements,
+  toCanvasElements,
+} from '@/features/editor/utils/elementAdapters';
+import type {
+  CanvasElement,
+  DrawLine,
+  Rect,
+  Shape,
+  TextObject,
+} from '@/features/editor/types';
 
 export const useCanvasState = () => {
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
   const [backgroundImage, setBackgroundImageState] = useState<string | null>(
     null,
   );
-  const [lines, setLines] = useState<DrawLine[]>([]);
-  const [shapes, setShapes] = useState<Shape[]>([]);
-  const [texts, setTexts] = useState<TextObject[]>([]);
+  const [elements, setElements] = useState<CanvasElement[]>([]);
   const [currentLine, setCurrentLine] = useState<DrawLine | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [shapeType, setShapeType] = useState('square');
@@ -30,6 +39,57 @@ export const useCanvasState = () => {
   const [lassoPath, setLassoPath] = useState<number[]>([]);
   const [isLassoing, setIsLassoing] = useState(false);
 
+  const { lines, shapes, texts } = useMemo(
+    () => partitionCanvasElements(elements),
+    [elements],
+  );
+
+  const updateLegacyCollection = useCallback(
+    <T,>(
+      key: 'lines' | 'shapes' | 'texts',
+      updater: SetStateAction<T[]>,
+    ) => {
+      setElements((prev) => {
+        const collections = partitionCanvasElements(prev);
+        const current = collections[key] as T[];
+        const next =
+          typeof updater === 'function'
+            ? (updater as (prevState: T[]) => T[])(current)
+            : updater;
+
+        return toCanvasElements({
+          lines:
+            key === 'lines'
+              ? (next as DrawLine[])
+              : collections.lines,
+          shapes:
+            key === 'shapes'
+              ? (next as Shape[])
+              : collections.shapes,
+          texts:
+            key === 'texts'
+              ? (next as TextObject[])
+              : collections.texts,
+        });
+      });
+    },
+    [],
+  );
+
+  const setLines: Dispatch<SetStateAction<DrawLine[]>> = useCallback(
+    (updater) => updateLegacyCollection('lines', updater),
+    [updateLegacyCollection],
+  );
+  const setShapes: Dispatch<SetStateAction<Shape[]>> = useCallback(
+    (updater) => updateLegacyCollection('shapes', updater),
+    [updateLegacyCollection],
+  );
+  const setTexts: Dispatch<SetStateAction<TextObject[]>> = useCallback(
+    (updater) => updateLegacyCollection('texts', updater),
+    [updateLegacyCollection],
+  );
+
+  const elementsRef = useRef(elements);
   const linesRef = useRef(lines);
   const shapesRef = useRef(shapes);
   const textsRef = useRef(texts);
@@ -41,6 +101,9 @@ export const useCanvasState = () => {
   const objectRefs = useRef<Record<string, any>>({});
   const trRef = useRef<any>(null);
 
+  useEffect(() => {
+    elementsRef.current = elements;
+  }, [elements]);
   useEffect(() => {
     linesRef.current = lines;
   }, [lines]);
@@ -59,6 +122,8 @@ export const useCanvasState = () => {
     setStageSize,
     backgroundImage,
     setBackgroundImageState,
+    elements,
+    setElements,
     lines,
     setLines,
     shapes,
@@ -91,6 +156,7 @@ export const useCanvasState = () => {
     setLassoPath,
     isLassoing,
     setIsLassoing,
+    elementsRef,
     linesRef,
     shapesRef,
     textsRef,
