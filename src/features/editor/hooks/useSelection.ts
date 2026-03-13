@@ -1,13 +1,12 @@
 import { useEffect } from 'react';
 import type { Dispatch, RefObject, SetStateAction } from 'react';
-import type { Shape, TextObject } from '@/features/editor/types';
+import type { CanvasElement } from '@/features/editor/types';
 
 interface Params {
   selectedId: string | null;
   selectedIds: string[];
   editingTextId: string | null;
-  shapes: Shape[];
-  texts: TextObject[];
+  elements: CanvasElement[];
   objectRefs: RefObject<Record<string, any>>;
   trRef: RefObject<any>;
   pushUndo: () => void;
@@ -15,16 +14,14 @@ interface Params {
   setSelectedIds: Dispatch<SetStateAction<string[]>>;
   setEditingTextId: Dispatch<SetStateAction<string | null>>;
   setActiveTool: Dispatch<SetStateAction<string>>;
-  setShapes: Dispatch<SetStateAction<Shape[]>>;
-  setTexts: Dispatch<SetStateAction<TextObject[]>>;
+  setElements: Dispatch<SetStateAction<CanvasElement[]>>;
 }
 
 export const useSelection = ({
   selectedId,
   selectedIds,
   editingTextId,
-  shapes,
-  texts,
+  elements,
   objectRefs,
   trRef,
   pushUndo,
@@ -32,8 +29,7 @@ export const useSelection = ({
   setSelectedIds,
   setEditingTextId,
   setActiveTool,
-  setShapes,
-  setTexts,
+  setElements,
 }: Params) => {
   const selectSingleId = (id: string | null) => {
     setSelectedId(id);
@@ -65,53 +61,49 @@ export const useSelection = ({
       }
       trRef.current.getLayer()?.batchDraw();
     }
-  }, [
-    editingTextId,
-    objectRefs,
-    selectedId,
-    selectedIds,
-    shapes,
-    texts,
-    trRef,
-  ]);
+  }, [editingTextId, elements, objectRefs, selectedId, selectedIds, trRef]);
 
   const handleTransformEnd = (e: any) => {
     pushUndo();
     const node = e.target;
     const scaleX = node.scaleX();
     const scaleY = node.scaleY();
+    const rotation = node.rotation?.() ?? 0;
     const id = node.id();
 
     node.scaleX(1);
     node.scaleY(1);
 
-    setTexts((prev) =>
-      prev.map((text) => {
-        if (text.id !== id) return text;
-        const baseScaleX = text.scaleX ?? 1;
-        const effectiveScaleX = scaleX / baseScaleX;
-        return {
-          ...text,
-          x: node.x(),
-          y: node.y(),
-          width: Math.max(5, (text.width ?? node.width()) * effectiveScaleX),
-          fontSize: Math.max(5, text.fontSize * scaleY),
-        };
-      }),
-    );
+    setElements((prev) =>
+      prev.map((element) => {
+        if (element.id !== id) return element;
 
-    setShapes((prev) =>
-      prev.map((s) =>
-        s.id === id
-          ? {
-              ...s,
-              x: node.x(),
-              y: node.y(),
-              width: Math.max(5, s.width * scaleX),
-              height: Math.max(5, s.height * scaleY),
-            }
-          : s,
-      ),
+        if (element.kind === 'text') {
+          const baseScaleX = element.scaleX ?? 1;
+          const effectiveScaleX = scaleX / baseScaleX;
+          return {
+            ...element,
+            x: node.x(),
+            y: node.y(),
+            rotation,
+            width: Math.max(5, (element.width ?? node.width()) * effectiveScaleX),
+            fontSize: Math.max(5, element.fontSize * scaleY),
+          };
+        }
+
+        if (element.kind === 'shape' || element.kind === 'image') {
+          return {
+            ...element,
+            x: node.x(),
+            y: node.y(),
+            rotation,
+            width: Math.max(5, element.width * scaleX),
+            height: Math.max(5, element.height * scaleY),
+          };
+        }
+
+        return element;
+      }),
     );
   };
 
@@ -122,12 +114,19 @@ export const useSelection = ({
     const nextX = node.x();
     const nextY = node.y();
 
-    setShapes((prev) => {
+    setElements((prev) => {
       let changed = false;
-      const next = prev.map((shape) => {
-        if (shape.id !== id) return shape;
+      const next = prev.map((element) => {
+        if (element.id !== id) return element;
+        if (
+          element.kind !== 'shape' &&
+          element.kind !== 'image' &&
+          element.kind !== 'text'
+        ) {
+          return element;
+        }
         changed = true;
-        return { ...shape, x: nextX, y: nextY };
+        return { ...element, x: nextX, y: nextY };
       });
       if (changed) pushUndo();
       return next;

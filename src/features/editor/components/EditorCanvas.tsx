@@ -493,6 +493,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               id={shape.id}
               x={shape.x}
               y={shape.y}
+              rotation={shape.rotation ?? 0}
               draggable={activeTool === 'mouse'}
               onClick={() => setSelectedId(shape.id)}
               onTap={() => setSelectedId(shape.id)}
@@ -562,6 +563,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               id={shape.id}
               x={shape.x}
               y={shape.y}
+              rotation={shape.rotation ?? 0}
               draggable={activeTool === 'mouse'}
               onClick={() => setSelectedId(shape.id)}
               onTap={() => setSelectedId(shape.id)}
@@ -612,6 +614,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
                   id={text.id}
                   x={text.x}
                   y={text.y}
+                  rotation={text.rotation ?? 0}
                   draggable={activeTool === 'mouse'}
                   visible={text.id !== editingTextId}
                   onClick={() => setSelectedId(text.id)}
@@ -687,6 +690,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
                 id={text.id}
                 x={text.x}
                 y={text.y}
+                rotation={text.rotation ?? 0}
                 draggable={activeTool === 'mouse'}
                 visible={text.id !== editingTextId}
                 onClick={() => setSelectedId(text.id)}
@@ -830,9 +834,14 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
                 : undefined,
             lineHeight: editingText.lineHeight,
             transform:
-              editingText.scaleX && editingText.scaleX !== 1
-                ? `scaleX(${editingText.scaleX})`
-                : undefined,
+              [
+                editingText.rotation ? `rotate(${editingText.rotation}deg)` : '',
+                editingText.scaleX && editingText.scaleX !== 1
+                  ? `scaleX(${editingText.scaleX})`
+                  : '',
+              ]
+                .filter(Boolean)
+                .join(' ') || undefined,
             transformOrigin: 'left top',
           }}
         />

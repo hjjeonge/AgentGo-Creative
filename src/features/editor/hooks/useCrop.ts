@@ -4,12 +4,17 @@ import {
   pickTargetIntersection,
 } from '@/features/editor/utils/cropUtils';
 import { getPathBoundingRect } from '@/features/editor/utils/geometry';
-import type { Rect, Shape } from '@/features/editor/types';
+import type {
+  CanvasElement,
+  ImageElement,
+  Rect,
+  Shape,
+} from '@/features/editor/types';
 
 interface Params {
-  shapesRef: RefObject<Shape[]>;
+  elementsRef: RefObject<CanvasElement[]>;
   selectedId: string | null;
-  setShapes: Dispatch<SetStateAction<Shape[]>>;
+  setElements: Dispatch<SetStateAction<CanvasElement[]>>;
   setSelectedId: Dispatch<SetStateAction<string | null>>;
   setSelectedIds: Dispatch<SetStateAction<string[]>>;
   setActiveTool: Dispatch<SetStateAction<string>>;
@@ -17,24 +22,38 @@ interface Params {
 }
 
 export const useCrop = ({
-  shapesRef,
+  elementsRef,
   selectedId,
-  setShapes,
+  setElements,
   setSelectedId,
   setSelectedIds,
   setActiveTool,
   pushUndo,
 }: Params) => {
-  /**
-   * cropByRect
-   *
-   * 사각/정사각 선택 영역을 기준으로 이미지 crop 값을 계산해 적용합니다.
-   * 교차 영역 계산, 대상 이미지 선택, cropX/Y/Width/Height 갱신을 담당합니다.
-   */
+  const toImageShape = (element: ImageElement): Shape => {
+    return {
+      id: element.id,
+      type: 'uploaded_image',
+      x: element.x,
+      y: element.y,
+      width: element.width,
+      height: element.height,
+      fill: 'transparent',
+      imageUrl: element.imageUrl,
+      sourceWidth: element.sourceWidth,
+      sourceHeight: element.sourceHeight,
+      cropX: element.cropX,
+      cropY: element.cropY,
+      cropWidth: element.cropWidth,
+      cropHeight: element.cropHeight,
+      maskPath: element.maskPath,
+    };
+  };
+
   const cropByRect = (rect: Rect) => {
-    const uploadedShapes = shapesRef.current.filter(
-      (shape) => shape.type === 'uploaded_image',
-    );
+    const uploadedShapes = elementsRef.current
+      .filter((element): element is ImageElement => element.kind === 'image')
+      .map(toImageShape);
     if (uploadedShapes.length === 0) return false;
 
     const intersections = getRectImageIntersections(rect, uploadedShapes);
@@ -65,11 +84,11 @@ export const useCrop = ({
       const nextCropHeight = target.iHeight * scaleY;
 
       pushUndo();
-      setShapes((prev) =>
-        prev.map((shape) =>
-          shape.id === target.shape.id
+      setElements((prev) =>
+        prev.map((element) =>
+          element.id === target.shape.id && element.kind === 'image'
             ? {
-                ...shape,
+                ...element,
                 x: target.ix,
                 y: target.iy,
                 width: target.iWidth,
@@ -81,7 +100,7 @@ export const useCrop = ({
                 cropWidth: nextCropWidth,
                 cropHeight: nextCropHeight,
               }
-            : shape,
+            : element,
         ),
       );
       setSelectedId(target.shape.id);
@@ -113,20 +132,14 @@ export const useCrop = ({
     return true;
   };
 
-  /**
-   * cropByLasso
-   *
-   * 자유형(lasso) 경로를 기준으로 대상 이미지에 마스크/라소 크롭 로직을 적용합니다.
-   * lasso 경계 계산, 대상 이미지 선택, 경로 좌표 변환/저장을 담당합니다.
-   */
   const cropByLasso = (lassoPath: number[]) => {
     if (lassoPath.length < 6) return false;
     const maskRect = getPathBoundingRect(lassoPath);
     if (!maskRect || maskRect.width <= 2 || maskRect.height <= 2) return false;
 
-    const uploadedShapes = shapesRef.current.filter(
-      (shape) => shape.type === 'uploaded_image',
-    );
+    const uploadedShapes = elementsRef.current
+      .filter((element): element is ImageElement => element.kind === 'image')
+      .map(toImageShape);
     const intersections = getRectImageIntersections(maskRect, uploadedShapes);
     const target = pickTargetIntersection(intersections, selectedId);
     if (!target) return false;
@@ -143,11 +156,11 @@ export const useCrop = ({
     }
 
     pushUndo();
-    setShapes((prev) =>
-      prev.map((shape) =>
-        shape.id === target.shape.id
-          ? { ...shape, maskPath: localMaskPath }
-          : shape,
+    setElements((prev) =>
+      prev.map((element) =>
+        element.id === target.shape.id && element.kind === 'image'
+          ? { ...element, maskPath: localMaskPath }
+          : element,
       ),
     );
     setSelectedId(target.shape.id);

@@ -27,6 +27,7 @@ export interface Shape {
   y: number;
   width: number;
   height: number;
+  rotation?: number;
   fill: string;
   imageUrl?: string;
   points?: number[];
@@ -48,6 +49,7 @@ export interface ShapeElement extends BaseCanvasElement {
   y: number;
   width: number;
   height: number;
+  rotation?: number;
   fill: string;
   points?: number[];
   pointsWidth?: number;
@@ -60,6 +62,7 @@ export interface ImageElement extends BaseCanvasElement {
   y: number;
   width: number;
   height: number;
+  rotation?: number;
   imageUrl: string;
   sourceWidth?: number;
   sourceHeight?: number;
@@ -74,6 +77,7 @@ export interface TextObject {
   id: string;
   x: number;
   y: number;
+  rotation?: number;
   text: string;
   width?: number;
   fontSize: number;
@@ -107,6 +111,7 @@ export interface TextElement extends BaseCanvasElement {
   kind: 'text';
   x: number;
   y: number;
+  rotation?: number;
   text: string;
   width?: number;
   fontSize: number;
