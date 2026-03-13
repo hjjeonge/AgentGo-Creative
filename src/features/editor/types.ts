@@ -5,6 +5,21 @@ export interface DrawLine {
   stroke: string;
 }
 
+export type CanvasElementKind = 'line' | 'shape' | 'text' | 'image';
+
+export interface BaseCanvasElement {
+  id: string;
+  kind: CanvasElementKind;
+}
+
+export interface LineElement extends BaseCanvasElement {
+  kind: 'line';
+  points: number[];
+  tool: string;
+  strokeWidth: number;
+  stroke: string;
+}
+
 export interface Shape {
   id: string;
   type: string;
@@ -17,6 +32,35 @@ export interface Shape {
   points?: number[];
   pointsWidth?: number;
   pointsHeight?: number;
+  sourceWidth?: number;
+  sourceHeight?: number;
+  cropX?: number;
+  cropY?: number;
+  cropWidth?: number;
+  cropHeight?: number;
+  maskPath?: number[];
+}
+
+export interface ShapeElement extends BaseCanvasElement {
+  kind: 'shape';
+  shapeType: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  fill: string;
+  points?: number[];
+  pointsWidth?: number;
+  pointsHeight?: number;
+}
+
+export interface ImageElement extends BaseCanvasElement {
+  kind: 'image';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  imageUrl: string;
   sourceWidth?: number;
   sourceHeight?: number;
   cropX?: number;
@@ -58,6 +102,45 @@ export interface TextObject {
   backgroundColor?: string;
   backgroundEnabled?: boolean;
 }
+
+export interface TextElement extends BaseCanvasElement {
+  kind: 'text';
+  x: number;
+  y: number;
+  text: string;
+  width?: number;
+  fontSize: number;
+  fill: string;
+  fontFamily?: string;
+  fontStyle?: string;
+  textDecoration?: string;
+  align?: 'left' | 'center' | 'right' | 'justify';
+  verticalAlign?: 'top' | 'middle' | 'bottom';
+  letterSpacing?: number;
+  lineHeight?: number;
+  scaleX?: number;
+  listFormat?: 'none' | 'unordered' | 'ordered';
+  stroke?: string;
+  strokeWidth?: number;
+  strokeEnabled?: boolean;
+  shadowColor?: string;
+  shadowBlur?: number;
+  shadowOpacity?: number;
+  shadowOffsetX?: number;
+  shadowOffsetY?: number;
+  shadowDirection?: number;
+  shadowDistance?: number;
+  shadowEnabled?: boolean;
+  verticalWriting?: boolean;
+  backgroundColor?: string;
+  backgroundEnabled?: boolean;
+}
+
+export type CanvasElement =
+  | LineElement
+  | ShapeElement
+  | ImageElement
+  | TextElement;
 
 export interface Rect {
   x: number;
