@@ -1,27 +1,27 @@
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import { DAMSidebar } from '../components/dam/DAMSidebar';
-import { DAMFilters, type FilterState } from '../components/dam/DAMFilters';
-import { DAMAdvancedFilters } from '../components/dam/DAMAdvancedFilters';
-import { DAMWorkspaceView } from '../components/dam/DAMWorkspaceView';
-import { DAMCollectionsView } from '../components/dam/DAMCollectionsView';
-import { DAMCreativePanel } from '../components/dam/DAMCreativePanel';
-import { FileDetailModal } from '../components/dam/FileDetailModal';
-import { NewFileModal } from '../components/dam/NewFileModal';
-import { PermissionModal } from '../components/dam/PermissionModal';
+import { DAMSidebar } from '@/features/dam/components/DAMSidebar';
+import { DAMFilters, type FilterState } from '@/features/dam/components/DAMFilters';
+import { DAMAdvancedFilters } from '@/features/dam/components/DAMAdvancedFilters';
+import { DAMWorkspaceView } from '@/features/dam/components/DAMWorkspaceView';
+import { DAMCollectionsView } from '@/features/dam/components/DAMCollectionsView';
+import { DAMCreativePanel } from '@/features/dam/components/DAMCreativePanel';
+import { FileDetailModal } from '@/features/dam/components/FileDetailModal';
+import { NewFileModal } from '@/features/dam/components/NewFileModal';
+import { PermissionModal } from '@/features/dam/components/PermissionModal';
 import {
   DAMContextMenu,
   type ContextMenuState,
-} from '../components/dam/DAMContextMenu';
-import { type DAMFile, type DAMTask } from '../components/dam/DAMData';
-import { DAMGridView } from '../components/dam/DAMGridView';
-import { DAMListView } from '../components/dam/DAMListView';
-import { RenameModal } from '../components/dam/RenameModal';
+} from '@/features/dam/components/DAMContextMenu';
+import { type DAMFile, type DAMTask } from '@/features/dam/components/DAMData';
+import { DAMGridView } from '@/features/dam/components/DAMGridView';
+import { DAMListView } from '@/features/dam/components/DAMListView';
+import { RenameModal } from '@/features/dam/components/RenameModal';
 import {
   GridViewIcon,
   ListViewIcon,
   SearchIcon,
-} from '../components/dam/DAMViewIcons';
+} from '@/features/dam/components/DAMViewIcons';
 import {
   copyAsset,
   createCollectionShareLink,
@@ -38,7 +38,7 @@ import {
   uploadAsset,
   type CollectionItem,
   type FolderNode,
-} from '../services/dam';
+} from '@/features/dam/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 

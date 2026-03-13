@@ -1,20 +1,24 @@
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { Aside } from '../components/editor/Aside';
-import { Canvas } from '../components/editor/Canvas';
-import { HistoryPanel } from '../components/editor/HistoryPanel';
-import { uploadFile } from '../services/file/api';
+import { Aside } from '@/features/editor/components/Aside';
+import { Canvas } from '@/features/editor/components/Canvas';
+import { HistoryPanel } from '@/features/editor/components/HistoryPanel';
+import { uploadFile } from '@/features/editor/api/file';
 import {
   getProjectDetail,
   getProjectHistory,
   putProject,
-} from '../services/project/api';
-import type { HistoryItemRes } from '../services/project/type';
-import { projectQueryKeys } from '../queries/project/queryKeys';
-import { queryClient } from '../queries/queryClient';
-import type { CanvasHandle, CanvasSnapshot, TextObject } from '../types/editor';
-import { resolveImageUrl } from '../utils/template/resolveImageUrl';
+} from '@/features/project/api';
+import type { HistoryItemRes } from '@/features/project/types';
+import { projectQueryKeys } from '@/features/project/queries/queryKeys';
+import { queryClient } from '@/lib/queryClient';
+import type {
+  CanvasHandle,
+  CanvasSnapshot,
+  TextObject,
+} from '@/features/editor/types';
+import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
 
 const MAX_HISTORY = 20;
 
