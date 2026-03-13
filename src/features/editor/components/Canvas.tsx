@@ -51,7 +51,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       setStageSize,
       backgroundImage,
       setBackgroundImageState,
-      lines,
+      elements,
       setLines,
       shapes,
       setShapes,
@@ -689,10 +689,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
               handleMouseDown={handleMouseDown}
               handleMouseMove={handleMouseMove}
               handleMouseUp={handleMouseUp}
-              lines={lines}
+              elements={elements}
               currentLine={currentLine}
-              shapes={shapes}
-              texts={texts}
               setSelectedId={handleSelectObject}
               objectRefs={objectRefs}
               trRef={trRef}

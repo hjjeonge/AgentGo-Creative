@@ -13,7 +13,13 @@ import {
   Text,
   Transformer,
 } from 'react-konva';
-import type { DrawLine, Shape, TextObject } from '@/features/editor/types';
+import { partitionCanvasElements } from '@/features/editor/utils/elementAdapters';
+import type {
+  CanvasElement,
+  DrawLine,
+  Shape,
+  TextObject,
+} from '@/features/editor/types';
 
 interface EditorCanvasProps {
   stageSize: { width: number; height: number };
@@ -21,10 +27,8 @@ interface EditorCanvasProps {
   handleMouseDown: (e: any) => void;
   handleMouseMove: (e: any) => void;
   handleMouseUp: (e: any) => void;
-  lines: DrawLine[];
+  elements: CanvasElement[];
   currentLine: DrawLine | null;
-  shapes: Shape[];
-  texts: TextObject[];
   setSelectedId: (id: string | null) => void;
   objectRefs: React.RefObject<Record<string, any>>;
   trRef: React.RefObject<any>;
@@ -66,10 +70,8 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   handleMouseDown,
   handleMouseMove,
   handleMouseUp,
-  lines,
+  elements,
   currentLine,
-  shapes,
-  texts,
   setSelectedId,
   objectRefs,
   trRef,
@@ -93,6 +95,10 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   const [shapeImages, setShapeImages] = useState<
     Record<string, HTMLImageElement>
   >({});
+  const { lines, shapes, texts } = useMemo(
+    () => partitionCanvasElements(elements),
+    [elements],
+  );
 
   useEffect(() => {
     if (backgroundImageUrl) {
