@@ -154,6 +154,7 @@ export interface CanvasSnapshot {
   shapes: Shape[];
   texts: TextObject[];
   backgroundImage: string | null;
+  elements?: CanvasElement[];
 }
 
 export interface HistoryEntry {
@@ -188,4 +189,5 @@ export interface HistoryState {
   shapes: Shape[];
   texts: TextObject[];
   backgroundImage: string | null;
+  elements?: CanvasElement[];
 }

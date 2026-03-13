@@ -16,6 +16,10 @@ import { useCrop } from '@/features/editor/hooks/useCrop';
 import { useDrawing } from '@/features/editor/hooks/useDrawing';
 import { useSelection } from '@/features/editor/hooks/useSelection';
 import { useUndoRedo } from '@/features/editor/hooks/useUndoRedo';
+import {
+  partitionCanvasElements,
+  toCanvasElements,
+} from '@/features/editor/utils/elementAdapters';
 import type {
   CanvasHandle,
   CanvasSnapshot,
@@ -315,6 +319,11 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         shapes: shapesRef.current,
         texts: textsRef.current,
         backgroundImage: backgroundImageRef.current,
+        elements: toCanvasElements({
+          lines: linesRef.current,
+          shapes: shapesRef.current,
+          texts: textsRef.current,
+        }),
       }),
       exportAsBlob: async (): Promise<Blob | null> => {
         const stage = stageRef.current;
@@ -325,15 +334,22 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         return res.blob();
       },
       restoreSnapshot: (snapshot: CanvasSnapshot) => {
-        const uploadedImageShape = snapshot.shapes.find(
+        const legacyCollections = snapshot.elements
+          ? partitionCanvasElements(snapshot.elements)
+          : {
+              lines: snapshot.lines,
+              shapes: snapshot.shapes,
+              texts: snapshot.texts,
+            };
+        const uploadedImageShape = legacyCollections.shapes.find(
           (shape) => shape.type === 'uploaded_image' && shape.imageUrl,
         );
         const nextBackgroundImage =
           snapshot.backgroundImage || uploadedImageShape?.imageUrl || null;
 
-        setLines(snapshot.lines);
-        setShapes(snapshot.shapes);
-        setTexts(snapshot.texts);
+        setLines(legacyCollections.lines);
+        setShapes(legacyCollections.shapes);
+        setTexts(legacyCollections.texts);
         setBackgroundImageState(nextBackgroundImage);
         if (!uploadedImageShape && nextBackgroundImage) {
           addUploadedImageShape(nextBackgroundImage, {

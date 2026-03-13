@@ -18,6 +18,10 @@ import type {
   CanvasSnapshot,
   TextObject,
 } from '@/features/editor/types';
+import {
+  partitionCanvasElements,
+  toCanvasElements,
+} from '@/features/editor/utils/elementAdapters';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
 
 const MAX_HISTORY = 20;
@@ -42,6 +46,13 @@ export const EditorPage: React.FC = () => {
     snapshot: CanvasSnapshot,
     fallbackImageUrl?: string | null,
   ): CanvasSnapshot => {
+    const legacyCollections = snapshot.elements
+      ? partitionCanvasElements(snapshot.elements)
+      : {
+          lines: snapshot.lines,
+          shapes: snapshot.shapes,
+          texts: snapshot.texts,
+        };
     const normalizedFallback = resolveImageUrl(fallbackImageUrl);
     const normalize = (url: string | null | undefined): string | null => {
       if (!url) return null;
@@ -50,7 +61,7 @@ export const EditorPage: React.FC = () => {
     };
 
     const normalizedBackground = normalize(snapshot.backgroundImage);
-    const normalizedShapes = snapshot.shapes.map((shape) => {
+    const normalizedShapes = legacyCollections.shapes.map((shape) => {
       if (shape.type !== 'uploaded_image') return shape;
       return {
         ...shape,
@@ -64,14 +75,25 @@ export const EditorPage: React.FC = () => {
 
     return {
       ...snapshot,
+      lines: legacyCollections.lines,
       backgroundImage: normalizedBackground || shapeBackground,
       shapes: normalizedShapes,
+      texts: legacyCollections.texts,
+      elements: toCanvasElements({
+        lines: legacyCollections.lines,
+        shapes: normalizedShapes,
+        texts: legacyCollections.texts,
+      }),
     };
   };
 
   const snapshotHasImage = (snapshot: CanvasSnapshot) =>
     snapshot.backgroundImage !== null ||
-    snapshot.shapes.some(
+    (
+      snapshot.elements
+        ? partitionCanvasElements(snapshot.elements).shapes
+        : snapshot.shapes
+    ).some(
       (shape) => shape.type === 'uploaded_image' && !!shape.imageUrl,
     );
 
@@ -188,6 +210,13 @@ export const EditorPage: React.FC = () => {
   const persistSnapshotAssetUrls = async (
     snapshot: CanvasSnapshot,
   ): Promise<CanvasSnapshot> => {
+    const legacyCollections = snapshot.elements
+      ? partitionCanvasElements(snapshot.elements)
+      : {
+          lines: snapshot.lines,
+          shapes: snapshot.shapes,
+          texts: snapshot.texts,
+        };
     const urlCache = new Map<string, string>();
     const persistUrl = async (
       url: string | undefined,
@@ -209,7 +238,7 @@ export const EditorPage: React.FC = () => {
       )) || null;
 
     const nextShapes = await Promise.all(
-      snapshot.shapes.map(async (shape) => {
+      legacyCollections.shapes.map(async (shape) => {
         if (shape.type !== 'uploaded_image' || !shape.imageUrl) return shape;
         const nextImageUrl = await persistUrl(shape.imageUrl, 'snapshot-shape');
         return nextImageUrl ? { ...shape, imageUrl: nextImageUrl } : shape;
@@ -218,8 +247,15 @@ export const EditorPage: React.FC = () => {
 
     return {
       ...snapshot,
+      lines: legacyCollections.lines,
       backgroundImage: nextBackgroundImage,
       shapes: nextShapes,
+      texts: legacyCollections.texts,
+      elements: toCanvasElements({
+        lines: legacyCollections.lines,
+        shapes: nextShapes,
+        texts: legacyCollections.texts,
+      }),
     };
   };
 
