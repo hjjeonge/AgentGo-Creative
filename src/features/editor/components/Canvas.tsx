@@ -118,10 +118,12 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     }, []);
 
     const { pushUndo, undo, redo } = useUndoRedo({
+      elementsRef,
       linesRef,
       shapesRef,
       textsRef,
       backgroundImageRef,
+      setElements,
       setLines,
       setShapes,
       setTexts,
