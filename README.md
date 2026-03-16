@@ -170,49 +170,65 @@ VITE_DAM_USE_DEV_DUMMY=true
 
 ```
 src/
-├── assets/                 # SVG 아이콘 및 이미지 리소스 (57개)
+├── assets/                     # SVG 아이콘 및 정적 리소스
+├── commons/
+│   ├── components/            # 여러 feature에서 재사용하는 공용 UI
+│   ├── types/                 # 공통 API/도메인 타입
+│   └── utils/                 # 토큰, 폰트, 이미지 헬퍼 등
 ├── components/
-│   ├── commons/            # 공용 컴포넌트 (Layout, Header, UserCard, ColorPalette)
-│   ├── dashboard/          # 대시보드 (Aside, Content, Template 등)
-│   ├── editor/             # 에디터 핵심 UI/로직 (21개 컴포넌트)
-│   │   ├── Canvas.tsx          # 캔버스 상태 관리 (forwardRef)
-│   │   ├── EditorCanvas.tsx    # Konva Stage 렌더링
-│   │   ├── Toolbar.tsx         # 편집 도구 선택 바
-│   │   ├── TextEditor.tsx      # 텍스트 속성 편집 패널
-│   │   ├── Prompt.tsx          # AI 프롬프트 입력
-│   │   └── HistoryPanel.tsx    # 작업이력 패널
-│   ├── dam/                # DAM (Sidebar, GridView, ListView, Filters, Modals)
-│   ├── template/           # 템플릿 빌더 컴포넌트
-│   ├── icons/              # 커스텀 아이콘 컴포넌트
-│   └── ui/                 # Radix UI 프리미티브 (select, switch, tooltip 등)
-├── services/               # API 연동 레이어
-│   ├── apiClient.ts            # HTTP 클라이언트 (Bearer 인증, 401 자동 처리)
-│   ├── auth.ts                 # 로그인/로그아웃
-│   ├── ai.ts                   # AI 기능 (KeyVisual, Translation, DetailCut, revokeBlobUrl)
-│   ├── images.ts               # 이미지 생성 API
-│   ├── projects.ts             # 프로젝트 CRUD
-│   ├── dam.ts                  # DAM 에셋 API
-│   ├── files.ts                # 파일 업로드
-│   └── users.ts                # 유저 정보
-├── store/
-│   └── colorHistoryStore.ts    # 색상 히스토리 (Zustand, 최근 7색)
-├── pages/                  # 라우트 페이지 (5개)
-│   ├── LoginPage.tsx
-│   ├── DashboardPage.tsx
-│   ├── TemplatePage.tsx
-│   ├── EditorPage.tsx
-│   └── DAMPage.tsx
-├── types/
-│   └── editor.ts           # CanvasHandle, CanvasSnapshot, HistoryEntry 타입
-├── utils/
-│   ├── fontLoader.ts       # Google Fonts 로더
-│   └── getImage.ts         # 이미지 유틸리티
+│   └── ui/                    # shadcn/ui 컴포넌트 (이동/수정 금지 대상)
+├── features/
+│   ├── auth/
+│   │   ├── api/
+│   │   ├── constants/
+│   │   ├── queries/
+│   │   └── types.ts
+│   ├── dam/
+│   │   ├── api/
+│   │   ├── components/
+│   │   └── types.ts
+│   ├── dashboard/
+│   │   └── components/
+│   ├── editor/
+│   │   ├── api/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── store/
+│   │   ├── utils/
+│   │   └── types.ts
+│   ├── project/
+│   │   ├── api/
+│   │   ├── queries/
+│   │   └── types.ts
+│   └── template/
+│       ├── api/
+│       ├── components/
+│       ├── constants/
+│       ├── hooks/
+│       ├── queries/
+│       ├── utils/
+│       └── types.ts
 ├── lib/
-│   └── utils.ts            # shadcn/ui 유틸리티 (cn)
-├── App.tsx                 # 메인 라우팅
-├── main.tsx                # React DOM 진입점
-└── index.css               # 글로벌 스타일 + Tailwind 테마
+│   ├── queryClient.ts         # React Query QueryClient
+│   └── utils.ts               # shadcn/ui util (cn)
+├── pages/                      # 라우트 단위 페이지 컴포넌트
+├── providers/
+│   └── QueryProvider.tsx      # QueryClientProvider 래퍼
+├── router/
+│   └── index.tsx              # BrowserRouter + protected routes
+├── services/
+│   └── axiosInstance.ts       # 공용 axios 인스턴스
+├── App.tsx                    # AppRouter 연결
+├── main.tsx                   # React DOM 진입점
+└── index.css                  # 글로벌 스타일 + Tailwind 테마
 ```
+
+### 구조 원칙
+
+- `pages`는 페이지 조합만 담당하고 실제 화면 로직은 `features/*`에서 가져옵니다.
+- 공통으로 재사용되는 컴포넌트/유틸/타입만 `commons/*`에 둡니다.
+- `components/ui`와 `lib/utils.ts`는 shadcn/ui 영역으로 유지합니다.
+- API 호출은 각 feature의 `api`, 서버 상태는 `queries`, 로컬 상태는 `store` 또는 hook으로 분리합니다.
 
 ---
 
@@ -220,35 +236,45 @@ src/
 
 ### 라우팅
 
-- React Router v7, 토큰 기반 인증 라우트 보호
-- 인증된 라우트에 Layout 래퍼 적용
-- Query Parameters로 에디터 브레드크럼 정보 전달
+- `src/router/index.tsx`에서 React Router v7 라우트를 관리합니다.
+- 로그인 이외의 라우트는 `PrivateRoute`로 보호합니다.
+- 인증된 라우트에는 `Layout`이 공통 래퍼로 적용됩니다.
+- Query Parameters로 에디터 브레드크럼 정보를 전달합니다.
 
 ### 상태 관리
 
-- Zustand: 색상 히스토리 (최근 7색)
-- Canvas: forwardRef + useImperativeHandle로 로컬 상태 관리
-- EditorPage에서 history, hasCanvasImage 등 상태 리프팅
+- React Query: 서버 상태 캐싱/동기화
+- Zustand: 에디터 색상 히스토리 (최근 7색)
+- Canvas: `forwardRef + useImperativeHandle` 기반 로컬 상태 제어
+- `EditorPage`에서 history, canvas image 여부, 선택 텍스트 상태를 상위에서 조정합니다.
 
 ### API 통신
 
-- `apiClient.ts`: GET/POST/PUT/PATCH/DELETE/upload 헬퍼
-- Bearer 토큰 자동 포함
-- ApiError 클래스 기반 에러 핸들링
-- 401 응답 시 토큰 초기화 후 `/login`으로 자동 리다이렉트
-- FormData 기반 파일 업로드
+- 모든 HTTP 요청은 `src/services/axiosInstance.ts`를 사용합니다.
+- Bearer 토큰을 자동 포함합니다.
+- 401 응답 시 refresh token 재발급을 시도합니다.
+- refresh 실패 시 토큰을 정리하고 로그인 흐름으로 복귀합니다.
+- 파일 업로드는 `FormData` 기반으로 처리합니다.
 
 ### React Query 규칙
 
-- Query Hook은 `src/queries/<domain>/` 구조로 관리합니다. (예: `auth`, `project`, `template`)
-- Query Key는 도메인 prefix를 사용합니다. (예: `['project', 'recent']`)
-- 신규 Query/Mutation은 `axiosInstance` 기반 서비스 함수와 연결합니다.
+- QueryClient는 `src/lib/queryClient.ts`에 있습니다.
+- Query Provider는 `src/providers/QueryProvider.tsx`에서 앱 전체에 주입합니다.
+- Query Hook은 각 feature의 `queries/` 아래에서 관리합니다.
+- Query Key는 feature 단위 prefix를 사용합니다. 예: `['project', 'recent']`
+- 신규 Query/Mutation은 feature `api/` 함수와 1:1로 연결하는 것을 기본 규칙으로 합니다.
 
 ### 캔버스 구현
 
 - Konva Stage + 멀티 레이어 (선, 도형, 텍스트, 배경)
 - 스냅샷/복원 패턴 기반 Undo/Redo
 - 선택 도구 활성화 시 Pan 지원
+
+### Import 규칙
+
+- 경로 별칭은 `@/* -> src/*`를 사용합니다.
+- feature 내부에서도 깊은 상대경로보다 `@/features/...`, `@/commons/...` import를 우선합니다.
+- shadcn 컴포넌트 import는 `@/components/ui/*`를 유지합니다.
 
 ---
 

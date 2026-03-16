@@ -1,11 +1,11 @@
 import type React from 'react';
 import { useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { TemplateFieldsSection } from '../components/template/TemplateFieldsSection';
-import { DEFAULT_TEMPLATE_KEY } from '../constants/templateConfigs';
-import { getTemplateConfig } from '../utils/getTemplateConfig';
-import { useTemplateForm } from '../hooks/template/useTemplateForm';
-import { useTemplateGenerate } from '../hooks/template/useTemplateGenerate';
+import { TemplateFieldsSection } from '@/features/template/components/TemplateFieldsSection';
+import { DEFAULT_TEMPLATE_KEY } from '@/features/template/constants/templateConfig';
+import { getTemplateConfig } from '@/features/template/utils/getTemplateConfig';
+import { useTemplateForm } from '@/features/template/hooks/useTemplateForm';
+import { useTemplateGenerate } from '@/features/template/hooks/useTemplateGenerate';
 
 export const TemplatePage: React.FC = () => {
   const navigate = useNavigate();
