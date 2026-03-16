@@ -1,15 +1,14 @@
-import type React from 'react';
-import { useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import New from '@/assets/file-new-line.svg';
-import Upload from '@/assets/upload-cloud-2-line.svg';
 import AI from '@/assets/ai.svg';
+import New from '@/assets/file-new-line.svg';
 import Home from '@/assets/home.svg';
-import { useState } from 'react';
-import { AiToolPanel } from './AiToolPanel';
+import Upload from '@/assets/upload-cloud-2-line.svg';
 import { TextIcon } from '@/commons/components/icons/TextIcon';
-import { TextEditor } from './TextEditor';
 import type { TextObject } from '@/features/editor/types';
+import type React from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AiToolPanel } from './AiToolPanel';
+import { TextEditor } from './TextEditor';
 
 interface Props {
   hasImage: boolean;
@@ -31,7 +30,6 @@ export const Aside: React.FC<Props> = ({
   const navigate = useNavigate();
   const [aiClick, setAiClick] = useState(false);
   const [textClick, setTextClick] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAiTool = () => {
     setTextClick(false);
@@ -42,10 +40,6 @@ export const Aside: React.FC<Props> = ({
     onAddText?.();
     setAiClick(false);
     setTextClick(true);
-  };
-
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,15 +63,19 @@ export const Aside: React.FC<Props> = ({
               새프로젝트
             </span>
           </button>
-          <button
-            onClick={handleUploadClick}
-            className="flex flex-col gap-[4px] items-center hover:opacity-70"
-          >
+          <label className="flex flex-col gap-[4px] items-center hover:opacity-70 cursor-pointer">
             <img src={Upload} className="w-[30px] h-[30px]" />
             <span className="text-[#0F172B] text-[13px] leading-[19.88px]">
               업로드
             </span>
-          </button>
+
+            <input
+              type="file"
+              accept=".jpg,.jpeg,.png,.webp"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </label>
           <button
             className="flex flex-col gap-[4px] items-center hover:opacity-70"
             onClick={handleAiTool}
@@ -106,14 +104,6 @@ export const Aside: React.FC<Props> = ({
             홈으로
           </span>
         </button>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleFileChange}
-        />
       </aside>
       {aiClick && (
         <div className="absolute left-[85px] top-0 bottom-0 z-[60] w-fit bg-white border-l border-r border-[#E2E8F0] shadow-[8px_0_8px_-6px_rgba(50,56,62,0.08),12px_0_12px_-6px_rgba(50,56,62,0.08)]">
