@@ -190,3 +190,8 @@ export interface HistoryState {
   backgroundImage: string | null;
   elements: CanvasElement[];
 }
+
+export interface PromptGeneratePayload {
+  prompt: string;
+  referenceFiles: File[];
+}
