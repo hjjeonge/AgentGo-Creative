@@ -25,7 +25,7 @@ export const getProjectDetail = (projectId: string) => {
 
 // 새 프로젝트 생성
 export const postNewProject = () => {
-  return axiosInstance.post<CreateProjectRes>('/api/projects/new');
+  return axiosInstance.post<CreateProjectRes>('/api/projects');
 };
 
 // 프로젝트 수정
