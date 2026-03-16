@@ -10,6 +10,8 @@ import { useNavigate } from 'react-router-dom';
 import { AiToolPanel } from './AiToolPanel';
 import { TextEditor } from './TextEditor';
 
+const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
 interface Props {
   hasImage: boolean;
   onUpload: (url: string) => void;
@@ -45,6 +47,11 @@ export const Aside: React.FC<Props> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!allowedTypes.includes(file.type)) {
+      alert('jpg, jpeg, png, webp, gif, pdf 파일만 업로드 가능합니다.');
+      return;
+    }
     const url = URL.createObjectURL(file);
     onUpload(url);
     e.target.value = '';
@@ -71,7 +78,7 @@ export const Aside: React.FC<Props> = ({
 
             <input
               type="file"
-              accept=".jpg,.jpeg,.png,.webp"
+              accept="image/jpeg,image/png,image/webp"
               className="hidden"
               onChange={handleFileChange}
             />
