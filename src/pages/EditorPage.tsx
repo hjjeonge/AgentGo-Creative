@@ -95,7 +95,10 @@ export const EditorPage: React.FC = () => {
       setHistory(
         entries.map((entry) => ({
           ...entry,
-          snapshot: normalizeSnapshotForRender(entry.snapshot, fallbackImageUrl),
+          snapshot: normalizeSnapshotForRender(
+            entry.snapshot,
+            fallbackImageUrl,
+          ),
         })),
       );
     },
@@ -117,11 +120,7 @@ export const EditorPage: React.FC = () => {
     }
 
     setHasCanvasImage(false);
-  }, [
-    normalizeSnapshotForRender,
-    projectDetailQuery.data,
-    snapshotHasImage,
-  ]);
+  }, [normalizeSnapshotForRender, projectDetailQuery.data, snapshotHasImage]);
 
   useEffect(() => {
     if (!projectHistoryQuery.data) return;
@@ -129,7 +128,11 @@ export const EditorPage: React.FC = () => {
       projectHistoryQuery.data,
       projectDetailQuery.data?.thumbnail_url || null,
     );
-  }, [projectDetailQuery.data?.thumbnail_url, projectHistoryQuery.data, syncHistory]);
+  }, [
+    projectDetailQuery.data?.thumbnail_url,
+    projectHistoryQuery.data,
+    syncHistory,
+  ]);
 
   useEffect(() => {
     if (!projectDetailQuery.error && !projectHistoryQuery.error) return;

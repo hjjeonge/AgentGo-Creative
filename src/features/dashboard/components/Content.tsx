@@ -8,13 +8,15 @@ import {
 } from '@/features/template/constants/templateConfig';
 import { useUserProfileQuery } from '@/features/auth/queries/useUserProfileQuery';
 import { useFavoriteTemplatesQuery } from '@/features/template/queries';
-import { postNewProject } from '@/features/project/api';
+import { useCreateProjectMutation } from '@/features/project/queries';
 import type { FavoriteTemplateRes } from '@/features/template/types';
 
 export const Content: React.FC = () => {
   const navigate = useNavigate();
   const { data: userProfile } = useUserProfileQuery();
   const { data, isError } = useFavoriteTemplatesQuery();
+  const { mutateAsync: createProject, isPending: isCreatingProject } =
+    useCreateProjectMutation();
 
   // todo 즐겨찾는 템플릿 목록 조회 res 있다면 해당 코드 제거
   const fallbackTemplates: FavoriteTemplateRes[] = TEMPLATE_CONFIGS.map(
@@ -35,8 +37,8 @@ export const Content: React.FC = () => {
   }, [isError]);
 
   const onClickCreateNewProject = async () => {
-    const res = await postNewProject();
-    const id = res.data.projectId;
+    const res = await createProject();
+    const id = res.projectId;
     navigate(`/editor/${id}`);
   };
 
@@ -56,6 +58,7 @@ export const Content: React.FC = () => {
         </div>
         <button
           onClick={onClickCreateNewProject}
+          disabled={isCreatingProject}
           className="bg-[linear-gradient(135deg,#0055E9_0%,#6A14D9_100%)] p-[14px_24px] rounded-[8px] flex items-center gap-[4px] text-[#F8FAFC] text-[17px] font-bold leading-[29.88px] w-fit"
         >
           <span>+</span>

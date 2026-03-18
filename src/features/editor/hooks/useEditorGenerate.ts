@@ -7,9 +7,7 @@ import type {
   CanvasSnapshot,
   PromptGeneratePayload,
 } from '@/features/editor/types';
-import { projectQueryKeys } from '@/features/project/queries/queryKeys';
-import { putProject } from '@/features/project/api';
-import { queryClient } from '@/lib/queryClient';
+import { useUpdateProjectMutation } from '@/features/project/queries';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
 
 interface Params {
@@ -42,6 +40,7 @@ export const useEditorGenerate = ({
   setHasCanvasImage,
 }: Params) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { mutateAsync: updateProject } = useUpdateProjectMutation();
 
   const waitForCanvasImage = async (imageUrl: string) => {
     const maxAttempts = 20;
@@ -140,19 +139,15 @@ export const useEditorGenerate = ({
       const uploaded = await uploadFile(file);
       const uploadedUrl = uploaded.file_url;
 
-      await putProject(projectId, {
-        title: projectTitle,
-        snapshot: persistedSnapshot,
-        thumbnail_url: uploadedUrl,
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: projectQueryKeys.detail(projectId),
+      await updateProject({
+        projectId,
+        data: {
+          title: projectTitle,
+          snapshot: persistedSnapshot,
+          thumbnail_url: uploadedUrl,
+        },
       });
       await refetchHistory();
-      await queryClient.invalidateQueries({
-        queryKey: projectQueryKeys.recent(),
-      });
     } catch (error) {
       const message = getErrorMessage(
         error,
