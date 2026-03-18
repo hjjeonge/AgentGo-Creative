@@ -21,7 +21,7 @@ interface Params {
   persistSnapshotAssetUrls: (
     snapshot: CanvasSnapshot,
   ) => Promise<CanvasSnapshot>;
-  fetchAndSetHistory: (fallbackImageUrl?: string | null) => Promise<void>;
+  refetchHistory: () => Promise<unknown>;
   setHasCanvasImage: (value: boolean) => void;
 }
 
@@ -38,7 +38,7 @@ export const useEditorGenerate = ({
   maxHistory,
   canvasRef,
   persistSnapshotAssetUrls,
-  fetchAndSetHistory,
+  refetchHistory,
   setHasCanvasImage,
 }: Params) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -146,7 +146,10 @@ export const useEditorGenerate = ({
         thumbnail_url: uploadedUrl,
       });
 
-      await fetchAndSetHistory(uploadedUrl);
+      await queryClient.invalidateQueries({
+        queryKey: projectQueryKeys.detail(projectId),
+      });
+      await refetchHistory();
       await queryClient.invalidateQueries({
         queryKey: projectQueryKeys.recent(),
       });
