@@ -17,7 +17,7 @@ export interface ProjectDetailRes {
   thumbnail_url: string | null;
   updated_at: string;
   latest_history_id: string | null;
-  snapshot: CanvasSnapshot | null; // snapShot 이 어떻게 오는거지?
+  snapshot: CanvasSnapshot | null;
 }
 
 export interface SaveProjectReq {
