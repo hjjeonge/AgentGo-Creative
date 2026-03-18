@@ -2,6 +2,7 @@ import type React from 'react';
 import { useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { TemplateFieldsSection } from '@/features/template/components/TemplateFieldsSection';
+import { postNewProject } from '@/features/project/api';
 import { DEFAULT_TEMPLATE_KEY } from '@/features/template/constants/templateConfig';
 import { getTemplateConfig } from '@/features/template/utils/getTemplateConfig';
 import { useTemplateForm } from '@/features/template/hooks/useTemplateForm';
@@ -41,11 +42,13 @@ export const TemplatePage: React.FC = () => {
 
     const result = await generateFromTemplate();
     if (!result) return;
+    const projectRes = await postNewProject();
+    const projectId = projectRes.data.projectId;
 
     navigate(
-      `/editor?image=${encodeURIComponent(result.imageUrl)}&prompt=${encodeURIComponent(
-        result.prompt,
-      )}&templateName=${encodeURIComponent(
+      `/editor/${projectId}?image=${encodeURIComponent(
+        result.imageUrl,
+      )}&prompt=${encodeURIComponent(result.prompt)}&templateName=${encodeURIComponent(
         template.title,
       )}&templatePath=${encodeURIComponent(`/template?template=${template.key}`)}`,
     );

@@ -22,17 +22,35 @@ export const FileField: React.FC<FileFieldProps> = ({
   const inputId = `file-input-${field.key}`;
   const isMulti = field.type === 'files';
 
+  const allowedTypes = [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+    'application/pdf',
+  ];
+
   return (
     <FormRow label={field.label} required={field.required}>
       <input
         id={inputId}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
         multiple={isMulti}
         className="hidden"
         onChange={(event) => {
           const nextFiles = Array.from(event.target.files ?? []);
           if (!nextFiles.length) return;
+
+          const invalidFile = nextFiles.find(
+            (file) => !allowedTypes.includes(file.type),
+          );
+
+          if (invalidFile) {
+            alert('jpg, jpeg, png, webp, gif, pdf 파일만 업로드 가능합니다.');
+            event.target.value = '';
+            return;
+          }
 
           if (isMulti) onMultiFilesChange(nextFiles);
           else onSingleFileChange(nextFiles[0] ?? null);

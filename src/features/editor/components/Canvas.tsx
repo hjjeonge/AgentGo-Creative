@@ -20,14 +20,16 @@ import type {
   CanvasElement,
   CanvasHandle,
   CanvasSnapshot,
+  PromptGeneratePayload,
   TextObject,
 } from '@/features/editor/types';
 
 interface Props {
-  onGenerate?: (prompt: string) => void;
+  onGenerate?: (payload: PromptGeneratePayload) => Promise<void>;
   breadcrumbLabel?: string | null;
   breadcrumbPath?: string | null;
   onSelectedTextObjectChange?: (textObject?: TextObject) => void;
+  isGenerating?: boolean;
 }
 
 const DEFAULT_PLACEHOLDER_TEXT = '텍스트를 입력하세요';
@@ -35,7 +37,13 @@ const UPLOADED_IMAGE_SHAPE_PREFIX = 'shape_uploaded_image_';
 
 export const Canvas = forwardRef<CanvasHandle, Props>(
   (
-    { onGenerate, breadcrumbLabel, breadcrumbPath, onSelectedTextObjectChange },
+    {
+      onGenerate,
+      breadcrumbLabel,
+      breadcrumbPath,
+      onSelectedTextObjectChange,
+      isGenerating = false,
+    },
     ref,
   ) => {
     const navigate = useNavigate();
@@ -731,7 +739,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           )}
         </div>
 
-        <Prompt onGenerate={onGenerate} />
+        <Prompt onGenerate={onGenerate} isSubmitting={isGenerating} />
       </section>
     );
   },
