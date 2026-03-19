@@ -1,8 +1,14 @@
+const LOCAL_FONTS = new Set(['Pretendard']);
+
 /**
  * Dynamically loads a Google Font by creating a <link> element in the document's <head>.
- * It checks if the font has already been loaded to avoid duplicates.
+ * Locally bundled fonts are skipped.
  */
 export const loadGoogleFont = (fontFamily: string) => {
+  if (LOCAL_FONTS.has(fontFamily)) {
+    return;
+  }
+
   const fontId = `google-font-${fontFamily.replace(/ /g, '-')}`;
 
   // Don't load if the font link already exists
