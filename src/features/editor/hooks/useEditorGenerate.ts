@@ -4,6 +4,7 @@ import { uploadFile } from '@/features/editor/api/file';
 import { generateImage, getImageJob } from '@/features/editor/api/image';
 import type {
   CanvasHandle,
+  ImageElement,
   CanvasSnapshot,
   PromptGeneratePayload,
 } from '@/features/editor/types';
@@ -24,10 +25,23 @@ interface Params {
 }
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   return error instanceof Error && error.message ? error.message : fallback;
 };
+
+const normalizeBackendAssetUrl = (url: string) => {
+  if (url.startsWith('/')) return url;
+  if (url.startsWith(`${API_BASE_URL}/`)) {
+    return url.slice(API_BASE_URL.length);
+  }
+  return url;
+};
+
+const isImageElement = (
+  element: CanvasSnapshot['elements'][number],
+): element is ImageElement => element.kind === 'image';
 
 export const useEditorGenerate = ({
   projectId,
@@ -41,6 +55,37 @@ export const useEditorGenerate = ({
 }: Params) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { mutateAsync: updateProject } = useUpdateProjectMutation();
+
+  const uploadBlobUrl = async (blobUrl: string, fileNamePrefix: string) => {
+    const blobRes = await fetch(blobUrl);
+    const blob = await blobRes.blob();
+    const file = new File([blob], `${fileNamePrefix}-${Date.now()}.png`, {
+      type: blob.type || 'image/png',
+    });
+    const uploaded = await uploadFile(file);
+    return uploaded.file_url;
+  };
+
+  const resolveTargetImageUrl = async () => {
+    const snapshot = canvasRef.current?.getSnapshot();
+    if (!snapshot) {
+      throw new Error('캔버스 이미지를 확인할 수 없습니다.');
+    }
+
+    const uploadedImage = snapshot.elements.find(isImageElement);
+    const targetUrl =
+      snapshot.backgroundImage || uploadedImage?.imageUrl || null;
+    if (!targetUrl) {
+      throw new Error('수정할 기준 이미지가 필요합니다.');
+    }
+
+    if (targetUrl.startsWith('blob:')) {
+      const uploadedUrl = await uploadBlobUrl(targetUrl, 'editor-target');
+      return normalizeBackendAssetUrl(uploadedUrl);
+    }
+
+    return normalizeBackendAssetUrl(targetUrl);
+  };
 
   const waitForCanvasImage = async (imageUrl: string) => {
     const maxAttempts = 20;
@@ -78,19 +123,21 @@ export const useEditorGenerate = ({
         );
       }
 
+      const targetImageUrl = await resolveTargetImageUrl();
       const referenceUrls =
         referenceFiles.length > 0
           ? await Promise.all(
               referenceFiles.map(async (file) => {
                 const uploaded = await uploadFile(file);
-                return uploaded.file_url;
+                return normalizeBackendAssetUrl(uploaded.file_url);
               }),
             )
           : [];
+      const generateReferenceUrls = [targetImageUrl, ...referenceUrls];
 
       const generateRes = await generateImage({
         prompt,
-        reference_urls: referenceUrls.length > 0 ? referenceUrls : undefined,
+        reference_urls: generateReferenceUrls,
       });
 
       let job = generateRes.data;
