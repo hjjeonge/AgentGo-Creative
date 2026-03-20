@@ -5,8 +5,11 @@ import { Aside } from '@/features/editor/components/Aside';
 import { Canvas } from '@/features/editor/components/Canvas';
 import { HistoryPanel } from '@/features/editor/components/HistoryPanel';
 import { uploadFile } from '@/features/editor/api/file';
-import { getProjectDetail, getProjectHistory } from '@/features/project/api';
 import type { HistoryItemRes } from '@/features/project/types';
+import {
+  useProjectDetailQuery,
+  useProjectHistoryQuery,
+} from '@/features/project/queries';
 import type {
   CanvasHandle,
   CanvasSnapshot,
@@ -84,11 +87,13 @@ export const EditorPage: React.FC = () => {
     [],
   );
 
-  const fetchAndSetHistory = useCallback(
-    async (fallbackImageUrl?: string | null) => {
-      const historyRes = await getProjectHistory(projectId);
+  const projectDetailQuery = useProjectDetailQuery(projectId);
+  const projectHistoryQuery = useProjectHistoryQuery(projectId);
+
+  const syncHistory = useCallback(
+    (entries: HistoryItemRes[], fallbackImageUrl?: string | null) => {
       setHistory(
-        historyRes.data.map((entry) => ({
+        entries.map((entry) => ({
           ...entry,
           snapshot: normalizeSnapshotForRender(
             entry.snapshot,
@@ -97,31 +102,45 @@ export const EditorPage: React.FC = () => {
         })),
       );
     },
-    [normalizeSnapshotForRender, projectId],
+    [normalizeSnapshotForRender],
   );
 
   useEffect(() => {
-    Promise.all([getProjectDetail(projectId), getProjectHistory(projectId)])
-      .then(([detailRes, historyRes]) => {
-        const thumbnailUrl = detailRes.data.thumbnail_url || null;
-        setProjectTitle(detailRes.data.title || '새 프로젝트');
+    if (!projectDetailQuery.data) return;
 
-        const snapshot = detailRes.data.snapshot;
-        if (snapshot) {
-          const normalized = normalizeSnapshotForRender(snapshot, thumbnailUrl);
-          canvasRef.current?.restoreSnapshot(normalized);
-          setHasCanvasImage(snapshotHasImage(normalized));
-        }
+    const thumbnailUrl = projectDetailQuery.data.thumbnail_url || null;
+    setProjectTitle(projectDetailQuery.data.title || '새 프로젝트');
 
-        setHistory(
-          historyRes.data.map((entry) => ({
-            ...entry,
-            snapshot: normalizeSnapshotForRender(entry.snapshot, thumbnailUrl),
-          })),
-        );
-      })
-      .catch((err) => console.error('project load error ', err));
-  }, [projectId]);
+    const snapshot = projectDetailQuery.data.snapshot;
+    if (snapshot) {
+      const normalized = normalizeSnapshotForRender(snapshot, thumbnailUrl);
+      canvasRef.current?.restoreSnapshot(normalized);
+      setHasCanvasImage(snapshotHasImage(normalized));
+      return;
+    }
+
+    setHasCanvasImage(false);
+  }, [normalizeSnapshotForRender, projectDetailQuery.data, snapshotHasImage]);
+
+  useEffect(() => {
+    if (!projectHistoryQuery.data) return;
+    syncHistory(
+      projectHistoryQuery.data,
+      projectDetailQuery.data?.thumbnail_url || null,
+    );
+  }, [
+    projectDetailQuery.data?.thumbnail_url,
+    projectHistoryQuery.data,
+    syncHistory,
+  ]);
+
+  useEffect(() => {
+    if (!projectDetailQuery.error && !projectHistoryQuery.error) return;
+    console.error(
+      'project load error ',
+      projectDetailQuery.error ?? projectHistoryQuery.error,
+    );
+  }, [projectDetailQuery.error, projectHistoryQuery.error]);
 
   const handleWorkHistory = () => {
     setIsHistoryOpen((prev) => !prev);
@@ -253,7 +272,7 @@ export const EditorPage: React.FC = () => {
     maxHistory: MAX_HISTORY,
     canvasRef,
     persistSnapshotAssetUrls,
-    fetchAndSetHistory,
+    refetchHistory: projectHistoryQuery.refetch,
     setHasCanvasImage,
   });
 

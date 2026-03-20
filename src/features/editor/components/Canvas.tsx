@@ -366,7 +366,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 
     const handleAddText = () => {
       pushUndo();
-      const defaultFont = 'Noto Sans KR';
+      const defaultFont = 'Pretendard';
       loadGoogleFont(defaultFont);
 
       const newText: TextObject = {
