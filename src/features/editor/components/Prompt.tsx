@@ -24,7 +24,10 @@ export const Prompt: React.FC<Props> = ({
   const [images, setImages] = useState<PreviewImage[]>([]);
 
   const imagesRef = useRef(images);
-  imagesRef.current = images;
+
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
 
   const canSend = prompt.trim().length > 0 && !isSubmitting;
   const isMaxImages = images.length >= MAX_IMAGES;
@@ -88,7 +91,6 @@ export const Prompt: React.FC<Props> = ({
     }
   };
 
-  // 4. 올바른 언마운트 클린업 (최신 이미지를 바라보는 ref 사용)
   useEffect(() => {
     return () => {
       imagesRef.current.forEach((img) => URL.revokeObjectURL(img.url));

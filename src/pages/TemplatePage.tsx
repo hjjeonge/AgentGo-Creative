@@ -2,7 +2,7 @@ import type React from 'react';
 import { useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { TemplateFieldsSection } from '@/features/template/components/TemplateFieldsSection';
-import { postNewProject } from '@/features/project/api';
+import { useCreateProjectMutation } from '@/features/project/queries';
 import { DEFAULT_TEMPLATE_KEY } from '@/features/template/constants/templateConfig';
 import { getTemplateConfig } from '@/features/template/utils/getTemplateConfig';
 import { useTemplateForm } from '@/features/template/hooks/useTemplateForm';
@@ -14,6 +14,8 @@ export const TemplatePage: React.FC = () => {
 
   const templateKey = searchParams.get('template') ?? DEFAULT_TEMPLATE_KEY;
   const template = useMemo(() => getTemplateConfig(templateKey), [templateKey]);
+  const { mutateAsync: createProject, isPending: isCreatingProject } =
+    useCreateProjectMutation();
 
   const {
     files,
@@ -42,8 +44,8 @@ export const TemplatePage: React.FC = () => {
 
     const result = await generateFromTemplate();
     if (!result) return;
-    const projectRes = await postNewProject();
-    const projectId = projectRes.data.projectId;
+    const projectRes = await createProject();
+    const projectId = projectRes.projectId;
 
     navigate(
       `/editor/${projectId}?image=${encodeURIComponent(
@@ -98,14 +100,14 @@ export const TemplatePage: React.FC = () => {
         <div className="flex justify-center mt-[40px]">
           <button
             onClick={handleGenerate}
-            disabled={!canGenerate || isSubmitting}
+            disabled={!canGenerate || isSubmitting || isCreatingProject}
             className={`px-[40px] py-[12px] rounded-[8px] text-[15px] font-medium ${
-              canGenerate && !isSubmitting
+              canGenerate && !isSubmitting && !isCreatingProject
                 ? 'bg-[#155DFC] text-white'
                 : 'bg-[#CBD5E1] text-[#94A3B8] cursor-not-allowed'
             }`}
           >
-            {isSubmitting ? '생성 중...' : '이미지 생성'}
+            {isSubmitting || isCreatingProject ? '생성 중...' : '이미지 생성'}
           </button>
         </div>
       </div>

@@ -1,13 +1,16 @@
-import axiosInstance from '@/services/axiosInstance';
+import axiosInstance, { AI_REQUEST_TIMEOUT_MS } from '@/services/axiosInstance';
 import type { ImageGenerateRequest, ImageGenerateResponse } from './image.type';
 
 export const generateImage = (data: ImageGenerateRequest) => {
   return axiosInstance.post<ImageGenerateResponse>(
     '/api/images/generate',
     data,
+    { timeout: AI_REQUEST_TIMEOUT_MS },
   );
 };
 
 export const getImageJob = (jobId: string) => {
-  return axiosInstance.get<ImageGenerateResponse>(`/api/images/jobs/${jobId}`);
+  return axiosInstance.get<ImageGenerateResponse>(`/api/images/jobs/${jobId}`, {
+    timeout: AI_REQUEST_TIMEOUT_MS,
+  });
 };

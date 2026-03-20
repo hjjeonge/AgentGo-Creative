@@ -7,9 +7,7 @@ import type {
   CanvasSnapshot,
   PromptGeneratePayload,
 } from '@/features/editor/types';
-import { projectQueryKeys } from '@/features/project/queries/queryKeys';
-import { putProject } from '@/features/project/api';
-import { queryClient } from '@/lib/queryClient';
+import { useUpdateProjectMutation } from '@/features/project/queries';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
 
 interface Params {
@@ -21,14 +19,23 @@ interface Params {
   persistSnapshotAssetUrls: (
     snapshot: CanvasSnapshot,
   ) => Promise<CanvasSnapshot>;
-  fetchAndSetHistory: (fallbackImageUrl?: string | null) => Promise<void>;
+  refetchHistory: () => Promise<unknown>;
   setHasCanvasImage: (value: boolean) => void;
 }
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   return error instanceof Error && error.message ? error.message : fallback;
+};
+
+const normalizeBackendAssetUrl = (url: string) => {
+  if (url.startsWith('/')) return url;
+  if (url.startsWith(`${API_BASE_URL}/`)) {
+    return url.slice(API_BASE_URL.length);
+  }
+  return url;
 };
 
 export const useEditorGenerate = ({
@@ -38,10 +45,29 @@ export const useEditorGenerate = ({
   maxHistory,
   canvasRef,
   persistSnapshotAssetUrls,
-  fetchAndSetHistory,
+  refetchHistory,
   setHasCanvasImage,
 }: Params) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { mutateAsync: updateProject } = useUpdateProjectMutation();
+
+  const uploadCanvasBlob = async (blob: Blob, fileNamePrefix: string) => {
+    const file = new File([blob], `${fileNamePrefix}-${Date.now()}.png`, {
+      type: blob.type || 'image/png',
+    });
+    const uploaded = await uploadFile(file);
+    return uploaded.file_url;
+  };
+
+  const resolveTargetImageUrl = async () => {
+    const canvasBlob = await canvasRef.current?.exportAsBlob();
+    if (!canvasBlob) {
+      throw new Error('캔버스 이미지를 확인할 수 없습니다.');
+    }
+
+    const uploadedUrl = await uploadCanvasBlob(canvasBlob, 'editor-target');
+    return normalizeBackendAssetUrl(uploadedUrl);
+  };
 
   const waitForCanvasImage = async (imageUrl: string) => {
     const maxAttempts = 20;
@@ -79,19 +105,21 @@ export const useEditorGenerate = ({
         );
       }
 
+      const targetImageUrl = await resolveTargetImageUrl();
       const referenceUrls =
         referenceFiles.length > 0
           ? await Promise.all(
               referenceFiles.map(async (file) => {
                 const uploaded = await uploadFile(file);
-                return uploaded.file_url;
+                return normalizeBackendAssetUrl(uploaded.file_url);
               }),
             )
           : [];
+      const generateReferenceUrls = [targetImageUrl, ...referenceUrls];
 
       const generateRes = await generateImage({
         prompt,
-        reference_urls: referenceUrls.length > 0 ? referenceUrls : undefined,
+        reference_urls: generateReferenceUrls,
       });
 
       let job = generateRes.data;
@@ -140,16 +168,15 @@ export const useEditorGenerate = ({
       const uploaded = await uploadFile(file);
       const uploadedUrl = uploaded.file_url;
 
-      await putProject(projectId, {
-        title: projectTitle,
-        snapshot: persistedSnapshot,
-        thumbnail_url: uploadedUrl,
+      await updateProject({
+        projectId,
+        data: {
+          title: projectTitle,
+          snapshot: persistedSnapshot,
+          thumbnail_url: uploadedUrl,
+        },
       });
-
-      await fetchAndSetHistory(uploadedUrl);
-      await queryClient.invalidateQueries({
-        queryKey: projectQueryKeys.recent(),
-      });
+      await refetchHistory();
     } catch (error) {
       const message = getErrorMessage(
         error,

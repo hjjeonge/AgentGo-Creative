@@ -1,4 +1,4 @@
-import axiosInstance from '@/services/axiosInstance';
+import axiosInstance, { AI_REQUEST_TIMEOUT_MS } from '@/services/axiosInstance';
 import type {
   AIProxyResponse,
   DetailCutParams,
@@ -23,6 +23,7 @@ export const generateKeyVisual = (params: KeyVisualParams) => {
   return axiosInstance.post<AIProxyResponse<KeyVisualResult>>(
     '/api/ai/key-visual',
     form,
+    { timeout: AI_REQUEST_TIMEOUT_MS },
   );
 };
 
@@ -39,6 +40,7 @@ export const translateMultilingual = (
   return axiosInstance.post<AIProxyResponse<MultilingualResult>>(
     '/api/ai/multilingual/translate',
     form,
+    { timeout: AI_REQUEST_TIMEOUT_MS },
   );
 };
 
@@ -55,12 +57,14 @@ export const submitMultilingualJob = (
   return axiosInstance.post<AIProxyResponse<MultilingualJobResult>>(
     '/api/ai/multilingual/translate/jobs',
     form,
+    { timeout: AI_REQUEST_TIMEOUT_MS },
   );
 };
 
 export const getMultilingualJobStatus = (jobId: string) => {
   return axiosInstance.get<AIProxyResponse<MultilingualJobResult>>(
     `/api/ai/multilingual/translate/jobs/${jobId}`,
+    { timeout: AI_REQUEST_TIMEOUT_MS },
   );
 };
 
@@ -76,5 +80,6 @@ export const renderDetailCut = (params: DetailCutParams) => {
   return axiosInstance.post<AIProxyResponse<DetailCutResult>>(
     '/api/ai/detail-cut/render',
     form,
+    { timeout: AI_REQUEST_TIMEOUT_MS },
   );
 };
