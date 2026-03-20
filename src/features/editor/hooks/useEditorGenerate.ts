@@ -4,7 +4,6 @@ import { uploadFile } from '@/features/editor/api/file';
 import { generateImage, getImageJob } from '@/features/editor/api/image';
 import type {
   CanvasHandle,
-  ImageElement,
   CanvasSnapshot,
   PromptGeneratePayload,
 } from '@/features/editor/types';
@@ -39,10 +38,6 @@ const normalizeBackendAssetUrl = (url: string) => {
   return url;
 };
 
-const isImageElement = (
-  element: CanvasSnapshot['elements'][number],
-): element is ImageElement => element.kind === 'image';
-
 export const useEditorGenerate = ({
   projectId,
   projectTitle,
@@ -56,9 +51,7 @@ export const useEditorGenerate = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { mutateAsync: updateProject } = useUpdateProjectMutation();
 
-  const uploadBlobUrl = async (blobUrl: string, fileNamePrefix: string) => {
-    const blobRes = await fetch(blobUrl);
-    const blob = await blobRes.blob();
+  const uploadCanvasBlob = async (blob: Blob, fileNamePrefix: string) => {
     const file = new File([blob], `${fileNamePrefix}-${Date.now()}.png`, {
       type: blob.type || 'image/png',
     });
@@ -67,24 +60,13 @@ export const useEditorGenerate = ({
   };
 
   const resolveTargetImageUrl = async () => {
-    const snapshot = canvasRef.current?.getSnapshot();
-    if (!snapshot) {
+    const canvasBlob = await canvasRef.current?.exportAsBlob();
+    if (!canvasBlob) {
       throw new Error('캔버스 이미지를 확인할 수 없습니다.');
     }
 
-    const uploadedImage = snapshot.elements.find(isImageElement);
-    const targetUrl =
-      snapshot.backgroundImage || uploadedImage?.imageUrl || null;
-    if (!targetUrl) {
-      throw new Error('수정할 기준 이미지가 필요합니다.');
-    }
-
-    if (targetUrl.startsWith('blob:')) {
-      const uploadedUrl = await uploadBlobUrl(targetUrl, 'editor-target');
-      return normalizeBackendAssetUrl(uploadedUrl);
-    }
-
-    return normalizeBackendAssetUrl(targetUrl);
+    const uploadedUrl = await uploadCanvasBlob(canvasBlob, 'editor-target');
+    return normalizeBackendAssetUrl(uploadedUrl);
   };
 
   const waitForCanvasImage = async (imageUrl: string) => {
