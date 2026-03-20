@@ -55,26 +55,27 @@ export const useTemplateGenerate = ({
     }
   };
 
-  const generateFromTemplate = async (): Promise<TemplateGenerateResult | null> => {
-    if (isSubmitting) return null;
+  const generateFromTemplate =
+    async (): Promise<TemplateGenerateResult | null> => {
+      if (isSubmitting) return null;
 
-    setIsSubmitting(true);
-    setErrorMessage(null);
+      setIsSubmitting(true);
+      setErrorMessage(null);
 
-    try {
-      const generate = selectGenerator();
-      return await generate();
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : '이미지 생성 요청에 실패했습니다.';
-      setErrorMessage(message);
-      return null;
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+      try {
+        const generate = selectGenerator();
+        return await generate();
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : '이미지 생성 요청에 실패했습니다.';
+        setErrorMessage(message);
+        return null;
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
 
   return {
     isSubmitting,
