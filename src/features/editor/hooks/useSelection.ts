@@ -7,6 +7,7 @@ interface Params {
   selectedIds: string[];
   editingTextId: string | null;
   elements: CanvasElement[];
+  baseImageId: string | null;
   objectRefs: RefObject<Record<string, any>>;
   trRef: RefObject<any>;
   pushUndo: () => void;
@@ -15,6 +16,12 @@ interface Params {
   setEditingTextId: Dispatch<SetStateAction<string | null>>;
   setActiveTool: Dispatch<SetStateAction<string>>;
   setElements: Dispatch<SetStateAction<CanvasElement[]>>;
+  setStageSize: Dispatch<
+    SetStateAction<{
+      width: number;
+      height: number;
+    }>
+  >;
 }
 
 export const useSelection = ({
@@ -22,6 +29,7 @@ export const useSelection = ({
   selectedIds,
   editingTextId,
   elements,
+  baseImageId,
   objectRefs,
   trRef,
   pushUndo,
@@ -30,6 +38,7 @@ export const useSelection = ({
   setEditingTextId,
   setActiveTool,
   setElements,
+  setStageSize,
 }: Params) => {
   const selectSingleId = (id: string | null) => {
     setSelectedId(id);
@@ -101,13 +110,23 @@ export const useSelection = ({
         }
 
         if (element.kind === 'shape' || element.kind === 'image') {
+          const width = Math.max(5, element.width * scaleX);
+          const height = Math.max(5, element.height * scaleY);
+          const isBaseImage =
+            element.kind === 'image' && element.id === baseImageId;
+          if (isBaseImage) {
+            setStageSize({
+              width: Math.round(width),
+              height: Math.round(height),
+            });
+          }
           return {
             ...element,
-            x: node.x(),
-            y: node.y(),
+            x: isBaseImage ? 0 : node.x(),
+            y: isBaseImage ? 0 : node.y(),
             rotation,
-            width: Math.max(5, element.width * scaleX),
-            height: Math.max(5, element.height * scaleY),
+            width,
+            height,
           };
         }
 
@@ -133,6 +152,9 @@ export const useSelection = ({
           element.kind !== 'text'
         ) {
           return element;
+        }
+        if (element.kind === 'image' && element.id === baseImageId) {
+          return { ...element, x: 0, y: 0 };
         }
         changed = true;
         return { ...element, x: nextX, y: nextY };

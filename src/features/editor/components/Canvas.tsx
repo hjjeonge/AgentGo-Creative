@@ -3,6 +3,7 @@
   useEffect,
   useImperativeHandle,
   useCallback,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -34,6 +35,7 @@ interface Props {
 
 const DEFAULT_PLACEHOLDER_TEXT = '텍스트를 입력하세요';
 const UPLOADED_IMAGE_SHAPE_PREFIX = 'shape_uploaded_image_';
+const DEFAULT_CANVAS_HEIGHT = 600;
 
 export const Canvas = forwardRef<CanvasHandle, Props>(
   (
@@ -48,7 +50,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
   ) => {
     const navigate = useNavigate();
     const [activeTool, setActiveTool] = useState<string>('mouse');
-    const containerRef = useRef<HTMLDivElement>(null);
+    const stageContainerRef = useRef<HTMLDivElement>(null);
     const stageRef = useRef<any>(null);
     const {
       stageSize,
@@ -96,8 +98,16 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       stageRef.current = stage;
     }, []);
 
+    const baseImageElement = useMemo(
+      () => elements.find((element) => element.kind === 'image') ?? null,
+      [elements],
+    );
+    const hasBaseImage =
+      backgroundImage !== null ||
+      elements.some((element) => element.kind === 'image');
+
     useEffect(() => {
-      const container = containerRef.current;
+      const container = stageContainerRef.current;
       if (!container) return;
 
       const handlePointerMove = (e: MouseEvent) => {
@@ -111,7 +121,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       container.addEventListener('mousemove', handlePointerMove);
       return () =>
         container.removeEventListener('mousemove', handlePointerMove);
-    }, []);
+    }, [hasBaseImage, stageSize.height, stageSize.width]);
 
     const { pushUndo, undo, redo } = useUndoRedo({
       elementsRef,
@@ -129,6 +139,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         selectedIds,
         editingTextId,
         elements,
+        baseImageId: baseImageElement?.id ?? null,
         objectRefs,
         trRef,
         pushUndo,
@@ -137,6 +148,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         setEditingTextId,
         setActiveTool,
         setElements,
+        setStageSize,
       });
 
     const { cropByRect, cropByLasso } = useCrop({
@@ -247,35 +259,56 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       image.onload = () => {
         const naturalWidth = Math.max(1, image.naturalWidth || image.width);
         const naturalHeight = Math.max(1, image.naturalHeight || image.height);
-        const canvasWidth = stageSize.width > 0 ? stageSize.width : 480;
-        const canvasHeight = stageSize.height > 0 ? stageSize.height : 600;
-        const ratio = Math.min(
-          canvasWidth / naturalWidth,
-          canvasHeight / naturalHeight,
-        );
+        const currentStageWidth =
+          stageSize.width > 0
+            ? stageSize.width
+            : Math.max(
+                1,
+                Math.round(
+                  (naturalWidth * DEFAULT_CANVAS_HEIGHT) / naturalHeight,
+                ),
+              );
+        const currentStageHeight =
+          stageSize.height > 0 ? stageSize.height : DEFAULT_CANVAS_HEIGHT;
+        const ratio = replaceExisting
+          ? DEFAULT_CANVAS_HEIGHT / naturalHeight
+          : Math.min(
+              currentStageWidth / naturalWidth,
+              currentStageHeight / naturalHeight,
+              1,
+            );
         const targetWidth = Math.max(1, Math.round(naturalWidth * ratio));
         const targetHeight = Math.max(1, Math.round(naturalHeight * ratio));
-        const targetX = Math.max(
-          0,
-          Math.round((canvasWidth - targetWidth) / 2),
-        );
-        const targetY = Math.max(
-          0,
-          Math.round((canvasHeight - targetHeight) / 2),
-        );
         const imageShapeId = `${UPLOADED_IMAGE_SHAPE_PREFIX}${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+
+        if (replaceExisting) {
+          setStageSize({
+            width: targetWidth,
+            height: targetHeight,
+          });
+        }
 
         updateElements((prev) => {
           const base = replaceExisting
             ? prev.filter((element) => element.kind !== 'image')
             : prev;
+          const nextStageWidth = replaceExisting
+            ? targetWidth
+            : currentStageWidth;
+          const nextStageHeight = replaceExisting
+            ? targetHeight
+            : currentStageHeight;
           return [
             ...base,
             {
               id: imageShapeId,
               kind: 'image',
-              x: targetX,
-              y: targetY,
+              x: replaceExisting
+                ? 0
+                : Math.max(0, Math.round((nextStageWidth - targetWidth) / 2)),
+              y: replaceExisting
+                ? 0
+                : Math.max(0, Math.round((nextStageHeight - targetHeight) / 2)),
               width: targetWidth,
               height: targetHeight,
               imageUrl: url,
@@ -300,14 +333,21 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     useImperativeHandle(ref, () => ({
       setBackgroundImage: (url: string | null) => {
         pushUndo();
-        backgroundImageRef.current = url;
-        setBackgroundImageState(url);
         if (url) {
+          const existingBaseImage = elementsRef.current.find(
+            (element) => element.kind === 'image',
+          );
+          if (!existingBaseImage || existingBaseImage.kind !== 'image') {
+            backgroundImageRef.current = url;
+            setBackgroundImageState(url);
+          }
           addUploadedImageShape(url, {
-            replaceExisting: true,
+            replaceExisting: !existingBaseImage,
             selectImage: true,
           });
         } else {
+          backgroundImageRef.current = null;
+          setBackgroundImageState(null);
           updateElements((prev) =>
             prev.filter((element) => element.kind !== 'image'),
           );
@@ -358,6 +398,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       clearCanvas: () => {
         setElements([]);
         setBackgroundImageState(null);
+        setStageSize({ width: 0, height: 0 });
         setSelectedId(null);
         setSelectedIds([]);
         setEditingTextId(null);
@@ -480,23 +521,14 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       setPenStrokeColor(value);
     };
 
-    // Canvas should fill the available area regardless of image size.
     useEffect(() => {
-      const container = containerRef.current;
-      if (!container) return;
+      if (baseImageElement?.kind !== 'image') return;
 
-      const updateSize = () => {
-        setStageSize({
-          width: Math.max(0, Math.floor(container.clientWidth)),
-          height: Math.max(0, Math.floor(container.clientHeight)),
-        });
-      };
-
-      updateSize();
-      const observer = new ResizeObserver(updateSize);
-      observer.observe(container);
-      return () => observer.disconnect();
-    }, []);
+      setStageSize({
+        width: Math.max(1, Math.round(baseImageElement.width)),
+        height: Math.max(1, Math.round(baseImageElement.height)),
+      });
+    }, [baseImageElement, setStageSize]);
 
     const handleMouseDown = (e: any) => {
       if (activeTool === 'shape') {
@@ -630,10 +662,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       onSelectedTextObjectChange?.(selectedTextObject);
     }, [onSelectedTextObjectChange, selectedTextObject]);
 
-    const hasBaseImage =
-      backgroundImage !== null ||
-      elements.some((element) => element.kind === 'image');
-
     return (
       <section className="h-full flex-1 min-w-0 bg-[#E2E8F0] relative flex flex-col items-center overflow-auto">
         {/* 브레드크럼 */}
@@ -674,53 +702,59 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         />
 
         {/* Konva canvas container */}
-        <div
-          ref={containerRef}
-          className="relative w-full h-[600px] mt-[20px] mb-[16px] shrink-0 flex items-center justify-center overflow-hidden rounded-[12px] border border-[#CBD5E1] bg-white"
-        >
-          {brushPreview.visible && (
-            <div
-              aria-hidden="true"
-              style={{
-                position: 'absolute',
-                left: brushPreview.x - brushPreview.size / 2,
-                top: brushPreview.y - brushPreview.size / 2,
-                width: brushPreview.size,
-                height: brushPreview.size,
-                borderRadius: '50%',
-                border: '1.5px solid rgba(21,93,252,0.9)',
-                boxShadow: '0 0 0 1px rgba(255,255,255,0.8)',
-                pointerEvents: 'none',
-                zIndex: 5,
-              }}
-            />
-          )}
-
+        <div className="relative w-full h-[600px] mt-[20px] mb-[16px] shrink-0 flex items-center justify-center">
           {stageSize.width > 0 && stageSize.height > 0 && hasBaseImage ? (
-            <EditorCanvas
-              stageSize={stageSize}
-              activeTool={activeTool}
-              handleMouseDown={handleMouseDown}
-              handleMouseMove={handleMouseMove}
-              handleMouseUp={handleMouseUp}
-              elements={elements}
-              currentLine={currentLine}
-              setSelectedId={handleSelectObject}
-              objectRefs={objectRefs}
-              trRef={trRef}
-              handleTransformEnd={handleTransformEnd}
-              handleDragEnd={handleDragEnd}
-              editingTextId={editingTextId}
-              setEditingTextId={setEditingTextId}
-              handleUpdateTextObject={handleUpdateTextObject}
-              backgroundImageUrl={null}
-              selectionRect={selectionRect}
-              lassoPath={lassoPath}
-              selectedIds={selectedIds}
-              onStageReady={handleStageReady}
-            />
+            <div
+              ref={stageContainerRef}
+              className="relative shrink-0 m-[20px]"
+              style={{
+                width: `${stageSize.width}px`,
+                height: `${stageSize.height}px`,
+              }}
+            >
+              {brushPreview.visible && (
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    left: brushPreview.x - brushPreview.size / 2,
+                    top: brushPreview.y - brushPreview.size / 2,
+                    width: brushPreview.size,
+                    height: brushPreview.size,
+                    borderRadius: '50%',
+                    border: '1.5px solid rgba(21,93,252,0.9)',
+                    boxShadow: '0 0 0 1px rgba(255,255,255,0.8)',
+                    pointerEvents: 'none',
+                    zIndex: 5,
+                  }}
+                />
+              )}
+              <EditorCanvas
+                stageSize={stageSize}
+                activeTool={activeTool}
+                handleMouseDown={handleMouseDown}
+                handleMouseMove={handleMouseMove}
+                handleMouseUp={handleMouseUp}
+                elements={elements}
+                baseImageId={baseImageElement?.id ?? null}
+                selectedId={selectedId}
+                currentLine={currentLine}
+                setSelectedId={handleSelectObject}
+                objectRefs={objectRefs}
+                trRef={trRef}
+                handleTransformEnd={handleTransformEnd}
+                handleDragEnd={handleDragEnd}
+                editingTextId={editingTextId}
+                setEditingTextId={setEditingTextId}
+                handleUpdateTextObject={handleUpdateTextObject}
+                selectionRect={selectionRect}
+                lassoPath={lassoPath}
+                selectedIds={selectedIds}
+                onStageReady={handleStageReady}
+              />
+            </div>
           ) : (
-            <div className="flex flex-col items-center gap-[8px] text-[#94A3B8] select-none">
+            <div className="flex flex-col items-center justify-center mt-[20px] mb-[20px] gap-[8px] text-[#94A3B8] select-none rounded-[12px] border border-[#CBD5E1] bg-white h-[600px] w-[500px]">
               <svg
                 width="48"
                 height="48"
