@@ -5,7 +5,7 @@ export interface AIProxyResponse<T = Record<string, unknown>> {
 }
 
 export interface KeyVisualResult {
-  image_base64: string;
+  image_url: string;
   mime_type: string;
   guide_version: number;
   guide_attributes: Record<string, string>;

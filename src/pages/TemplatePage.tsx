@@ -2,7 +2,10 @@ import type React from 'react';
 import { useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { TemplateFieldsSection } from '@/features/template/components/TemplateFieldsSection';
-import { useCreateProjectMutation } from '@/features/project/queries';
+import {
+  useCreateProjectMutation,
+  useUpdateProjectMutation,
+} from '@/features/project/queries';
 import { DEFAULT_TEMPLATE_KEY } from '@/features/template/constants/templateConfig';
 import { getTemplateConfig } from '@/features/template/utils/getTemplateConfig';
 import { useTemplateForm } from '@/features/template/hooks/useTemplateForm';
@@ -16,6 +19,7 @@ export const TemplatePage: React.FC = () => {
   const template = useMemo(() => getTemplateConfig(templateKey), [templateKey]);
   const { mutateAsync: createProject, isPending: isCreatingProject } =
     useCreateProjectMutation();
+  const { mutateAsync: updateProject } = useUpdateProjectMutation();
 
   const {
     files,
@@ -47,10 +51,20 @@ export const TemplatePage: React.FC = () => {
     const projectRes = await createProject();
     const projectId = projectRes.projectId;
 
+    await updateProject({
+      projectId,
+      data: {
+        title: 'new Project',
+        snapshot: {
+          backgroundImage: result.imageUrl ?? null,
+          elements: [],
+        },
+        thumbnail_url: result.imageUrl,
+      },
+    });
+
     navigate(
-      `/editor/${projectId}?image=${encodeURIComponent(
-        result.imageUrl ?? '',
-      )}&prompt=${encodeURIComponent(result.prompt)}&templateName=${encodeURIComponent(
+      `/editor/${projectId}?templateName=${encodeURIComponent(
         template.title,
       )}&templatePath=${encodeURIComponent(`/template?template=${template.key}`)}`,
     );

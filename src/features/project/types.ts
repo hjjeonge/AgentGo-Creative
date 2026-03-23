@@ -22,7 +22,7 @@ export interface ProjectDetailRes {
 
 export interface SaveProjectReq {
   title: string;
-  snapshot: CanvasSnapshot;
+  snapshot: CanvasSnapshot | null;
   thumbnail_url?: string | null;
 }
 
