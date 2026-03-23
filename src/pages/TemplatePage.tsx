@@ -49,7 +49,7 @@ export const TemplatePage: React.FC = () => {
 
     navigate(
       `/editor/${projectId}?image=${encodeURIComponent(
-        result.imageUrl,
+        result.imageUrl ?? '',
       )}&prompt=${encodeURIComponent(result.prompt)}&templateName=${encodeURIComponent(
         template.title,
       )}&templatePath=${encodeURIComponent(`/template?template=${template.key}`)}`,
