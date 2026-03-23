@@ -27,6 +27,11 @@ import { StrokeContent } from './StrokeContent';
 import { ShadowContent } from './ShadowContent';
 import { SpecialCharPopup } from './SpecialCharPopup';
 import type { TextObject } from '@/features/editor/types';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 const fontStyle = [
   { name: 'bold', img: Bold, tooltip: '굵게' },
@@ -424,89 +429,121 @@ export const TextEditor: React.FC<TextEditorProps> = ({
             {fontDeco.map((el) => {
               if (el.name === 'color') {
                 return (
-                  <div key={el.name} className="relative">
-                    <ToolbarButton
-                      icon={el.img}
-                      tooltip={el.tooltip}
-                      onClick={() => openPicker('text')}
-                    />
-                    {activePopupTarget === 'text' && (
-                      <div className="absolute top-full left-0 mt-[6px] z-[100]">
-                        {popupMode === 'picker' ? (
-                          <ColorPickerPopup
-                            onClose={closePopup}
-                            onOpenPalette={() => openPalette('text')}
-                            currentColor={normalizedCurrentColor}
-                            recentlyUseColorList={recentTextColors}
-                            onSelectColor={(value) => {
-                              if (!selectedTextObject) return;
-                              handleUpdateTextObject(selectedTextObject.id, {
-                                fill: value,
-                              });
-                              addRecentColor(value);
-                            }}
-                          />
-                        ) : (
-                          <ColorPalette
-                            colorCode={normalizedCurrentColor}
-                            handleColorCode={(value) => {
-                              if (!selectedTextObject) return;
-                              handleUpdateTextObject(selectedTextObject.id, {
-                                fill: value,
-                              });
-                              addRecentColor(value);
-                            }}
-                            onBack={() => openPicker('text', true)}
-                          />
-                        )}
+                  <Popover
+                    key={el.name}
+                    open={activePopupTarget === 'text'}
+                    onOpenChange={(open) => {
+                      if (open) {
+                        openPicker('text', true);
+                        return;
+                      }
+                      closePopup();
+                    }}
+                  >
+                    <PopoverTrigger asChild>
+                      <div className="relative">
+                        <ToolbarButton
+                          icon={el.img}
+                          tooltip={el.tooltip}
+                          onClick={() => openPicker('text')}
+                        />
                       </div>
-                    )}
-                  </div>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      align="start"
+                      sideOffset={6}
+                      className="z-[220] w-fit border-none bg-transparent p-0 shadow-none"
+                    >
+                      {popupMode === 'picker' ? (
+                        <ColorPickerPopup
+                          onClose={closePopup}
+                          onOpenPalette={() => openPalette('text')}
+                          currentColor={normalizedCurrentColor}
+                          recentlyUseColorList={recentTextColors}
+                          onSelectColor={(value) => {
+                            if (!selectedTextObject) return;
+                            handleUpdateTextObject(selectedTextObject.id, {
+                              fill: value,
+                            });
+                            addRecentColor(value);
+                          }}
+                        />
+                      ) : (
+                        <ColorPalette
+                          colorCode={normalizedCurrentColor}
+                          handleColorCode={(value) => {
+                            if (!selectedTextObject) return;
+                            handleUpdateTextObject(selectedTextObject.id, {
+                              fill: value,
+                            });
+                            addRecentColor(value);
+                          }}
+                          onBack={() => openPicker('text', true)}
+                        />
+                      )}
+                    </PopoverContent>
+                  </Popover>
                 );
               }
 
               if (el.name === 'highlighter') {
                 return (
-                  <div key={el.name} className="relative">
-                    <ToolbarButton
-                      icon={el.img}
-                      tooltip={el.tooltip}
-                      onClick={() => openPicker('highlight')}
-                    />
-                    {activePopupTarget === 'highlight' && (
-                      <div className="absolute top-full left-0 mt-[6px] z-[100]">
-                        {popupMode === 'picker' ? (
-                          <ColorPickerPopup
-                            onClose={closePopup}
-                            onOpenPalette={() => openPalette('highlight')}
-                            currentColor={normalizedHighlightColor}
-                            recentlyUseColorList={recentTextColors}
-                            onSelectColor={(value) => {
-                              if (!selectedTextObject) return;
-                              handleUpdateTextObject(selectedTextObject.id, {
-                                backgroundColor: value,
-                                backgroundEnabled: value !== 'transparent',
-                              });
-                              addRecentColor(value);
-                            }}
-                          />
-                        ) : (
-                          <ColorPalette
-                            colorCode={normalizedHighlightColor}
-                            handleColorCode={(value) => {
-                              if (!selectedTextObject) return;
-                              handleUpdateTextObject(selectedTextObject.id, {
-                                backgroundColor: value,
-                                backgroundEnabled: value !== 'transparent',
-                              });
-                              addRecentColor(value);
-                            }}
-                            onBack={() => openPicker('highlight', true)}
-                          />
-                        )}
+                  <Popover
+                    key={el.name}
+                    open={activePopupTarget === 'highlight'}
+                    onOpenChange={(open) => {
+                      if (open) {
+                        openPicker('highlight', true);
+                        return;
+                      }
+                      closePopup();
+                    }}
+                  >
+                    <PopoverTrigger asChild>
+                      <div className="relative">
+                        <ToolbarButton
+                          icon={el.img}
+                          tooltip={el.tooltip}
+                          onClick={() => openPicker('highlight')}
+                        />
                       </div>
-                    )}
-                  </div>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      align="start"
+                      sideOffset={6}
+                      className="z-[220] w-fit border-none bg-transparent p-0 shadow-none"
+                    >
+                      {popupMode === 'picker' ? (
+                        <ColorPickerPopup
+                          onClose={closePopup}
+                          onOpenPalette={() => openPalette('highlight')}
+                          currentColor={normalizedHighlightColor}
+                          recentlyUseColorList={recentTextColors}
+                          onSelectColor={(value) => {
+                            if (!selectedTextObject) return;
+                            handleUpdateTextObject(selectedTextObject.id, {
+                              backgroundColor: value,
+                              backgroundEnabled: value !== 'transparent',
+                            });
+                            addRecentColor(value);
+                          }}
+                        />
+                      ) : (
+                        <ColorPalette
+                          colorCode={normalizedHighlightColor}
+                          handleColorCode={(value) => {
+                            if (!selectedTextObject) return;
+                            handleUpdateTextObject(selectedTextObject.id, {
+                              backgroundColor: value,
+                              backgroundEnabled: value !== 'transparent',
+                            });
+                            addRecentColor(value);
+                          }}
+                          onBack={() => openPicker('highlight', true)}
+                        />
+                      )}
+                    </PopoverContent>
+                  </Popover>
                 );
               }
 

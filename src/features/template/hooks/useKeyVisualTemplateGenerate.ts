@@ -1,9 +1,10 @@
 import { generateKeyVisual } from '@/features/editor/api/ai';
+import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
 import type {
   TemplateGenerateContext,
   TemplateGenerateResult,
 } from './templateGenerate.types';
-import { compactLines, toDataUrl } from './templateGenerate.utils';
+import { compactLines } from './templateGenerate.utils';
 
 const buildKeyVisualFeedback = ({
   template,
@@ -75,12 +76,12 @@ export const useKeyVisualTemplateGenerate = ({
     });
     const result = response.data.result;
 
-    if (!result?.image_base64) {
+    if (!result?.image_url) {
       throw new Error('키비주얼 생성 결과를 받지 못했습니다.');
     }
 
     return {
-      imageUrl: toDataUrl(result.mime_type, result.image_base64),
+      imageUrl: resolveImageUrl(result.image_url) || result.image_url,
       prompt,
     };
   };
