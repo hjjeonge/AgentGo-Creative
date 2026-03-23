@@ -119,6 +119,16 @@ export const EditorPage: React.FC = () => {
       return;
     }
 
+    const normalizedThumbnail = resolveImageUrl(thumbnailUrl);
+    if (normalizedThumbnail) {
+      canvasRef.current?.restoreSnapshot({
+        backgroundImage: normalizedThumbnail,
+        elements: [],
+      });
+      setHasCanvasImage(true);
+      return;
+    }
+
     setHasCanvasImage(false);
   }, [normalizeSnapshotForRender, projectDetailQuery.data, snapshotHasImage]);
 

@@ -28,6 +28,8 @@ interface EditorCanvasProps {
   handleMouseMove: (e: any) => void;
   handleMouseUp: (e: any) => void;
   elements: CanvasElement[];
+  baseImageId: string | null;
+  selectedId: string | null;
   currentLine: DrawLine | null;
   setSelectedId: (id: string | null) => void;
   objectRefs: React.RefObject<Record<string, any>>;
@@ -37,7 +39,6 @@ interface EditorCanvasProps {
   editingTextId: string | null;
   setEditingTextId: (id: string | null) => void;
   handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void;
-  backgroundImageUrl?: string | null;
   selectionRect?: {
     x: number;
     y: number;
@@ -71,6 +72,8 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   handleMouseMove,
   handleMouseUp,
   elements,
+  baseImageId,
+  selectedId,
   currentLine,
   setSelectedId,
   objectRefs,
@@ -80,18 +83,12 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   editingTextId,
   setEditingTextId,
   handleUpdateTextObject,
-  backgroundImageUrl,
   selectionRect,
   lassoPath = [],
   selectedIds = [],
   onStageReady,
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const [bgImage, setBgImage] = useState<HTMLImageElement | null>(null);
-  const [bgImageNaturalSize, setBgImageNaturalSize] = useState<{
-    width: number;
-    height: number;
-  } | null>(null);
   const [shapeImages, setShapeImages] = useState<
     Record<string, HTMLImageElement>
   >({});
@@ -99,41 +96,6 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
     () => partitionCanvasElements(elements),
     [elements],
   );
-
-  useEffect(() => {
-    if (backgroundImageUrl) {
-      const img = new window.Image();
-      img.crossOrigin = 'anonymous';
-      img.src = backgroundImageUrl;
-      img.onload = () => {
-        setBgImage(img);
-        setBgImageNaturalSize({
-          width: Math.max(1, img.naturalWidth || img.width),
-          height: Math.max(1, img.naturalHeight || img.height),
-        });
-      };
-    } else {
-      setBgImage(null);
-      setBgImageNaturalSize(null);
-    }
-  }, [backgroundImageUrl]);
-
-  const bgImageRect = useMemo(() => {
-    if (!bgImageNaturalSize) return null;
-    const { width: imageWidth, height: imageHeight } = bgImageNaturalSize;
-    const ratio = Math.min(
-      stageSize.width / imageWidth,
-      stageSize.height / imageHeight,
-    );
-    const width = Math.max(1, Math.round(imageWidth * ratio));
-    const height = Math.max(1, Math.round(imageHeight * ratio));
-    return {
-      x: Math.round((stageSize.width - width) / 2),
-      y: Math.round((stageSize.height - height) / 2),
-      width,
-      height,
-    };
-  }, [bgImageNaturalSize, stageSize.height, stageSize.width]);
 
   useEffect(() => {
     if (editingTextId && textAreaRef.current) {
@@ -462,6 +424,16 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   const overlayShapes = shapes.filter(
     (shape) => shape.type !== 'uploaded_image',
   );
+  const selectedElement = selectedId
+    ? (elements.find((element) => element.id === selectedId) ?? null)
+    : null;
+  const imageTransformerEnabled =
+    selectedElement?.kind === 'image' &&
+    selectedElement.id === baseImageId &&
+    selectedIds.length <= 1;
+  const transformerAnchors = imageTransformerEnabled
+    ? (['bottom-right'] as const)
+    : (['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const);
 
   return (
     <div style={{ position: 'relative', cursor: 'default' }}>
@@ -475,18 +447,6 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
         onMouseUp={handleMouseUp}
       >
         <Layer>
-          {bgImage && bgImageRect && (
-            <KonvaImage
-              image={bgImage}
-              x={bgImageRect.x}
-              y={bgImageRect.y}
-              width={bgImageRect.width}
-              height={bgImageRect.height}
-              listening={false}
-            />
-          )}
-        </Layer>
-        <Layer>
           {backgroundShapes.map((shape) => (
             <Group
               key={shape.id}
@@ -494,7 +454,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               x={shape.x}
               y={shape.y}
               rotation={shape.rotation ?? 0}
-              draggable={activeTool === 'mouse'}
+              draggable={activeTool === 'mouse' && shape.id !== baseImageId}
               onClick={() => setSelectedId(shape.id)}
               onTap={() => setSelectedId(shape.id)}
               ref={(node) => {
@@ -761,14 +721,9 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             })}
           <Transformer
             ref={trRef}
-            rotateEnabled={true}
+            rotateEnabled={!imageTransformerEnabled}
             keepRatio={true}
-            enabledAnchors={[
-              'top-left',
-              'top-right',
-              'bottom-left',
-              'bottom-right',
-            ]}
+            enabledAnchors={[...transformerAnchors]}
           />
         </Layer>
         <Layer>
