@@ -16,6 +16,7 @@ interface FontFamilySelectProps {
 }
 
 const googleFonts = [
+  'Pretendard',
   'Roboto',
   'Open Sans',
   'Lato',
@@ -44,13 +45,13 @@ export const FontFamilySelect: React.FC<FontFamilySelectProps> = ({
 
   return (
     <Select
-      value={selectedTextObject?.fontFamily || 'Noto Sans KR'}
+      value={selectedTextObject?.fontFamily || 'Pretendard'}
       onValueChange={handleFontChange}
     >
       <SelectTrigger className="border border-[#90A1B9] rounded-[6px] w-full focus:outline-0 p-[14px] h-[52px]">
         <SelectValue placeholder="글씨체 선택" />
       </SelectTrigger>
-      <SelectContent position="popper">
+      <SelectContent position="popper" className="z-[200] bg-white">
         <SelectGroup>
           {googleFonts.map((font) => (
             <SelectItem key={font} value={font} style={{ fontFamily: font }}>
