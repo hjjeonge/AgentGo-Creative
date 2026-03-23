@@ -37,6 +37,17 @@ const DEFAULT_PLACEHOLDER_TEXT = '텍스트를 입력하세요';
 const UPLOADED_IMAGE_SHAPE_PREFIX = 'shape_uploaded_image_';
 const DEFAULT_CANVAS_HEIGHT = 600;
 
+const isEditableTarget = (target: EventTarget | null) => {
+  if (!(target instanceof HTMLElement)) return false;
+  const tagName = target.tagName.toLowerCase();
+  return (
+    target.isContentEditable ||
+    tagName === 'input' ||
+    tagName === 'textarea' ||
+    tagName === 'select'
+  );
+};
+
 export const Canvas = forwardRef<CanvasHandle, Props>(
   (
     {
@@ -191,6 +202,10 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     // Delete / Undo / Redo 핸들러
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
+        if (isEditableTarget(e.target)) {
+          return;
+        }
+
         // Ctrl+Z: Undo
         if (e.key === 'z' && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
           e.preventDefault();
@@ -219,7 +234,11 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         }
 
         // Delete/Backspace: 선택 객체 삭제
-        if ((e.key === 'Delete' || e.key === 'Backspace') && !editingTextId) {
+        if (
+          (e.key === 'Delete' || e.key === 'Backspace') &&
+          !editingTextId &&
+          activeTool === 'mouse'
+        ) {
           const toDelete =
             selectedIds.length > 0
               ? selectedIds
@@ -247,7 +266,17 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       };
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [selectedId, selectedIds, editingTextId, penStrokeWidth]);
+    }, [
+      activeTool,
+      editingTextId,
+      penStrokeWidth,
+      redo,
+      selectedId,
+      selectedIds,
+      showBrushPreview,
+      undo,
+      updateElements,
+    ]);
 
     const addUploadedImageShape = (
       url: string,
