@@ -1,9 +1,10 @@
-import type React from 'react';
 import { useState } from 'react';
+import type React from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import Logo from '@/assets/logo.svg';
-import { useLoginMutation } from '@/features/auth/queries/useLoginMutation';
 import { setTokens } from '@/commons/utils/tokenManager';
+import { useLoginMutation } from '@/features/auth/queries/useLoginMutation';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();

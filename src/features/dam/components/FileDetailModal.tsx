@@ -1,9 +1,12 @@
-import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
+import type React from 'react';
+
 import CloseIcon from '@/assets/close-line.svg';
-import type { DAMFile } from './DAMData';
-import { FileIcon } from './DAMFileIcons';
 import { updateAssetMetadata } from '@/features/dam/api';
+
+import { FileIcon } from './DAMFileIcons';
+
+import type { DAMFile } from './DAMData';
 
 interface Props {
   file: DAMFile;

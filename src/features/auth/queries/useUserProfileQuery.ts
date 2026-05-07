@@ -3,8 +3,10 @@ import {
   type UseQueryOptions,
   type UseQueryResult,
 } from '@tanstack/react-query';
+
 import { getUserProfile } from '@/features/auth/api';
 import type { UserProfileRes } from '@/features/auth/types';
+
 import { authQueryKeys } from './queryKeys';
 
 type UserProfileQueryOptions = Omit<

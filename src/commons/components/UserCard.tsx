@@ -1,10 +1,11 @@
-import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
+import type React from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import Dots from '@/assets/dots.svg';
 import { clearTokens, getAccessToken } from '@/commons/utils/tokenManager';
 import { useLogoutMutation } from '@/features/auth/queries/useLogoutMutation';
 import { useUserProfileQuery } from '@/features/auth/queries/useUserProfileQuery';
-import Dots from '@/assets/dots.svg';
 
 export const UserCard: React.FC = () => {
   const navigate = useNavigate();

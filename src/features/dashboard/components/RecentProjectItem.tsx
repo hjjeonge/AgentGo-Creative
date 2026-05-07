@@ -1,7 +1,8 @@
 import type React from 'react';
+import dayjs from 'dayjs';
+
 import RemoveIcon from '@/assets/remove.svg';
 import type { RecentProjectItem as RecentProjectItemType } from '@/features/project/types';
-import dayjs from 'dayjs';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
 
 interface Props {

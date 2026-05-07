@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { RefObject } from 'react';
+
 import { uploadFile } from '@/features/editor/api/file';
 import { generateImage, getImageJob } from '@/features/editor/api/image';
 import type {

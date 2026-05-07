@@ -1,15 +1,16 @@
 import type { Dispatch, RefObject, SetStateAction } from 'react';
-import {
-  getRectImageIntersections,
-  pickTargetIntersection,
-} from '@/features/editor/utils/cropUtils';
-import { getPathBoundingRect } from '@/features/editor/utils/geometry';
+
 import type {
   CanvasElement,
   ImageElement,
   Rect,
   Shape,
 } from '@/features/editor/types';
+import {
+  getRectImageIntersections,
+  pickTargetIntersection,
+} from '@/features/editor/utils/cropUtils';
+import { getPathBoundingRect } from '@/features/editor/utils/geometry';
 
 interface Params {
   elementsRef: RefObject<CanvasElement[]>;

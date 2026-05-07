@@ -1,7 +1,8 @@
-import type React from 'react';
 import { useState } from 'react';
-import type { CollectionItem, FolderNode } from '@/features/dam/api';
+import type React from 'react';
+
 import ArrowDown from '@/assets/arrow_down.svg';
+import type { CollectionItem, FolderNode } from '@/features/dam/api';
 
 const FOLDER_YEARS = [
   {

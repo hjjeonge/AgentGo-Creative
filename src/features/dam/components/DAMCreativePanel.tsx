@@ -1,4 +1,5 @@
 import type React from 'react';
+
 import type { DAMFile } from './DAMData';
 
 interface Props {

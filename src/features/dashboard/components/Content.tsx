@@ -1,15 +1,17 @@
-import type React from 'react';
 import { useEffect } from 'react';
+import type React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Template } from './Template';
+
+import { useUserProfileQuery } from '@/features/auth/queries/useUserProfileQuery';
+import { useCreateProjectMutation } from '@/features/project/queries';
 import {
   DEFAULT_TEMPLATE_KEY,
   TEMPLATE_CONFIGS,
 } from '@/features/template/constants/templateConfig';
-import { useUserProfileQuery } from '@/features/auth/queries/useUserProfileQuery';
 import { useFavoriteTemplatesQuery } from '@/features/template/queries';
-import { useCreateProjectMutation } from '@/features/project/queries';
 import type { FavoriteTemplateRes } from '@/features/template/types';
+
+import { Template } from './Template';
 
 export const Content: React.FC = () => {
   const navigate = useNavigate();

@@ -1,7 +1,9 @@
 import type React from 'react';
-import UploadIcon from '@/assets/upload-cloud-2-line.svg';
+
 import CloseIcon from '@/assets/close-line.svg';
+import UploadIcon from '@/assets/upload-cloud-2-line.svg';
 import type { TemplateField } from '@/features/template/types';
+
 import { FormRow } from '../FormRow';
 
 interface FileFieldProps {

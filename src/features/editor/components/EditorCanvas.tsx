@@ -1,5 +1,5 @@
-﻿import Konva from 'konva';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
+import Konva from 'konva';
 import {
   Arrow,
   Ellipse,
@@ -13,13 +13,14 @@ import {
   Text,
   Transformer,
 } from 'react-konva';
-import { partitionCanvasElements } from '@/features/editor/utils/elementAdapters';
+
 import type {
   CanvasElement,
   DrawLine,
   Shape,
   TextObject,
 } from '@/features/editor/types';
+import { partitionCanvasElements } from '@/features/editor/utils/elementAdapters';
 
 interface EditorCanvasProps {
   stageSize: { width: number; height: number };

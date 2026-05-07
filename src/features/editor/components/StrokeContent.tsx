@@ -1,5 +1,6 @@
-import type React from 'react';
 import { useMemo } from 'react';
+import type React from 'react';
+
 import { ColorPalette } from '@/commons/components/ColorPalette';
 import { ColorPickerPopup } from '@/commons/components/ColorPickerPopup';
 import { useColorHistoryStore } from '@/features/editor/store/colorHistoryStore';

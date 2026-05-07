@@ -1,13 +1,15 @@
+import { useState } from 'react';
 import type React from 'react';
+
+import Arrow from '@/assets/arrow_down.svg';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+
 import { CustomSwitch } from './CustomSwitch';
-import Arrow from '@/assets/arrow_down.svg';
-import { useState } from 'react';
 import { cn } from '../../lib/utils';
 
 interface Props {

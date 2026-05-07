@@ -1,13 +1,15 @@
-import type React from 'react';
 import { useEffect, useState } from 'react';
+import type React from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import Arrow from '@/assets/arrow_down.svg';
 import Collapse from '@/assets/Collapse.svg';
-import { RecentProjectItem } from './RecentProjectItem';
-import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { useDeleteRecentProjectMutation } from '@/features/project/queries/useDeleteRecentProjectMutation';
 import { useRecentProjectsQuery } from '@/features/project/queries/useRecentProjectsQuery';
-import { useNavigate } from 'react-router-dom';
 import type { RecentProjectItem as RecentProject } from '@/features/project/types';
+
+import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { RecentProjectItem } from './RecentProjectItem';
 
 interface Props {
   asideOpen: boolean;

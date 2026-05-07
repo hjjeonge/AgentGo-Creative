@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { Dispatch, RefObject, SetStateAction } from 'react';
+
 import type { CanvasElement, DrawLine } from '@/features/editor/types';
 
 interface Params {

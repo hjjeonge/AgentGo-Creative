@@ -3,8 +3,10 @@ import {
   type UseQueryOptions,
   type UseQueryResult,
 } from '@tanstack/react-query';
+
 import { getFavoriteTemplates } from '@/features/template/api';
 import type { FavoriteTemplateRes } from '@/features/template/types';
+
 import { templateQueryKeys } from './queryKeys';
 
 type FavoriteTemplatesQueryOptions = Omit<

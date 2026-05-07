@@ -1,30 +1,6 @@
-import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import { DAMSidebar } from '@/features/dam/components/DAMSidebar';
-import {
-  DAMFilters,
-  type FilterState,
-} from '@/features/dam/components/DAMFilters';
-import { DAMAdvancedFilters } from '@/features/dam/components/DAMAdvancedFilters';
-import { DAMWorkspaceView } from '@/features/dam/components/DAMWorkspaceView';
-import { DAMCollectionsView } from '@/features/dam/components/DAMCollectionsView';
-import { DAMCreativePanel } from '@/features/dam/components/DAMCreativePanel';
-import { FileDetailModal } from '@/features/dam/components/FileDetailModal';
-import { NewFileModal } from '@/features/dam/components/NewFileModal';
-import { PermissionModal } from '@/features/dam/components/PermissionModal';
-import {
-  DAMContextMenu,
-  type ContextMenuState,
-} from '@/features/dam/components/DAMContextMenu';
-import { type DAMFile, type DAMTask } from '@/features/dam/components/DAMData';
-import { DAMGridView } from '@/features/dam/components/DAMGridView';
-import { DAMListView } from '@/features/dam/components/DAMListView';
-import { RenameModal } from '@/features/dam/components/RenameModal';
-import {
-  GridViewIcon,
-  ListViewIcon,
-  SearchIcon,
-} from '@/features/dam/components/DAMViewIcons';
+import type React from 'react';
+
 import {
   copyAsset,
   createCollectionShareLink,
@@ -42,6 +18,31 @@ import {
   type CollectionItem,
   type FolderNode,
 } from '@/features/dam/api';
+import { DAMAdvancedFilters } from '@/features/dam/components/DAMAdvancedFilters';
+import { DAMCollectionsView } from '@/features/dam/components/DAMCollectionsView';
+import {
+  DAMContextMenu,
+  type ContextMenuState,
+} from '@/features/dam/components/DAMContextMenu';
+import { DAMCreativePanel } from '@/features/dam/components/DAMCreativePanel';
+import { type DAMFile, type DAMTask } from '@/features/dam/components/DAMData';
+import {
+  DAMFilters,
+  type FilterState,
+} from '@/features/dam/components/DAMFilters';
+import { DAMGridView } from '@/features/dam/components/DAMGridView';
+import { DAMListView } from '@/features/dam/components/DAMListView';
+import { DAMSidebar } from '@/features/dam/components/DAMSidebar';
+import {
+  GridViewIcon,
+  ListViewIcon,
+  SearchIcon,
+} from '@/features/dam/components/DAMViewIcons';
+import { DAMWorkspaceView } from '@/features/dam/components/DAMWorkspaceView';
+import { FileDetailModal } from '@/features/dam/components/FileDetailModal';
+import { NewFileModal } from '@/features/dam/components/NewFileModal';
+import { PermissionModal } from '@/features/dam/components/PermissionModal';
+import { RenameModal } from '@/features/dam/components/RenameModal';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 

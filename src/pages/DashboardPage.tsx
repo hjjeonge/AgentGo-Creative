@@ -1,6 +1,7 @@
-import type React from 'react';
-import { Aside } from '@/features/dashboard/components/Aside';
 import { useState } from 'react';
+import type React from 'react';
+
+import { Aside } from '@/features/dashboard/components/Aside';
 import { Content } from '@/features/dashboard/components/Content';
 
 export const DashboardPage: React.FC = () => {

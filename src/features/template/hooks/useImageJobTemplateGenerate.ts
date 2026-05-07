@@ -6,11 +6,13 @@ import {
   extractReferenceUrls,
 } from '@/features/template/utils/buildTemplateInputs';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
+
+import { wait } from './templateGenerate.utils';
+
 import type {
   TemplateGenerateContext,
   TemplateGenerateResult,
 } from './templateGenerate.types';
-import { wait } from './templateGenerate.utils';
 
 export const useImageJobTemplateGenerate = ({
   template,
