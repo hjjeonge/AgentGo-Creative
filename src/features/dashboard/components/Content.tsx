@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useUserProfileQuery } from '@/features/auth/queries/useUserProfileQuery';
@@ -12,7 +13,6 @@ import type { FavoriteTemplateRes } from '@/features/template/types';
 
 import { Template } from './Template';
 
-import type React from 'react';
 
 export const Content: React.FC = () => {
   const navigate = useNavigate();

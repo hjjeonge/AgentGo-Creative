@@ -1,3 +1,5 @@
+import type React from 'react';
+
 import Arrow from '@/assets/arrow.svg';
 import ArrowFill from '@/assets/arrow_fill.svg';
 import Circle from '@/assets/circle.svg';
@@ -15,7 +17,6 @@ import Semicircle from '@/assets/semicircle.svg';
 import Square from '@/assets/square.svg';
 import Triangle from '@/assets/triangle.svg';
 
-import type React from 'react';
 
 const diagramList = [
   { name: 'square', img: Square },

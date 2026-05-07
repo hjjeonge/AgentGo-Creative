@@ -1,8 +1,9 @@
+import type React from 'react';
+
 import type { TemplateField } from '@/features/template/types';
 
 import { TemplateFieldRenderer } from './TemplateFieldRenderer';
 
-import type React from 'react';
 
 type FormFiles = Record<string, File[]>;
 type TagInput = Record<string, string>;

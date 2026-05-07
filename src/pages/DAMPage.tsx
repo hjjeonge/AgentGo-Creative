@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import type React from 'react';
 
 import {
   copyAsset,
@@ -43,7 +44,6 @@ import { NewFileModal } from '@/features/dam/components/NewFileModal';
 import { PermissionModal } from '@/features/dam/components/PermissionModal';
 import { RenameModal } from '@/features/dam/components/RenameModal';
 
-import type React from 'react';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 

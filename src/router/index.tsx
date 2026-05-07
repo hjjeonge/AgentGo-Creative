@@ -1,3 +1,4 @@
+import type React from 'react';
 import {
   BrowserRouter,
   Navigate,
@@ -14,7 +15,6 @@ import { EditorPage } from '@/pages/EditorPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { TemplatePage } from '@/pages/TemplatePage';
 
-import type React from 'react';
 
 const PrivateRoute: React.FC = () => {
   const token = getAccessToken();

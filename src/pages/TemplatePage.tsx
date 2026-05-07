@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import type React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import {
@@ -11,7 +12,6 @@ import { useTemplateForm } from '@/features/template/hooks/useTemplateForm';
 import { useTemplateGenerate } from '@/features/template/hooks/useTemplateGenerate';
 import { getTemplateConfig } from '@/features/template/utils/getTemplateConfig';
 
-import type React from 'react';
 
 export const TemplatePage: React.FC = () => {
   const navigate = useNavigate();

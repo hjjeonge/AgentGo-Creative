@@ -1,9 +1,9 @@
 import { useState } from 'react';
+import type React from 'react';
 
 import ArrowDown from '@/assets/arrow_down.svg';
 
 import type { FilterState } from './DAMFilters';
-import type React from 'react';
 
 interface Props {
   filters: FilterState;

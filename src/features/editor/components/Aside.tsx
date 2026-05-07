@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import AI from '@/assets/ai.svg';
@@ -11,7 +12,6 @@ import type { TextObject } from '@/features/editor/types';
 import { AiToolPanel } from './AiToolPanel';
 import { TextEditor } from './TextEditor';
 
-import type React from 'react';
 
 const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 

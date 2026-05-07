@@ -1,10 +1,11 @@
+import type React from 'react';
+
 import CloseIcon from '@/assets/close-line.svg';
 import UploadIcon from '@/assets/upload-cloud-2-line.svg';
 import type { TemplateField } from '@/features/template/types';
 
 import { FormRow } from '../FormRow';
 
-import type React from 'react';
 
 interface FileFieldProps {
   field: TemplateField;

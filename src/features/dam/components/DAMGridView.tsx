@@ -1,11 +1,11 @@
 import { useState } from 'react';
+import type React from 'react';
 
 import DotsIcon from '@/assets/dots.svg';
 
 import { type DAMFile } from './DAMData';
 import { FileIcon } from './DAMFileIcons';
 
-import type React from 'react';
 
 interface Props {
   files: DAMFile[];

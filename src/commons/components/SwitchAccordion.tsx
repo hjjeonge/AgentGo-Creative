@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type React from 'react';
 
 import Arrow from '@/assets/arrow_down.svg';
 import {
@@ -11,7 +12,6 @@ import {
 import { CustomSwitch } from './CustomSwitch';
 import { cn } from '../../lib/utils';
 
-import type React from 'react';
 
 interface Props {
   value: string;

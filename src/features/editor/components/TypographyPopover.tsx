@@ -1,10 +1,11 @@
+import type React from 'react';
+
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-import type React from 'react';
 
 interface Props {
   children: React.ReactNode;

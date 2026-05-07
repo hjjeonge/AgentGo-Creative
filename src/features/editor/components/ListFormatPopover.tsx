@@ -1,3 +1,5 @@
+import type React from 'react';
+
 import ListBulleted from '@/assets/format_list_bulleted.svg';
 import NumberedList from '@/assets/format_list_numbered.svg';
 import {
@@ -6,7 +8,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-import type React from 'react';
 
 interface Props {
   children: React.ReactNode;

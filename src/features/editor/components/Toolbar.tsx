@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type React from 'react';
 
 import { ColorPalette } from '@/commons/components/ColorPalette';
 import { ColorPickerPopup } from '@/commons/components/ColorPickerPopup';
@@ -15,7 +16,6 @@ import { DiagramPopup } from './DiagramPopup';
 import { ToolbarButton } from './ToolbarButton';
 import { ToolButton } from './ToolButton';
 
-import type React from 'react';
 
 interface Props {
   activeTool: string;

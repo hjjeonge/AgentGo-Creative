@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type React from 'react';
 
 import Add from '@/assets/add.svg';
 import AlignCenter from '@/assets/format_align_center.svg';
@@ -34,7 +35,6 @@ import { ToolbarButton } from './ToolbarButton';
 import { TypographyPopover } from './TypographyPopover';
 import { VerticalAlignPopover } from './VerticalAlignPopover';
 
-import type React from 'react';
 
 const fontStyle = [
   { name: 'bold', img: Bold, tooltip: '굵게' },

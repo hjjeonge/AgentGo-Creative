@@ -1,3 +1,5 @@
+import type React from 'react';
+
 import Center from '@/assets/format_align_center.svg';
 import Justify from '@/assets/format_align_justify.svg';
 import Left from '@/assets/format_align_left.svg';
@@ -8,7 +10,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-import type React from 'react';
 
 interface Props {
   children: React.ReactNode;

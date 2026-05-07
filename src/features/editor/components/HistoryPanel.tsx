@@ -1,10 +1,11 @@
+import type React from 'react';
+
 import Arrow from '@/assets/arrow_down.svg';
 import Collapse from '@/assets/Collapse.svg';
 import type { HistoryItemRes } from '@/features/project/types';
 
 import { HistoryItem } from './HistoryItem';
 
-import type React from 'react';
 
 interface Props {
   historyOpen: boolean;

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Arrow from '@/assets/arrow_down.svg';
@@ -10,7 +11,6 @@ import type { RecentProjectItem as RecentProject } from '@/features/project/type
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { RecentProjectItem } from './RecentProjectItem';
 
-import type React from 'react';
 
 interface Props {
   asideOpen: boolean;

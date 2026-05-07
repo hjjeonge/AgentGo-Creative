@@ -38,10 +38,16 @@ export default defineConfig([
           ],
           pathGroups: [
             {
-              pattern: '@/**', // @로 시작하는 경로를 internal로 인식
+              pattern: 'react',
+              group: 'external',
+              position: 'before',
+            },
+            {
+              pattern: '@/**',
               group: 'internal',
             },
           ],
+          pathGroupsExcludedImportTypes: ['react'],
           distinctGroup: false,
           'newlines-between': 'always',
           alphabetize: {

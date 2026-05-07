@@ -1,3 +1,5 @@
+import type React from 'react';
+
 import { loadGoogleFont } from '@/commons/utils/fontLoader';
 import {
   Select,
@@ -9,7 +11,6 @@ import {
 } from '@/components/ui/select';
 import type { TextObject } from '@/features/editor/types';
 
-import type React from 'react';
 
 interface FontFamilySelectProps {
   selectedTextObject?: TextObject;

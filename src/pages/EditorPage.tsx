@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type React from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 
 import { uploadFile } from '@/features/editor/api/file';
@@ -22,7 +23,6 @@ import {
 import type { HistoryItemRes } from '@/features/project/types';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
 
-import type React from 'react';
 
 const MAX_HISTORY = 20;
 

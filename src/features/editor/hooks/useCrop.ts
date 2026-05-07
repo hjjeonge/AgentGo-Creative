@@ -1,3 +1,5 @@
+import type { Dispatch, RefObject, SetStateAction } from 'react';
+
 import type {
   CanvasElement,
   ImageElement,
@@ -10,7 +12,6 @@ import {
 } from '@/features/editor/utils/cropUtils';
 import { getPathBoundingRect } from '@/features/editor/utils/geometry';
 
-import type { Dispatch, RefObject, SetStateAction } from 'react';
 
 interface Params {
   elementsRef: RefObject<CanvasElement[]>;

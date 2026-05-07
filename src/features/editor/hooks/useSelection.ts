@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
+import type { Dispatch, RefObject, SetStateAction } from 'react';
 
 import type { CanvasElement } from '@/features/editor/types';
 
-import type { Dispatch, RefObject, SetStateAction } from 'react';
 
 interface Params {
   selectedId: string | null;
