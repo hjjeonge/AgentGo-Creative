@@ -35,7 +35,6 @@ import { ToolbarButton } from './ToolbarButton';
 import { TypographyPopover } from './TypographyPopover';
 import { VerticalAlignPopover } from './VerticalAlignPopover';
 
-
 const fontStyle = [
   { name: 'bold', img: Bold, tooltip: '굵게' },
   { name: 'italic', img: Italic, tooltip: '기울임' },

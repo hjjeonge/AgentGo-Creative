@@ -12,7 +12,6 @@ import {
 } from '@/features/editor/utils/cropUtils';
 import { getPathBoundingRect } from '@/features/editor/utils/geometry';
 
-
 interface Params {
   elementsRef: RefObject<CanvasElement[]>;
   selectedId: string | null;

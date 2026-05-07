@@ -3,7 +3,6 @@ import type React from 'react';
 
 import CloseIcon from '@/assets/close-line.svg';
 
-
 interface Props {
   onClose: () => void;
   onSave: (metadata: Record<string, string>, file: File | null) => void;

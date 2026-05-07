@@ -17,7 +17,6 @@ import Semicircle from '@/assets/semicircle.svg';
 import Square from '@/assets/square.svg';
 import Triangle from '@/assets/triangle.svg';
 
-
 const diagramList = [
   { name: 'square', img: Square },
   { name: 'round_square', img: RoundSquare },

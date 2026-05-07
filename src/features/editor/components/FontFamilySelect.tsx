@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/select';
 import type { TextObject } from '@/features/editor/types';
 
-
 interface FontFamilySelectProps {
   selectedTextObject?: TextObject;
   handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void;

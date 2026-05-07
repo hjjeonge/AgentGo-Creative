@@ -7,7 +7,6 @@ import { type DAMFile } from './DAMData';
 import { FileIcon } from './DAMFileIcons';
 import { DownloadIcon, RenameIcon } from './DAMViewIcons';
 
-
 interface Props {
   files: DAMFile[];
   onContextMenu: (e: React.MouseEvent, fileId: string) => void;

@@ -3,7 +3,6 @@ import type { Dispatch, RefObject, SetStateAction } from 'react';
 
 import type { CanvasElement, HistoryState } from '@/features/editor/types';
 
-
 interface Params {
   elementsRef: RefObject<CanvasElement[]>;
   backgroundImageRef: RefObject<string | null>;

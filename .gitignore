@@ -25,3 +25,4 @@ dist-ssr
 /feature list/
 
 .codex
+.eslintcache

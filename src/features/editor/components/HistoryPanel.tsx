@@ -6,7 +6,6 @@ import type { HistoryItemRes } from '@/features/project/types';
 
 import { HistoryItem } from './HistoryItem';
 
-
 interface Props {
   historyOpen: boolean;
   handleWorkHistory: () => void;

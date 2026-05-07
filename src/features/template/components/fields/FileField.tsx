@@ -6,7 +6,6 @@ import type { TemplateField } from '@/features/template/types';
 
 import { FormRow } from '../FormRow';
 
-
 interface FileFieldProps {
   field: TemplateField;
   selectedFiles: File[];

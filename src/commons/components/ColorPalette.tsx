@@ -3,7 +3,6 @@ import { ColorPicker, useColor, type IColor } from 'react-color-palette';
 
 import Arrow from '@/assets/arrow_down.svg';
 
-
 import 'react-color-palette/css';
 
 interface Props {

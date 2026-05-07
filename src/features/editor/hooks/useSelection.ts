@@ -3,7 +3,6 @@ import type { Dispatch, RefObject, SetStateAction } from 'react';
 
 import type { CanvasElement } from '@/features/editor/types';
 
-
 interface Params {
   selectedId: string | null;
   selectedIds: string[];

@@ -12,7 +12,6 @@ import type { TextObject } from '@/features/editor/types';
 import { AiToolPanel } from './AiToolPanel';
 import { TextEditor } from './TextEditor';
 
-
 const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
 interface Props {

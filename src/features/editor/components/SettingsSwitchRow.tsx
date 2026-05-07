@@ -3,7 +3,6 @@ import type React from 'react';
 import Arrow from '@/assets/arrow_down.svg';
 import { CustomSwitch } from '@/commons/components/CustomSwitch';
 
-
 interface SettingsSwitchRowProps {
   label: string;
   // onToggle, initialState 등 추후 확장 가능

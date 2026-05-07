@@ -4,7 +4,6 @@ import type { TemplateField } from '@/features/template/types';
 
 import { TemplateFieldRenderer } from './TemplateFieldRenderer';
 
-
 type FormFiles = Record<string, File[]>;
 type TagInput = Record<string, string>;
 

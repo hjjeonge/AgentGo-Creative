@@ -13,7 +13,6 @@ import type { FavoriteTemplateRes } from '@/features/template/types';
 
 import { Template } from './Template';
 
-
 export const Content: React.FC = () => {
   const navigate = useNavigate();
   const { data: userProfile } = useUserProfileQuery();

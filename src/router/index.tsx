@@ -15,7 +15,6 @@ import { EditorPage } from '@/pages/EditorPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { TemplatePage } from '@/pages/TemplatePage';
 
-
 const PrivateRoute: React.FC = () => {
   const token = getAccessToken();
   return token ? <Outlet /> : <Navigate to="/login" replace />;

@@ -6,7 +6,6 @@ import DotsIcon from '@/assets/dots.svg';
 import { type DAMFile } from './DAMData';
 import { FileIcon } from './DAMFileIcons';
 
-
 interface Props {
   files: DAMFile[];
   onContextMenu: (e: React.MouseEvent, fileId: string) => void;

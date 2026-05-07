@@ -4,7 +4,6 @@ import type React from 'react';
 import ArrowDown from '@/assets/arrow_down.svg';
 import type { CollectionItem, FolderNode } from '@/features/dam/api';
 
-
 const FOLDER_YEARS = [
   {
     year: '2025',

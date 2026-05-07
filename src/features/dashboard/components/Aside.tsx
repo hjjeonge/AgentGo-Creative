@@ -11,7 +11,6 @@ import type { RecentProjectItem as RecentProject } from '@/features/project/type
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { RecentProjectItem } from './RecentProjectItem';
 
-
 interface Props {
   asideOpen: boolean;
   handleAside: () => void;

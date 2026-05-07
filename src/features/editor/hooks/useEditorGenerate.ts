@@ -11,7 +11,6 @@ import type {
 import { useUpdateProjectMutation } from '@/features/project/queries';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
 
-
 interface Params {
   projectId: string;
   projectTitle: string;

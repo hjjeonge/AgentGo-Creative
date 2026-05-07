@@ -7,7 +7,6 @@ import type { TemplateField } from '@/features/template/types';
 
 import { FormRow } from '../FormRow';
 
-
 interface TagsFieldProps {
   field: TemplateField;
   selectedTags: string[];

@@ -4,7 +4,6 @@ import type { TemplateField } from '@/features/template/types';
 
 import { FormRow } from '../FormRow';
 
-
 interface TextareaFieldProps {
   field: TemplateField;
   value: string;

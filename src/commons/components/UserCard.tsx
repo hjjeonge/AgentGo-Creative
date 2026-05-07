@@ -7,7 +7,6 @@ import { clearTokens, getAccessToken } from '@/commons/utils/tokenManager';
 import { useLogoutMutation } from '@/features/auth/queries/useLogoutMutation';
 import { useUserProfileQuery } from '@/features/auth/queries/useUserProfileQuery';
 
-
 export const UserCard: React.FC = () => {
   const navigate = useNavigate();
   const { mutateAsync: logoutMutateAsync } = useLogoutMutation();

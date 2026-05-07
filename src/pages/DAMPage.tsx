@@ -44,7 +44,6 @@ import { NewFileModal } from '@/features/dam/components/NewFileModal';
 import { PermissionModal } from '@/features/dam/components/PermissionModal';
 import { RenameModal } from '@/features/dam/components/RenameModal';
 
-
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const toFileType = (fileType: string): DAMFile['type'] => {

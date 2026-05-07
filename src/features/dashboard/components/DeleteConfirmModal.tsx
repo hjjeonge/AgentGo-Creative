@@ -2,7 +2,6 @@ import type React from 'react';
 
 import CloseIcon from '@/assets/close-line.svg';
 
-
 interface Props {
   projectTitle: string;
   onCancel: () => void;

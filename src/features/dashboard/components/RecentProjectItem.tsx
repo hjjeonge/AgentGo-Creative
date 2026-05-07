@@ -5,7 +5,6 @@ import RemoveIcon from '@/assets/remove.svg';
 import type { RecentProjectItem as RecentProjectItemType } from '@/features/project/types';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
 
-
 interface Props {
   project: RecentProjectItemType;
   onDelete: (id: string) => void;

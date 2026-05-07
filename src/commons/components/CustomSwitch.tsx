@@ -2,7 +2,6 @@ import type React from 'react';
 
 import { Switch } from '@/components/ui/switch';
 
-
 interface Props {
   checked?: boolean;
   onCheckedChange?: (value: boolean) => void;

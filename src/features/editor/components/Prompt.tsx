@@ -4,7 +4,6 @@ import type React from 'react';
 import Close from '@/assets/close-line.svg';
 import type { PromptGeneratePayload } from '@/features/editor/types';
 
-
 interface Props {
   onGenerate?: (payload: PromptGeneratePayload) => Promise<void>;
   isSubmitting?: boolean;

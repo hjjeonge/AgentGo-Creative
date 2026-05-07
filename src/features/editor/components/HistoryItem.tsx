@@ -4,7 +4,6 @@ import { partitionCanvasElements } from '@/features/editor/utils/elementAdapters
 import type { HistoryItemRes } from '@/features/project/types';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
 
-
 interface Props {
   entry: HistoryItemRes;
   onClick: (entry: HistoryItemRes) => void;

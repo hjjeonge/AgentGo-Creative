@@ -23,7 +23,6 @@ import {
 import type { HistoryItemRes } from '@/features/project/types';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
 
-
 const MAX_HISTORY = 20;
 
 export const EditorPage: React.FC = () => {

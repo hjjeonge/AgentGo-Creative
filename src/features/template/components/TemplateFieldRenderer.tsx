@@ -9,7 +9,6 @@ import { TagsField } from './fields/TagsField';
 import { TextareaField } from './fields/TextareaField';
 import { TextField } from './fields/TextField';
 
-
 interface TemplateFieldRendererProps {
   field: TemplateField;
   stringValue: string;

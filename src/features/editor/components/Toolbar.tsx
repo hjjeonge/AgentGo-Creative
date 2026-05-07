@@ -16,7 +16,6 @@ import { DiagramPopup } from './DiagramPopup';
 import { ToolbarButton } from './ToolbarButton';
 import { ToolButton } from './ToolButton';
 
-
 interface Props {
   activeTool: string;
   onToolChange: (tool: string) => void;

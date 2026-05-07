@@ -6,7 +6,6 @@ import Logo from '@/assets/logo.svg';
 import { setTokens } from '@/commons/utils/tokenManager';
 import { useLoginMutation } from '@/features/auth/queries/useLoginMutation';
 
-
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { mutateAsync, isPending } = useLoginMutation();

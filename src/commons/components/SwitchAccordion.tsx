@@ -12,7 +12,6 @@ import {
 import { CustomSwitch } from './CustomSwitch';
 import { cn } from '../../lib/utils';
 
-
 interface Props {
   value: string;
   title: string;

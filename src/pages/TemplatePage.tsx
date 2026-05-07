@@ -12,7 +12,6 @@ import { useTemplateForm } from '@/features/template/hooks/useTemplateForm';
 import { useTemplateGenerate } from '@/features/template/hooks/useTemplateGenerate';
 import { getTemplateConfig } from '@/features/template/utils/getTemplateConfig';
 
-
 export const TemplatePage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

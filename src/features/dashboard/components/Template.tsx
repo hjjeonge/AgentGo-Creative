@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 
 import type { FavoriteTemplateRes } from '@/features/template/types';
 
-
 interface Props {
   template: FavoriteTemplateRes;
 }

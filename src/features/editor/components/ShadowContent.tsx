@@ -5,7 +5,6 @@ import { ColorPalette } from '@/commons/components/ColorPalette';
 import { ColorPickerPopup } from '@/commons/components/ColorPickerPopup';
 import { useColorHistoryStore } from '@/features/editor/store/colorHistoryStore';
 
-
 interface Props {
   shadowColor?: string;
   shadowDirection?: number;

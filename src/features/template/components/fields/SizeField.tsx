@@ -5,7 +5,6 @@ import type { TemplateField } from '@/features/template/types';
 import { FormRow } from '../FormRow';
 import { SizePreviewIcon } from '../SizePreviewIcon';
 
-
 interface SizeFieldProps {
   field: TemplateField;
   value: string;

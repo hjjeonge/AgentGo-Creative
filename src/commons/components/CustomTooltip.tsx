@@ -7,7 +7,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-
 interface Props {
   content: string;
   children: React.ReactNode;
