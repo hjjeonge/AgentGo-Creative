@@ -3,8 +3,10 @@ import {
   type UseQueryOptions,
   type UseQueryResult,
 } from '@tanstack/react-query';
+
 import { getProjectHistory } from '@/features/project/api';
 import type { HistoryItemRes } from '@/features/project/types';
+
 import { projectQueryKeys } from './queryKeys';
 
 type ProjectHistoryQueryOptions = Omit<

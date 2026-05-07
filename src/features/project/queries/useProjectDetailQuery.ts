@@ -3,8 +3,10 @@ import {
   type UseQueryOptions,
   type UseQueryResult,
 } from '@tanstack/react-query';
+
 import { getProjectDetail } from '@/features/project/api';
 import type { ProjectDetailRes } from '@/features/project/types';
+
 import { projectQueryKeys } from './queryKeys';
 
 type ProjectDetailQueryOptions = Omit<

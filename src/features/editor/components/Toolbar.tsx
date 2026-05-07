@@ -1,7 +1,5 @@
-import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { useColorHistoryStore } from '@/features/editor/store/colorHistoryStore';
-import { getPenColorImg, getPenStrokeWidthImg } from '@/commons/utils/getImage';
+
 import { ColorPalette } from '@/commons/components/ColorPalette';
 import { ColorPickerPopup } from '@/commons/components/ColorPickerPopup';
 import { ClickIcon } from '@/commons/components/icons/ClickIcon';
@@ -10,9 +8,14 @@ import { EraserIcon } from '@/commons/components/icons/EraserIcon';
 import { LassoIcon } from '@/commons/components/icons/LassoIcon';
 import { PencilIcon } from '@/commons/components/icons/PencilIcon';
 import { ShapeIcon } from '@/commons/components/icons/ShapeIcon';
+import { getPenColorImg, getPenStrokeWidthImg } from '@/commons/utils/getImage';
+import { useColorHistoryStore } from '@/features/editor/store/colorHistoryStore';
+
 import { DiagramPopup } from './DiagramPopup';
-import { ToolButton } from './ToolButton';
 import { ToolbarButton } from './ToolbarButton';
+import { ToolButton } from './ToolButton';
+
+import type React from 'react';
 
 interface Props {
   activeTool: string;

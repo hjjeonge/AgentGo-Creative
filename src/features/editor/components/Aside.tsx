@@ -1,14 +1,17 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import AI from '@/assets/ai.svg';
 import New from '@/assets/file-new-line.svg';
 import Home from '@/assets/home.svg';
 import Upload from '@/assets/upload-cloud-2-line.svg';
 import { TextIcon } from '@/commons/components/icons/TextIcon';
 import type { TextObject } from '@/features/editor/types';
-import type React from 'react';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { AiToolPanel } from './AiToolPanel';
 import { TextEditor } from './TextEditor';
+
+import type React from 'react';
 
 const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 

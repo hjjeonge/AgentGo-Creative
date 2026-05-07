@@ -3,8 +3,9 @@ import {
   type UseMutationOptions,
   type UseMutationResult,
 } from '@tanstack/react-query';
-import { postLogout } from '@/features/auth/api';
+
 import { getRefreshToken } from '@/commons/utils/tokenManager';
+import { postLogout } from '@/features/auth/api';
 
 type LogoutMutationOptions = UseMutationOptions<void, Error, void>;
 

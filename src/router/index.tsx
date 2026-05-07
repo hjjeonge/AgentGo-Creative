@@ -1,4 +1,3 @@
-import type React from 'react';
 import {
   BrowserRouter,
   Navigate,
@@ -6,6 +5,7 @@ import {
   Route,
   Routes,
 } from 'react-router-dom';
+
 import { Layout } from '@/commons/components/Layout';
 import { getAccessToken } from '@/commons/utils/tokenManager';
 import { DAMPage } from '@/pages/DAMPage';
@@ -13,6 +13,8 @@ import { DashboardPage } from '@/pages/DashboardPage';
 import { EditorPage } from '@/pages/EditorPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { TemplatePage } from '@/pages/TemplatePage';
+
+import type React from 'react';
 
 const PrivateRoute: React.FC = () => {
   const token = getAccessToken();

@@ -4,7 +4,9 @@ import {
   type UseMutationOptions,
   type UseMutationResult,
 } from '@tanstack/react-query';
+
 import { deleteRecentProject } from '@/features/project/api';
+
 import { projectQueryKeys } from './queryKeys';
 
 type DeleteRecentProjectMutationOptions = UseMutationOptions<

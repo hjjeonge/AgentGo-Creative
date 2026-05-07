@@ -8,10 +8,8 @@
   useState,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { EditorCanvas } from './EditorCanvas';
+
 import { loadGoogleFont } from '@/commons/utils/fontLoader';
-import { Toolbar } from './Toolbar';
-import { Prompt } from './Prompt';
 import { useCanvasState } from '@/features/editor/hooks/useCanvasState';
 import { useCrop } from '@/features/editor/hooks/useCrop';
 import { useDrawing } from '@/features/editor/hooks/useDrawing';
@@ -24,6 +22,10 @@ import type {
   PromptGeneratePayload,
   TextObject,
 } from '@/features/editor/types';
+
+import { EditorCanvas } from './EditorCanvas';
+import { Prompt } from './Prompt';
+import { Toolbar } from './Toolbar';
 
 interface Props {
   onGenerate?: (payload: PromptGeneratePayload) => Promise<void>;
@@ -359,6 +361,67 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       image.src = url;
     };
 
+    const handleAddText = () => {
+      pushUndo();
+      const defaultFont = 'Pretendard';
+      loadGoogleFont(defaultFont);
+
+      const newText: TextObject = {
+        id: `text_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+        text: DEFAULT_PLACEHOLDER_TEXT,
+        x: 150,
+        y: 150,
+        width: 200,
+        fontSize: 24,
+        fill: '#000000',
+        fontFamily: defaultFont,
+        fontStyle: 'normal',
+        textDecoration: '',
+        align: 'left',
+        verticalAlign: 'top',
+        letterSpacing: 0,
+        lineHeight: 1.2,
+        scaleX: 1,
+        listFormat: 'none',
+        stroke: '#000000',
+        strokeWidth: 0,
+        strokeEnabled: false,
+        shadowColor: 'none',
+        shadowBlur: 0,
+        shadowOpacity: 0,
+        shadowOffsetX: 0,
+        shadowOffsetY: 0,
+        shadowDirection: 0,
+        shadowDistance: 0,
+        shadowEnabled: false,
+        verticalWriting: false,
+        backgroundColor: '#FFFF00',
+        backgroundEnabled: false,
+      };
+      updateElements((prev) => [
+        ...prev,
+        {
+          ...newText,
+          kind: 'text',
+        },
+      ]);
+      setSelectedId(newText.id);
+      setActiveTool('mouse');
+    };
+
+    const handleUpdateTextObject = (
+      id: string,
+      updates: Partial<TextObject>,
+    ) => {
+      updateElements((prev) =>
+        prev.map((element) =>
+          element.id === id && element.kind === 'text'
+            ? { ...element, ...updates }
+            : element,
+        ),
+      );
+    };
+
     useImperativeHandle(ref, () => ({
       setBackgroundImage: (url: string | null) => {
         pushUndo();
@@ -434,54 +497,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       },
     }));
 
-    const handleAddText = () => {
-      pushUndo();
-      const defaultFont = 'Pretendard';
-      loadGoogleFont(defaultFont);
-
-      const newText: TextObject = {
-        id: `text_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
-        text: DEFAULT_PLACEHOLDER_TEXT,
-        x: 150,
-        y: 150,
-        width: 200,
-        fontSize: 24,
-        fill: '#000000',
-        fontFamily: defaultFont,
-        fontStyle: 'normal',
-        textDecoration: '',
-        align: 'left',
-        verticalAlign: 'top',
-        letterSpacing: 0,
-        lineHeight: 1.2,
-        scaleX: 1,
-        listFormat: 'none',
-        stroke: '#000000',
-        strokeWidth: 0,
-        strokeEnabled: false,
-        shadowColor: 'none',
-        shadowBlur: 0,
-        shadowOpacity: 0,
-        shadowOffsetX: 0,
-        shadowOffsetY: 0,
-        shadowDirection: 0,
-        shadowDistance: 0,
-        shadowEnabled: false,
-        verticalWriting: false,
-        backgroundColor: '#FFFF00',
-        backgroundEnabled: false,
-      };
-      updateElements((prev) => [
-        ...prev,
-        {
-          ...newText,
-          kind: 'text',
-        },
-      ]);
-      setSelectedId(newText.id);
-      setActiveTool('mouse');
-    };
-
     const removeUneditedPlaceholderTexts = (candidateIds: string[]) => {
       const targetIds = candidateIds.filter((id) =>
         elementsRef.current.some(
@@ -528,19 +543,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       setSelectionRect(null);
       setLassoPath([]);
       setIsLassoing(false);
-    };
-
-    const handleUpdateTextObject = (
-      id: string,
-      updates: Partial<TextObject>,
-    ) => {
-      updateElements((prev) =>
-        prev.map((element) =>
-          element.id === id && element.kind === 'text'
-            ? { ...element, ...updates }
-            : element,
-        ),
-      );
     };
 
     const handlePenStrokeWidth = (value: number) => {

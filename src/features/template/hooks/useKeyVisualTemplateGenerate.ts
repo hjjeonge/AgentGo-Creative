@@ -1,10 +1,12 @@
 import { generateKeyVisual } from '@/features/editor/api/ai';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
+
+import { compactLines } from './templateGenerate.utils';
+
 import type {
   TemplateGenerateContext,
   TemplateGenerateResult,
 } from './templateGenerate.types';
-import { compactLines } from './templateGenerate.utils';
 
 const buildKeyVisualFeedback = ({
   template,

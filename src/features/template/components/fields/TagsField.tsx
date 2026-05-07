@@ -1,9 +1,11 @@
-import type React from 'react';
 import AddIcon from '@/assets/add.svg';
 import CloseIcon from '@/assets/close-line.svg';
 import { TARGET_KEYWORDS } from '@/features/template/constants/templateConfig';
 import type { TemplateField } from '@/features/template/types';
+
 import { FormRow } from '../FormRow';
+
+import type React from 'react';
 
 interface TagsFieldProps {
   field: TemplateField;

@@ -1,8 +1,10 @@
-import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import NONE_COLOR from '@/assets/none.svg';
+
 import Close from '@/assets/close-line.svg';
 import Picker from '@/assets/colorize.svg';
+import NONE_COLOR from '@/assets/none.svg';
+
+import type React from 'react';
 
 const DEFAULT_COLOR_LIST = [
   '#000000',

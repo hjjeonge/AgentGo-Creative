@@ -1,15 +1,11 @@
-import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
+
+import { uploadFile } from '@/features/editor/api/file';
 import { Aside } from '@/features/editor/components/Aside';
 import { Canvas } from '@/features/editor/components/Canvas';
 import { HistoryPanel } from '@/features/editor/components/HistoryPanel';
-import { uploadFile } from '@/features/editor/api/file';
-import type { HistoryItemRes } from '@/features/project/types';
-import {
-  useProjectDetailQuery,
-  useProjectHistoryQuery,
-} from '@/features/project/queries';
+import { useEditorGenerate } from '@/features/editor/hooks/useEditorGenerate';
 import type {
   CanvasHandle,
   CanvasSnapshot,
@@ -19,8 +15,14 @@ import {
   partitionCanvasElements,
   toCanvasElements,
 } from '@/features/editor/utils/elementAdapters';
-import { useEditorGenerate } from '@/features/editor/hooks/useEditorGenerate';
+import {
+  useProjectDetailQuery,
+  useProjectHistoryQuery,
+} from '@/features/project/queries';
+import type { HistoryItemRes } from '@/features/project/types';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
+
+import type React from 'react';
 
 const MAX_HISTORY = 20;
 

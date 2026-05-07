@@ -1,7 +1,10 @@
-import type React from 'react';
 import { ColorPicker, useColor, type IColor } from 'react-color-palette';
-import 'react-color-palette/css';
+
 import Arrow from '@/assets/arrow_down.svg';
+
+import type React from 'react';
+
+import 'react-color-palette/css';
 
 interface Props {
   colorCode: string;

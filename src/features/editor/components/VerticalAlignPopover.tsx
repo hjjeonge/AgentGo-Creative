@@ -1,12 +1,13 @@
-import type React from 'react';
-import Top from '@/assets/vertical_align_top.svg';
-import Center from '@/assets/vertical_align_center.svg';
 import Bottom from '@/assets/vertical_align_bottom.svg';
+import Center from '@/assets/vertical_align_center.svg';
+import Top from '@/assets/vertical_align_top.svg';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+
+import type React from 'react';
 
 interface Props {
   children: React.ReactNode;

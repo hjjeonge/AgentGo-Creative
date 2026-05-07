@@ -1,7 +1,8 @@
-import type React from 'react';
-import type { HistoryItemRes } from '@/features/project/types';
 import { partitionCanvasElements } from '@/features/editor/utils/elementAdapters';
+import type { HistoryItemRes } from '@/features/project/types';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
+
+import type React from 'react';
 
 interface Props {
   entry: HistoryItemRes;

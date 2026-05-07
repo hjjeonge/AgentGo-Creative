@@ -1,7 +1,10 @@
-import type React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserCard } from './UserCard';
+
 import Logo from '@/assets/logo.svg';
+
+import { UserCard } from './UserCard';
+
+import type React from 'react';
 
 export const Header: React.FC = () => {
   const navigate = useNavigate();

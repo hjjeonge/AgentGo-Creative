@@ -1,6 +1,8 @@
 import { useRef } from 'react';
-import type { Dispatch, RefObject, SetStateAction } from 'react';
+
 import type { CanvasElement, HistoryState } from '@/features/editor/types';
+
+import type { Dispatch, RefObject, SetStateAction } from 'react';
 
 interface Params {
   elementsRef: RefObject<CanvasElement[]>;

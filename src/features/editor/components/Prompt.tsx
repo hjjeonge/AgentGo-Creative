@@ -1,7 +1,9 @@
-import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
+
 import Close from '@/assets/close-line.svg';
 import type { PromptGeneratePayload } from '@/features/editor/types';
+
+import type React from 'react';
 
 interface Props {
   onGenerate?: (payload: PromptGeneratePayload) => Promise<void>;

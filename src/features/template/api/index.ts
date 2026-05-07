@@ -1,4 +1,5 @@
 import axiosInstance from '@/services/axiosInstance';
+
 import type {
   CreateNewTemplateReq,
   FavoriteTemplateRes,

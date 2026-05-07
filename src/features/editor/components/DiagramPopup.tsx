@@ -1,20 +1,21 @@
-import type React from 'react';
-import Square from '@/assets/square.svg';
-import RoundSquare from '@/assets/round_square.svg';
-import Oblong from '@/assets/oblong.svg';
-import RoundOblong from '@/assets/round_oblong.svg';
-import Triangle from '@/assets/triangle.svg';
-import Rhombus from '@/assets/rhombus.svg';
-import Pentagon from '@/assets/pentagon.svg';
-import Hexagon from '@/assets/hexagon.svg';
-import Circle from '@/assets/circle.svg';
-import Oval from '@/assets/oval.svg';
-import CircleCut from '@/assets/circle_cut.svg';
-import Semicircle from '@/assets/semicircle.svg';
 import Arrow from '@/assets/arrow.svg';
 import ArrowFill from '@/assets/arrow_fill.svg';
-import LabelCut from '@/assets/label_cut.svg';
+import Circle from '@/assets/circle.svg';
+import CircleCut from '@/assets/circle_cut.svg';
+import Hexagon from '@/assets/hexagon.svg';
 import Label from '@/assets/label.svg';
+import LabelCut from '@/assets/label_cut.svg';
+import Oblong from '@/assets/oblong.svg';
+import Oval from '@/assets/oval.svg';
+import Pentagon from '@/assets/pentagon.svg';
+import Rhombus from '@/assets/rhombus.svg';
+import RoundOblong from '@/assets/round_oblong.svg';
+import RoundSquare from '@/assets/round_square.svg';
+import Semicircle from '@/assets/semicircle.svg';
+import Square from '@/assets/square.svg';
+import Triangle from '@/assets/triangle.svg';
+
+import type React from 'react';
 
 const diagramList = [
   { name: 'square', img: Square },

@@ -1,6 +1,8 @@
-import type React from 'react';
 import type { TemplateField } from '@/features/template/types';
+
 import { FormRow } from '../FormRow';
+
+import type React from 'react';
 
 interface TextareaFieldProps {
   field: TemplateField;

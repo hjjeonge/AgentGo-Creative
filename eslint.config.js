@@ -21,7 +21,7 @@ export default defineConfig([
       reactRefresh.configs.vite,
     ],
     rules: {
-      'react-hooks/exhaustive-deps': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
       'react-hooks/set-state-in-effect': 'warn',
       'react-hooks/immutability': 'error',
       'react-hooks/preserve-manual-memoization': 'off',

@@ -1,4 +1,5 @@
 import axiosInstance, { AI_REQUEST_TIMEOUT_MS } from '@/services/axiosInstance';
+
 import type { ImageGenerateRequest, ImageGenerateResponse } from './image.type';
 
 export const generateImage = (data: ImageGenerateRequest) => {

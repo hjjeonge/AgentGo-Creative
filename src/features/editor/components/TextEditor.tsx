@@ -1,9 +1,5 @@
-import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { SwitchAccordion } from '@/commons/components/SwitchAccordion';
-import { ColorPickerPopup } from '@/commons/components/ColorPickerPopup';
-import { ColorPalette } from '@/commons/components/ColorPalette';
-import { useColorHistoryStore } from '@/features/editor/store/colorHistoryStore';
+
 import Add from '@/assets/add.svg';
 import AlignCenter from '@/assets/format_align_center.svg';
 import Bold from '@/assets/format_bold.svg';
@@ -17,21 +13,28 @@ import Underlined from '@/assets/format_underlined.svg';
 import Remove from '@/assets/remove.svg';
 import Satisfied from '@/assets/sentiment_satisfied.svg';
 import VerticalTop from '@/assets/vertical_align_top.svg';
-import { FontFamilySelect } from './FontFamilySelect';
-import { ListFOrmatPopover } from './ListFormatPopover';
-import { TextAlignPopover } from './TextAlignPopver';
-import { ToolbarButton } from './ToolbarButton';
-import { TypographyPopover } from './TypographyPopover';
-import { VerticalAlignPopover } from './VerticalAlignPopover';
-import { StrokeContent } from './StrokeContent';
-import { ShadowContent } from './ShadowContent';
-import { SpecialCharPopup } from './SpecialCharPopup';
-import type { TextObject } from '@/features/editor/types';
+import { ColorPalette } from '@/commons/components/ColorPalette';
+import { ColorPickerPopup } from '@/commons/components/ColorPickerPopup';
+import { SwitchAccordion } from '@/commons/components/SwitchAccordion';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useColorHistoryStore } from '@/features/editor/store/colorHistoryStore';
+import type { TextObject } from '@/features/editor/types';
+
+import { FontFamilySelect } from './FontFamilySelect';
+import { ListFOrmatPopover } from './ListFormatPopover';
+import { ShadowContent } from './ShadowContent';
+import { SpecialCharPopup } from './SpecialCharPopup';
+import { StrokeContent } from './StrokeContent';
+import { TextAlignPopover } from './TextAlignPopver';
+import { ToolbarButton } from './ToolbarButton';
+import { TypographyPopover } from './TypographyPopover';
+import { VerticalAlignPopover } from './VerticalAlignPopover';
+
+import type React from 'react';
 
 const fontStyle = [
   { name: 'bold', img: Bold, tooltip: '굵게' },

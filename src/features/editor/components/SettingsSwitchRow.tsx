@@ -1,6 +1,7 @@
-import type React from 'react';
-import { CustomSwitch } from '@/commons/components/CustomSwitch';
 import Arrow from '@/assets/arrow_down.svg';
+import { CustomSwitch } from '@/commons/components/CustomSwitch';
+
+import type React from 'react';
 
 interface SettingsSwitchRowProps {
   label: string;

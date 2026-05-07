@@ -1,11 +1,13 @@
 import { renderDetailCut } from '@/features/editor/api/ai';
 import { buildPrompt } from '@/features/template/utils/buildPrompt';
 import { buildTemplateInputs } from '@/features/template/utils/buildTemplateInputs';
+
+import { toDataUrl } from './templateGenerate.utils';
+
 import type {
   TemplateGenerateContext,
   TemplateGenerateResult,
 } from './templateGenerate.types';
-import { toDataUrl } from './templateGenerate.utils';
 
 export const useDetailCutTemplateGenerate = ({
   template,

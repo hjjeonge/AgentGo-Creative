@@ -1,11 +1,13 @@
-import type React from 'react';
 import type { TemplateField } from '@/features/template/types';
+
 import { FileField } from './fields/FileField';
 import { SelectField } from './fields/SelectField';
 import { SizeField } from './fields/SizeField';
 import { TagsField } from './fields/TagsField';
 import { TextareaField } from './fields/TextareaField';
 import { TextField } from './fields/TextField';
+
+import type React from 'react';
 
 interface TemplateFieldRendererProps {
   field: TemplateField;

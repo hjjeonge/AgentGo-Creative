@@ -1,7 +1,9 @@
-import type React from 'react';
-import { Aside } from '@/features/dashboard/components/Aside';
 import { useState } from 'react';
+
+import { Aside } from '@/features/dashboard/components/Aside';
 import { Content } from '@/features/dashboard/components/Content';
+
+import type React from 'react';
 
 export const DashboardPage: React.FC = () => {
   const [asideOpen, setAsideOpen] = useState(true);

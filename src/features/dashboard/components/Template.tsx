@@ -1,6 +1,8 @@
-import type React from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import type { FavoriteTemplateRes } from '@/features/template/types';
+
+import type React from 'react';
 
 interface Props {
   template: FavoriteTemplateRes;

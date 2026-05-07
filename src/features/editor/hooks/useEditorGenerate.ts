@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { RefObject } from 'react';
+
 import { uploadFile } from '@/features/editor/api/file';
 import { generateImage, getImageJob } from '@/features/editor/api/image';
 import type {
@@ -9,6 +9,8 @@ import type {
 } from '@/features/editor/types';
 import { useUpdateProjectMutation } from '@/features/project/queries';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
+
+import type { RefObject } from 'react';
 
 interface Params {
   projectId: string;

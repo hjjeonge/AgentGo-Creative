@@ -1,12 +1,12 @@
 import axios, { AxiosError } from 'axios';
 
+import type { CommonError } from '@/commons/types/api';
 import {
   clearTokens,
   getAccessToken,
   getRefreshToken,
   setAccessToken,
 } from '@/commons/utils/tokenManager';
-import type { CommonError } from '@/commons/types/api';
 import { postRefreshToken } from '@/features/auth/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';

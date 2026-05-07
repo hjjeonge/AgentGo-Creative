@@ -1,7 +1,9 @@
-import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
+
 import ArrowDown from '@/assets/arrow_down.svg';
 import { listUploaders, type UploaderInfo } from '@/features/dam/api';
+
+import type React from 'react';
 
 export interface FilterState {
   fileType: string | null;

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+
 import type { CanvasElement, DrawLine, Rect } from '@/features/editor/types';
 
 export const useCanvasState = () => {
