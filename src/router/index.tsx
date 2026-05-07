@@ -12,6 +12,7 @@ import { getAccessToken } from '@/commons/utils/tokenManager';
 import { DAMPage } from '@/pages/DAMPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { EditorPage } from '@/pages/EditorPage';
+import { HistoryPage } from '@/pages/HistoryPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { TemplatePage } from '@/pages/TemplatePage';
 
@@ -29,6 +30,7 @@ export const AppRouter: React.FC = () => {
           <Route element={<Layout />}>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/template" element={<TemplatePage />} />
+            <Route path="/history" element={<HistoryPage />} />
             <Route path="/editor/:projectId" element={<EditorPage />} />
             <Route path="/dam" element={<DAMPage />} />
           </Route>
