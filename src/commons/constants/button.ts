@@ -117,4 +117,48 @@ export const buttonVariantStyles: Record<
       borderColor: Neutral.outlined.disabledBorder,
     },
   },
+  'primary-plain': {
+    enabled: {
+      backgroundColor: 'transparent',
+      color: Primary.plain.color,
+      borderColor: 'transparent',
+    },
+    hover: {
+      backgroundColor: Primary.plain.hoverBg,
+      color: Primary.plain.color,
+      borderColor: 'transparent',
+    },
+    active: {
+      backgroundColor: Primary.plain.activeBg,
+      color: Primary.plain.color,
+      borderColor: 'transparent',
+    },
+    disabled: {
+      backgroundColor: 'transparent',
+      color: Primary.plain.disabledColor,
+      borderColor: 'transparent',
+    },
+  },
+  'neutral-plain': {
+    enabled: {
+      backgroundColor: 'transparent',
+      color: Neutral.plain.color,
+      borderColor: 'transparent',
+    },
+    hover: {
+      backgroundColor: Neutral.plain.hoverBg,
+      color: Neutral.plain.color,
+      borderColor: 'transparent',
+    },
+    active: {
+      backgroundColor: Neutral.plain.activeBg,
+      color: Neutral.plain.color,
+      borderColor: 'transparent',
+    },
+    disabled: {
+      backgroundColor: 'transparent',
+      color: Neutral.plain.disabledColor,
+      borderColor: 'transparent',
+    },
+  },
 } as const;

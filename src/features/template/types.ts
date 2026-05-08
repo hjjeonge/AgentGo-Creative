@@ -21,7 +21,7 @@ export interface TemplateConfig {
   key: string;
   title: string;
   comment: string;
-  icon: string;
+  imgSrc: string;
   aiStatus: 'available' | 'planned';
   aiFeature: string;
   fields: TemplateField[];

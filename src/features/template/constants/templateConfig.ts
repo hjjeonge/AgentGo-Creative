@@ -1,3 +1,10 @@
+import template_art from '@/assets/template_art.png';
+import template_detail from '@/assets/template_detail.png';
+import template_illustration from '@/assets/template_illustration.png';
+import template_infographic from '@/assets/template_infographic.png';
+import template_marketing from '@/assets/template_marketing.png';
+import template_studio from '@/assets/template_studio.png';
+import template_translation from '@/assets/template_translation.png';
 import type { TemplateConfig } from '@/features/template/types';
 
 const COMMON_SIZE_OPTIONS = ['1:1', '4:5', '16:9', '9:16'];
@@ -5,10 +12,10 @@ const COMMON_SIZE_OPTIONS = ['1:1', '4:5', '16:9', '9:16'];
 export const TEMPLATE_CONFIGS: TemplateConfig[] = [
   {
     key: 'sns_marketing',
-    title: 'SNS/마케팅광고 소재',
+    title: 'SNS 마케팅 광고',
     comment:
       '브랜드 캠페인, 프로모션 등 마케팅 목적의 SNS피드, 배너, 썸네일 등 즉시 활용 가능한 광고 소재 생성',
-    icon: '📢',
+    imgSrc: template_marketing,
     aiStatus: 'available',
     aiFeature: 'key-visual',
     fields: [
@@ -45,9 +52,9 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
   },
   {
     key: 'detail_catalog',
-    title: '상세페이지/카탈로그 생성',
+    title: '상세페이지',
     comment: '제품 배치, 공간 연출 등 실제 사용 환경을 표현한 상세 이미지 생성',
-    icon: '🎨',
+    imgSrc: template_detail,
     aiStatus: 'available',
     aiFeature: 'detail-cut',
     fields: [
@@ -93,10 +100,10 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
   },
   {
     key: 'studio_shot',
-    title: '스튜디오 촬영 이미지 생성',
+    title: '스튜디오 촬영',
     comment:
       '패션, 화장품, 가구, 가전 등 제품군에 최적화된 고품질 촬영 연출 이미지 생성',
-    icon: '📸',
+    imgSrc: template_studio,
     aiStatus: 'available',
     aiFeature: 'key-visual',
     fields: [
@@ -137,9 +144,9 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
   },
   {
     key: 'multilingual',
-    title: '다국어 변환 이미지 생성',
+    title: '다국어 변환',
     comment: '하나의 콘텐츠를 문맥에 맞는 여러 언어로 이미지를 자동 변환',
-    icon: '🌐',
+    imgSrc: template_translation,
     aiStatus: 'available',
     aiFeature: 'multilingual',
     fields: [
@@ -179,10 +186,10 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
   },
   {
     key: 'infographic',
-    title: '인포그래픽 이미지 생성',
+    title: '인포그래픽',
     comment:
       '제품 설명, 홍보물, 분석 리포트 등 중요 정보를 시각화한 이미지 생성',
-    icon: '📊',
+    imgSrc: template_infographic,
     aiStatus: 'planned',
     aiFeature: 'planned',
     fields: [
@@ -218,10 +225,10 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
   },
   {
     key: 'illustration',
-    title: '삽화 이미지 생성',
+    title: '삽화',
     comment:
       '뉴스, 웹소설 등 텍스트 기반 콘텐츠의 주제와 문맥을 시각화한 대표 이미지 생성',
-    icon: '📰',
+    imgSrc: template_art,
     aiStatus: 'planned',
     aiFeature: 'planned',
     fields: [
@@ -261,10 +268,10 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
   },
   {
     key: 'illustration_finish',
-    title: '일러스트 이미지 완성',
+    title: '일러스트',
     comment:
       '의뢰 디자인, 웹툰(콘텐츠) 스케치 등의 이미지를 기반으로 채색·완성된 일러스트로 변환',
-    icon: '🖌️',
+    imgSrc: template_illustration,
     aiStatus: 'planned',
     aiFeature: 'planned',
     fields: [
