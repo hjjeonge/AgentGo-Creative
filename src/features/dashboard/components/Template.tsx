@@ -24,7 +24,7 @@ export const Template: React.FC<Props> = ({ template }: Props) => {
       tabIndex={0}
       onClick={handleClickTemplate}
       onKeyDown={handleKeyDownTemplate}
-      className="min-h-27 flex cursor-pointer flex-col justify-between gap-2 rounded-md border border-border-neutral bg-white px-4 py-3 text-left"
+      className="min-h-27 flex cursor-pointer flex-col justify-between gap-2 rounded-md border border-border-neutral bg-white px-4 py-3 text-left hover:bg-[#F1F5F9]"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">

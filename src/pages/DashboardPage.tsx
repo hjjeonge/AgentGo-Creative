@@ -1,5 +1,5 @@
 import type React from 'react';
-
+import { Link } from 'react-router-dom';
 
 import ai from '@/assets/ai.svg';
 import logo from '@/assets/logo.svg';
@@ -25,13 +25,15 @@ export const DashboardPage: React.FC = () => {
           </div>
           AI Designer가 되어보세요.
         </div>
-        <Button
-          variant="primary-solid"
-          size="md"
-          startDecorator={<img src={ai} className="w-5.5 h-5.5" />}
-        >
-          이미지 생성
-        </Button>
+        <Link to="/editor/new">
+          <Button
+            variant="primary-solid"
+            size="md"
+            startDecorator={<img src={ai} className="w-5.5 h-5.5" />}
+          >
+            이미지 생성
+          </Button>
+        </Link>
       </div>
       <TemplateList />
     </div>
