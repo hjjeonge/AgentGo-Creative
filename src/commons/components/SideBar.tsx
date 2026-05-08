@@ -9,7 +9,7 @@ export const Sidebar: React.FC = () => {
   const { pathname } = location;
 
   return (
-    <div className="w-[80px] bg-[#F1F5F9] border-r border-border-neutral h-full py-6 px-3">
+    <div className="fixed top-[52px] left-0 bottom-0 z-10 w-[80px] border-r border-border-neutral bg-[#F1F5F9] px-3 py-6">
       <div className="flex flex-col gap-3">
         {sidebarMenus.map(({ Icon, label, to, isActive }) => (
           <Menu

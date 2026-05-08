@@ -6,11 +6,11 @@ import { Sidebar } from './SideBar';
 
 export const Layout: React.FC = () => {
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen overflow-hidden">
       <Header />
-      <div className="flex-1 flex pt-[52px]">
+      <div className="flex h-full pt-[52px]">
         <Sidebar />
-        <main className="flex-1 overflow-hidden h-full">
+        <main className="h-full flex-1 overflow-y-auto pl-[80px]">
           <Outlet />
         </main>
       </div>
