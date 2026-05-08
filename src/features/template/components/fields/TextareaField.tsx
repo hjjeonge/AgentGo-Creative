@@ -21,7 +21,7 @@ export const TextareaField: React.FC<TextareaFieldProps> = ({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={field.placeholder}
-        className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-[8px] p-[12px] text-[14px] resize-none h-[120px] placeholder:text-[#94A3B8] outline-none"
+        className="w-full h-22 border border-border-neutral rounded-xs px-2 py-3 text-[14px] text-text-primary placeholder:text-[#90A1B9] outline-none focus:border-[#1447E6] bg-white"
       />
     </FormRow>
   );

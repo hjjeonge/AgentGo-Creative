@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
 import type React from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
+import { Button } from '@/commons/components/Button';
 import {
   useCreateProjectMutation,
   useUpdateProjectMutation,
@@ -72,58 +74,63 @@ export const TemplatePage: React.FC = () => {
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-[#F8FAFC]">
-      <div className="max-w-[1000px] mx-auto py-[40px] px-[20px] bg-white border-l border-r border-[#E2E8F0]">
-        <div className="flex items-center gap-[8px] text-[14px] mb-[16px]">
+    <div className="h-full overflow-y-auto bg-white">
+      <div className="mx-auto w-full max-w-[992px] bg-white">
+        {/* BreadCrumb */}
+        <div className="flex items-center gap-4 mt-3">
           <button
             onClick={() => navigate('/')}
-            className="text-[#64748B] hover:text-[#155DFC]"
+            className="border border-border-neutral rounded-xs flex items-center justify-center p-2"
           >
-            홈
+            <ArrowLeft />
           </button>
-          <span className="text-[#94A3B8]">&gt;</span>
-          <span className="text-[#0F172B] font-bold">{template.title}</span>
+          <div className="flex items-center gap-1 text-sm text-[#1D293D]">
+            <span className="text-[#62748E]">홈</span>
+            <span>/</span>
+            <span>{template.title}</span>
+          </div>
         </div>
 
-        <div className="mb-[24px] rounded-[10px] border border-[#DBEAFE] bg-[#EFF6FF] px-[14px] py-[10px] text-[13px] text-[#1E3A8A]">
+        <div className="m-6 rounded-[10px] border border-[#DBEAFE] bg-[#EFF6FF]  text-[13px] text-[#1E3A8A]">
           {template.aiStatus === 'available'
             ? `AI 연동 기준: ${template.aiFeature} API 입력 규격`
             : 'AI 서버 미구현 템플릿입니다. 입력값은 현재 key-value 프롬프트로 조합되어 생성됩니다.'}
         </div>
 
-        <TemplateFieldsSection
-          fields={template.fields}
-          files={files}
-          tagInput={tagInput}
-          getStringValue={getStringValue}
-          getTagsValue={getTagsValue}
-          setStringValue={setStringValue}
-          setTagInputValue={setTagInputValue}
-          addTag={addTag}
-          removeTag={removeTag}
-          handleSingleFile={handleSingleFile}
-          handleMultiFiles={handleMultiFiles}
-          removeFile={removeFile}
-        />
-
+        {/* Template Fields */}
+        <div className="border border-border-neutral rounded-xs flex flex-col mt-4 mb-6">
+          <div className="font-bold text-text-primary text-lg border-b border-border-neutral px-6 py-4">
+            {template.title} 템플릿 시작
+          </div>
+          <TemplateFieldsSection
+            fields={template.fields}
+            files={files}
+            tagInput={tagInput}
+            getStringValue={getStringValue}
+            getTagsValue={getTagsValue}
+            setStringValue={setStringValue}
+            setTagInputValue={setTagInputValue}
+            addTag={addTag}
+            removeTag={removeTag}
+            handleSingleFile={handleSingleFile}
+            handleMultiFiles={handleMultiFiles}
+            removeFile={removeFile}
+          />
+        </div>
         {errorMessage && (
           <div className="mt-[24px] rounded-[8px] border border-[#FCA5A5] bg-[#FEF2F2] px-[14px] py-[10px] text-[13px] text-[#991B1B]">
             {errorMessage}
           </div>
         )}
 
-        <div className="flex justify-center mt-[40px]">
-          <button
+        {/* Button */}
+        <div className="flex justify-end">
+          <Button
             onClick={handleGenerate}
             disabled={!canGenerate || isSubmitting || isCreatingProject}
-            className={`px-[40px] py-[12px] rounded-[8px] text-[15px] font-medium ${
-              canGenerate && !isSubmitting && !isCreatingProject
-                ? 'bg-[#155DFC] text-white'
-                : 'bg-[#CBD5E1] text-[#94A3B8] cursor-not-allowed'
-            }`}
           >
             {isSubmitting || isCreatingProject ? '생성 중...' : '이미지 생성'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -44,7 +44,7 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
       {
         key: 'size',
         label: '사이즈',
-        type: 'size',
+        type: 'select',
         required: true,
         options: COMMON_SIZE_OPTIONS,
       },

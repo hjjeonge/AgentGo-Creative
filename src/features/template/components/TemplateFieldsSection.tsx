@@ -37,7 +37,7 @@ export const TemplateFieldsSection: React.FC<TemplateFieldsSectionProps> = ({
   removeFile,
 }) => {
   return (
-    <div className="flex flex-col gap-[32px]">
+    <div className="flex flex-col gap-6 px-6 py-8">
       {fields.map((field) => (
         <TemplateFieldRenderer
           key={field.key}

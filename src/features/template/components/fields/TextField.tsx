@@ -21,7 +21,7 @@ export const TextField: React.FC<TextFieldProps> = ({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={field.placeholder}
-        className="w-full h-[44px] border border-[#CBD5E1] rounded-[8px] px-[12px] text-[14px] text-[#0F172B] placeholder:text-[#94A3B8] outline-none focus:border-[#155DFC]"
+        className="w-full border border-border-neutral rounded-xs px-2 py-3 text-[14px] text-text-primary placeholder:text-[#90A1B9] outline-none focus:border-[#1447E6] bg-white"
       />
     </FormRow>
   );
