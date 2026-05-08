@@ -25,13 +25,7 @@ export interface TemplateConfig {
   aiStatus: 'available' | 'planned';
   aiFeature: string;
   fields: TemplateField[];
-}
-
-export interface FavoriteTemplateRes {
-  id: string;
-  imgUrl: string;
-  title: string;
-  summary: string;
+  isLike: boolean;
 }
 
 export interface TemplateRes {

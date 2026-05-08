@@ -1,15 +1,6 @@
 import axiosInstance from '@/services/axiosInstance';
 
-import type {
-  CreateNewTemplateReq,
-  FavoriteTemplateRes,
-  TemplateRes,
-} from '../types';
-
-// 즐겨찾는 템플릿 목록 조회 -> 검색 가능해야함
-export const getFavoriteTemplates = () => {
-  return axiosInstance.get<FavoriteTemplateRes[]>(`/api/templates/favorites`);
-};
+import type { CreateNewTemplateReq, TemplateRes } from '../types';
 
 // 전체 템플릿 목록 조회
 export const getTemplates = () => {

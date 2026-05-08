@@ -18,6 +18,7 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
     imgSrc: template_marketing,
     aiStatus: 'available',
     aiFeature: 'key-visual',
+    isLike: true,
     fields: [
       { key: 'source_image', label: '이미지', type: 'file', required: true },
       {
@@ -57,6 +58,7 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
     imgSrc: template_detail,
     aiStatus: 'available',
     aiFeature: 'detail-cut',
+    isLike: true,
     fields: [
       {
         key: 'source_images',
@@ -106,6 +108,7 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
     imgSrc: template_studio,
     aiStatus: 'available',
     aiFeature: 'key-visual',
+    isLike: false,
     fields: [
       {
         key: 'source_image',
@@ -149,6 +152,7 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
     imgSrc: template_translation,
     aiStatus: 'available',
     aiFeature: 'multilingual',
+    isLike: false,
     fields: [
       {
         key: 'source_image',
@@ -192,6 +196,7 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
     imgSrc: template_infographic,
     aiStatus: 'planned',
     aiFeature: 'planned',
+    isLike: true,
     fields: [
       {
         key: 'topic',
@@ -231,6 +236,7 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
     imgSrc: template_art,
     aiStatus: 'planned',
     aiFeature: 'planned',
+    isLike: false,
     fields: [
       {
         key: 'source_text',
@@ -274,6 +280,7 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
     imgSrc: template_illustration,
     aiStatus: 'planned',
     aiFeature: 'planned',
+    isLike: false,
     fields: [
       {
         key: 'sketch_image',

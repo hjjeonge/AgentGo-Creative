@@ -1,4 +1,10 @@
-export const StarIcon: React.FC = () => {
+interface StarIconProps {
+  isActive?: boolean;
+}
+
+export const StarIcon: React.FC<StarIconProps> = ({
+  isActive = false,
+}: StarIconProps) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -9,7 +15,7 @@ export const StarIcon: React.FC = () => {
     >
       <path
         d="M9.00045 13.695L3.71036 16.6562L4.89186 10.7099L0.440918 6.59385L6.4612 5.88005L9.00045 0.375L11.5396 5.88005L17.5599 6.59385L13.109 10.7099L14.2905 16.6562L9.00045 13.695ZM9.00045 11.976L12.1855 13.7588L11.4741 10.1788L14.1539 7.70055L10.5292 7.27075L9.00045 3.95627L7.47161 7.27075L3.84691 7.70055L6.52673 10.1788L5.81537 13.7588L9.00045 11.976Z"
-        fill="#62748E"
+        fill={isActive ? '#1447E6' : '#62748E'}
       />
     </svg>
   );
