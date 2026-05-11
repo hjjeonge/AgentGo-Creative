@@ -142,25 +142,27 @@ export const FileField: React.FC<FileFieldProps> = ({
             >
               사진 및 파일 추가
             </Button>
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center text-text-secondary font-bold text-xs gap-2">
-                <span>첨부파일</span>
-                <span className="bg-[#DBEAFE] text-[#193CB8] px-[7px] font-bold text-sm rounded-lg">
-                  {selectedFiles.length}
-                </span>
-              </div>
-              <div className="min-w-0 overflow-x-auto pr-6">
-                <div className="flex w-max gap-3">
-                  {selectedFiles.map((file, index) => (
-                    <UploadedImageCard
-                      key={`${file.name}-${index}`}
-                      file={file}
-                      onRemove={() => onRemoveFile(index)}
-                    />
-                  ))}
+            {!!selectedFiles.length && (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center text-text-secondary font-bold text-xs gap-2">
+                  <span>첨부파일</span>
+                  <span className="bg-[#DBEAFE] text-[#193CB8] px-[7px] font-bold text-sm rounded-lg">
+                    {selectedFiles.length}
+                  </span>
+                </div>
+                <div className="min-w-0 overflow-x-auto pr-6">
+                  <div className="flex w-max gap-3">
+                    {selectedFiles.map((file, index) => (
+                      <UploadedImageCard
+                        key={`${file.name}-${index}`}
+                        file={file}
+                        onRemove={() => onRemoveFile(index)}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         )}
       </div>
