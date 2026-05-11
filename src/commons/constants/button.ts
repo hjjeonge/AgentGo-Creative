@@ -75,7 +75,7 @@ export const buttonVariantStyles: Record<
   },
   'primary-outlined': {
     enabled: {
-      backgroundColor: Primary.outlined.bg,
+      backgroundColor: Primary.solid.color,
       color: Primary.outlined.color,
       borderColor: Primary.outlined.border,
     },
@@ -97,7 +97,7 @@ export const buttonVariantStyles: Record<
   },
   'neutral-outlined': {
     enabled: {
-      backgroundColor: Neutral.outlined.bg,
+      backgroundColor: Neutral.solid.color,
       color: Neutral.outlined.color,
       borderColor: Neutral.outlined.border,
     },
