@@ -25,6 +25,7 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
         label: '타겟 이미지',
         type: 'file',
         required: true,
+        isTargetImage: true,
       },
       {
         key: 'target_audience',

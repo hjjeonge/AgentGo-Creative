@@ -22,7 +22,7 @@ export const UploadedImageCard: React.FC<Props> = ({ file, onRemove }) => {
   const extension = lastDot >= 0 ? file.name.slice(lastDot) : '';
 
   return (
-    <div className="flex flex-col gap-2 p-3 rounded-md border border-border-neutral w-42.5">
+    <div className="flex flex-col gap-2 p-3 rounded-md border border-border-neutral w-42.5 shrink-0">
       <div className="relative group rounded-md overflow-hidden">
         <img
           src={previewUrl}

@@ -25,7 +25,7 @@ export const FileField: React.FC<FileFieldProps> = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = `file-input-${field.key}`;
-  const isMulti = field.type === 'files';
+  const isMulti = !field.isTargetImage;
 
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -68,8 +68,8 @@ export const FileField: React.FC<FileFieldProps> = ({
     setIsDragOver(false);
 
     const files = Array.from(event.dataTransfer.files);
-    if (files.length > 1) {
-      alert('파일은 하나만 업로드할 수 있습니다.');
+    if (field.isTargetImage && files.length > 1) {
+      alert('타겟 이미지는 하나만 업로드할 수 있습니다.');
       return;
     }
 
@@ -78,7 +78,9 @@ export const FileField: React.FC<FileFieldProps> = ({
 
   return (
     <FormRow
-      label={selectedFiles.length ? '타겟 이미지' : undefined}
+      label={
+        !selectedFiles.length && field.isTargetImage ? undefined : field.label
+      }
       required={field.required}
     >
       <input
@@ -93,45 +95,73 @@ export const FileField: React.FC<FileFieldProps> = ({
           event.target.value = '';
         }}
       />
-      <div className="">
-        {!selectedFiles.length ? (
-          <div>
-            <label
-              htmlFor={inputId}
-              className={`w-full border border-dashed rounded-md flex flex-col items-center gap-4 cursor-pointer px-[14px] py-5.5 transition-colors ${isDragOver ? 'border-[#2B7FFF] bg-[#EFF6FF]' : 'border-[#2B7FFF] bg-[#F8FAFC]'}`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
+      <div className="min-w-0">
+        {field.isTargetImage ? (
+          <>
+            {!selectedFiles.length ? (
+              <div>
+                <label
+                  htmlFor={inputId}
+                  className={`w-full border border-dashed rounded-md flex flex-col items-center gap-4 cursor-pointer px-[14px] py-5.5 transition-colors ${isDragOver ? 'border-[#2B7FFF] bg-[#EFF6FF]' : 'border-[#2B7FFF] bg-[#F8FAFC]'}`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  <div className="flex flex-col items-center gap-2 text-md text-text-primary font-bold">
+                    <div className="flex gap-1">
+                      <span>타겟 이미지나 파일을 업로드하세요.</span>
+                      <span className="text-[#E7000B]">*</span>
+                    </div>
+                    <span className="text-sm text-text-tertiary font-normal">
+                      드래그 앤 드롭 하거나 클릭하여 파일 업로드
+                    </span>
+                  </div>
+
+                  <Button
+                    onClick={onClickImageUpload}
+                    startDecorator={<Paperclip />}
+                    variant="primary-outlined"
+                  >
+                    사진 및 파일 추가
+                  </Button>
+                </label>
+              </div>
+            ) : (
+              <UploadedImageCard
+                file={selectedFiles[0]}
+                onRemove={() => onRemoveFile(0)}
+              />
+            )}
+          </>
+        ) : (
+          <div className="flex min-w-0 flex-col gap-3 overflow-hidden">
+            <Button
+              onClick={onClickImageUpload}
+              startDecorator={<Paperclip />}
+              variant="primary-outlined"
             >
-              <div className="flex flex-col items-center gap-2 text-md text-text-primary font-bold">
-                <div className="flex gap-1">
-                  <span>타겟 이미지나 파일을 업로드하세요.</span>
-                  <span className="text-[#E7000B]">*</span>
-                </div>
-                <span className="text-sm text-text-tertiary font-normal">
-                  드래그 앤 드롭 하거나 클릭하여 파일 업로드
+              사진 및 파일 추가
+            </Button>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center text-text-secondary font-bold text-xs gap-2">
+                <span>첨부파일</span>
+                <span className="bg-[#DBEAFE] text-[#193CB8] px-[7px] font-bold text-sm rounded-lg">
+                  {selectedFiles.length}
                 </span>
               </div>
-
-              <Button
-                onClick={onClickImageUpload}
-                startDecorator={<Paperclip />}
-                variant="primary-outlined"
-              >
-                사진 및 파일 추가
-              </Button>
-            </label>
+              <div className="min-w-0 overflow-x-auto pr-6">
+                <div className="flex w-max gap-3">
+                  {selectedFiles.map((file, index) => (
+                    <UploadedImageCard
+                      key={`${file.name}-${index}`}
+                      file={file}
+                      onRemove={() => onRemoveFile(index)}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-        ) : (
-          <>
-            {selectedFiles.map((file, index) => (
-              <UploadedImageCard
-                key={`${file.name}-${index}`}
-                file={file}
-                onRemove={() => onRemoveFile(index)}
-              />
-            ))}
-          </>
         )}
       </div>
     </FormRow>

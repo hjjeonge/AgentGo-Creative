@@ -15,6 +15,7 @@ export interface TemplateField {
   placeholder?: string;
   options?: string[];
   maxItems?: number;
+  isTargetImage?: boolean;
 }
 
 export interface TemplateConfig {
