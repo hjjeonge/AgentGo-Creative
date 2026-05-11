@@ -20,10 +20,15 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
     aiFeature: 'key-visual',
     isLike: true,
     fields: [
-      { key: 'source_image', label: '이미지', type: 'file', required: true },
+      {
+        key: 'source_image',
+        label: '타겟 이미지',
+        type: 'file',
+        required: true,
+      },
       {
         key: 'target_audience',
-        label: '타겟설정',
+        label: '타겟 설정',
         type: 'tags',
         required: true,
         maxItems: 5,
