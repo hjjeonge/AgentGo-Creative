@@ -208,6 +208,13 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
     isLike: true,
     fields: [
       {
+        key: 'source_images',
+        label: '타겟 이미지',
+        type: 'files',
+        required: true,
+        isTargetImage: true,
+      },
+      {
         key: 'topic',
         label: '주제',
         type: 'text',
@@ -247,6 +254,13 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
     aiFeature: 'planned',
     isLike: false,
     fields: [
+      {
+        key: 'source_images',
+        label: '타겟 이미지',
+        type: 'files',
+        required: true,
+        isTargetImage: true,
+      },
       {
         key: 'source_text',
         label: '원문 텍스트',
