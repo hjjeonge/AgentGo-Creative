@@ -325,26 +325,11 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
 ];
 
 export const TARGET_KEYWORDS = [
-  '10대',
-  '20대',
-  '30대',
-  '40대',
-  '50대',
-  '자기관리',
-  '메이크업',
-  '학생',
-  '직장인',
-  '신혼',
-  '자취',
-  '사회초년',
   '인테리어',
-  '여행',
-  '재테크',
-  '1인가구',
+  '가구',
+  '화장품',
   '반려동물',
-  '집밥',
-  '자기계발',
-  '가성비',
+  '패션',
 ];
 
 export const DEFAULT_TEMPLATE_KEY = 'sns_marketing';

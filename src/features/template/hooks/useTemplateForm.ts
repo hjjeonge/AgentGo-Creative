@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import { TARGET_KEYWORDS } from '@/features/template/constants/templateConfig';
 import type { TemplateField } from '@/features/template/types';
 
 type FormValues = Record<string, string | string[]>;
@@ -7,7 +8,13 @@ type FormFiles = Record<string, File[]>;
 
 const buildInitialValues = (fields: TemplateField[]): FormValues => {
   return fields.reduce<FormValues>((acc, field) => {
-    acc[field.key] = field.type === 'tags' ? [] : '';
+    if (field.type === 'tags') {
+      acc[field.key] =
+        field.key === 'target_audience' ? [...TARGET_KEYWORDS] : [];
+      return acc;
+    }
+
+    acc[field.key] = '';
     return acc;
   }, {});
 };
@@ -45,9 +52,8 @@ export const useTemplateForm = (fields: TemplateField[]) => {
     const trimmed = raw.trim();
     if (!trimmed) return;
 
-    const maxItems = field.maxItems ?? 5;
     const current = getTagsValue(field.key);
-    if (current.includes(trimmed) || current.length >= maxItems) return;
+    if (current.includes(trimmed)) return;
 
     setValues((prev) => ({
       ...prev,
