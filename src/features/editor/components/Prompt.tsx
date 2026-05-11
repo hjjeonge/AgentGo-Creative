@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import type React from 'react';
+import { ArrowUp } from 'lucide-react';
 
 import Close from '@/assets/close-line.svg';
+import { IconButton } from '@/commons/components/IconButton';
 import type { PromptGeneratePayload } from '@/features/editor/types';
 
 interface Props {
@@ -101,7 +103,7 @@ export const Prompt: React.FC<Props> = ({
   const previewSize = images.length <= 1 ? 100 : 55;
 
   return (
-    <div className="z-[40] w-full max-w-[768px] bg-white border border-[#155DFC] rounded-[8px] p-[10px_8px] flex flex-col gap-[12px] mb-[20px]">
+    <div className="z-[40] w-full max-w-[768px] bg-white border border-[#155DFC] rounded-[8px] p-[10px_8px] flex flex-col gap-[12px] shadow-[0_20px_24px_-4px_rgba(50,56,62,0.08)]">
       {images.length > 0 && (
         <div className="flex items-center gap-[8px] flex-wrap">
           {images.map((img, index) => (
@@ -138,10 +140,10 @@ export const Prompt: React.FC<Props> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-[6px]">
             <label
-              className={`text-[12px] leading-[19.88px] rounded-[4px] border px-[10px] py-[4px] transition-colors ${
+              className={`text-sm rounded-xs border px-3 py-0.5 transition-colors font-bold ${
                 isMaxImages
                   ? 'text-[#90A1B9] border-[#CAD5E2] cursor-not-allowed'
-                  : 'text-[#0F172B] border-[#CAD5E2] hover:bg-[#F8FAFF] cursor-pointer'
+                  : 'text-[#1D293D] border-border-neutral hover:bg-[#F8FAFF] cursor-pointer'
               }`}
             >
               <input
@@ -167,19 +169,10 @@ export const Prompt: React.FC<Props> = ({
               </span>
             )}
           </div>
-          <button
-            onClick={handleSend}
-            disabled={!canSend}
-            className={`w-[32px] h-[32px] rounded-[4px] flex items-center justify-center transition-colors ${
-              canSend
-                ? 'bg-[#155DFC] hover:bg-[#0044CC]'
-                : 'bg-[#90A1B9] cursor-not-allowed'
-            }`}
-          >
-            <span className="text-white text-[16px] leading-none">
-              {isSubmitting ? '…' : '↑'}
-            </span>
-          </button>
+
+          <IconButton onClick={handleSend} disabled={!canSend}>
+            <ArrowUp size={18} />
+          </IconButton>
         </div>
       </div>
     </div>
