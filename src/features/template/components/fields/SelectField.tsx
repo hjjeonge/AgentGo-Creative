@@ -29,7 +29,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
         optionList={optionList}
         selectedOption={selectedOption}
         onOptionSelect={(option) => onChange(option.value)}
-        placeholder={field.placeholder ?? '선택해 주세요'}
+        placeholder={field.placeholder ?? '선택'}
       />
     </FormRow>
   );

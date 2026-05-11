@@ -40,7 +40,7 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        'border-border-neutral data-[placeholder]:text-text-tertiary flex w-full items-center justify-between gap-2 rounded-xs border bg-transparent px-3 py-1.5 text-sm text-text-tertiary whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2',
+        'border-border-neutral data-[placeholder]:text-text-tertiary flex w-full items-center justify-between gap-2 rounded-xs border bg-transparent px-3 py-1.5 text-sm text-text-tertiary whitespace-nowrap shadow-[0_1px_2px_0_rgba(50,56,62,0.08)] transition-[color,box-shadow] outline-none disabled:cursor-not-allowed disabled:opacity-50 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2',
         className,
       )}
       {...props}

@@ -68,9 +68,10 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
     fields: [
       {
         key: 'source_images',
-        label: '제품 이미지(복수)',
+        label: '타겟 이미지',
         type: 'files',
         required: true,
+        isTargetImage: true,
       },
       {
         key: 'product_name',
@@ -101,7 +102,7 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
       {
         key: 'size',
         label: '사이즈',
-        type: 'size',
+        type: 'select',
         options: COMMON_SIZE_OPTIONS,
       },
     ],
@@ -118,9 +119,10 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
     fields: [
       {
         key: 'source_image',
-        label: '제품 이미지',
+        label: '타겟 이미지',
         type: 'file',
         required: true,
+        isTargetImage: true,
       },
       { key: 'product_name', label: '제품명', type: 'text', required: true },
       {
@@ -145,7 +147,7 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
       {
         key: 'size',
         label: '사이즈',
-        type: 'size',
+        type: 'select',
         required: true,
         options: COMMON_SIZE_OPTIONS,
       },
@@ -162,9 +164,10 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
     fields: [
       {
         key: 'source_image',
-        label: '원본 이미지',
+        label: '타겟 이미지',
         type: 'file',
         required: true,
+        isTargetImage: true,
       },
       {
         key: 'source_lang',
@@ -189,7 +192,7 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
       {
         key: 'size',
         label: '사이즈',
-        type: 'size',
+        type: 'select',
         options: COMMON_SIZE_OPTIONS,
       },
     ],
@@ -228,7 +231,7 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
       {
         key: 'size',
         label: '사이즈',
-        type: 'size',
+        type: 'select',
         required: true,
         options: COMMON_SIZE_OPTIONS,
       },
@@ -272,7 +275,7 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
       {
         key: 'size',
         label: '사이즈',
-        type: 'size',
+        type: 'select',
         required: true,
         options: COMMON_SIZE_OPTIONS,
       },
@@ -290,9 +293,10 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
     fields: [
       {
         key: 'sketch_image',
-        label: '스케치 이미지',
+        label: '타겟 이미지',
         type: 'file',
         required: true,
+        isTargetImage: true,
       },
       {
         key: 'color_style',
@@ -316,7 +320,7 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
       {
         key: 'size',
         label: '사이즈',
-        type: 'size',
+        type: 'select',
         required: true,
         options: COMMON_SIZE_OPTIONS,
       },

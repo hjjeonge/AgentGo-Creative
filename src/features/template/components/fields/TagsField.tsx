@@ -53,7 +53,7 @@ export const TagsField: React.FC<TagsFieldProps> = ({
             }
           }}
           placeholder="어울리는 키워드를 입력 후 엔터를 눌러주세요."
-          className="border border-border-neutral placeholder:text-[#90A1B9] px-3 py-1.5 rounded-xs text-sm text-text-primary outline-none focus:border-[#1447E6]"
+          className="border border-border-neutral placeholder:text-[#90A1B9] px-3 py-1.5 rounded-xs text-sm text-text-primary outline-none focus:border-[#1447E6] shadow-[0_1px_2px_0_rgba(50,56,62,0.08)]"
         />
       </div>
     </FormRow>
