@@ -27,8 +27,8 @@ export const ListFOrmatPopover: React.FC<Props> = ({
   return (
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent align="start" className="p-0 w-fit">
-        <div className="flex gap-[8px] p-[7px] rounded-[8px]">
+      <PopoverContent align="start" className="p-0 w-fit border-none">
+        <div className="flex gap-[8px] p-[7px] rounded-[8px] bg-white">
           {list.map((el) => (
             <button
               key={el.name}

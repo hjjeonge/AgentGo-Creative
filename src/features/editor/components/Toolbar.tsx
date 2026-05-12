@@ -275,7 +275,7 @@ export const Toolbar: React.FC<Props> = ({
         </div>
       )}
       {isTextPopupVisible && (
-        <div className="absolute top-full left-1/2 z-20 mt-[7px] h-[420px] w-[720px] -translate-x-1/2 overflow-hidden rounded-[8px] border border-[#90A1B9] bg-white shadow-[0_12px_24px_-4px_rgba(50,56,62,0.12)]">
+        <div className="absolute top-full left-1/2 z-20 mt-[7px] w-[470px] -translate-x-1/2 overflow-visible rounded-[8px] border border-border-neutral bg-[#F8FAFC] shadow-[0_6px_12px_-2px_rgba(50,56,62,0.08)]">
           <TextEditor
             selectedTextObject={selectedTextObject}
             handleUpdateTextObject={handleUpdateTextObject}
