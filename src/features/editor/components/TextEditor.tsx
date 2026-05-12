@@ -101,6 +101,23 @@ export const TextEditor: React.FC<TextEditorProps> = ({
     setActivePopupTarget(null);
   };
 
+  const handleApplyTextColor = (value: string) => {
+    if (!selectedTextObject) return;
+    handleUpdateTextObject(selectedTextObject.id, {
+      fill: value,
+    });
+    addRecentColor(value);
+  };
+
+  const handleApplyHighlightColor = (value: string) => {
+    if (!selectedTextObject) return;
+    handleUpdateTextObject(selectedTextObject.id, {
+      backgroundColor: value,
+      backgroundEnabled: value !== 'transparent',
+    });
+    addRecentColor(value);
+  };
+
   const handleInsertSpecialChar = (char: string) => {
     if (!selectedTextObject) return;
     handleUpdateTextObject(selectedTextObject.id, {
@@ -462,24 +479,12 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                           onOpenPalette={() => openPalette('text')}
                           currentColor={normalizedCurrentColor}
                           recentlyUseColorList={recentTextColors}
-                          onSelectColor={(value) => {
-                            if (!selectedTextObject) return;
-                            handleUpdateTextObject(selectedTextObject.id, {
-                              fill: value,
-                            });
-                            addRecentColor(value);
-                          }}
+                          onSelectColor={handleApplyTextColor}
                         />
                       ) : (
                         <ColorPalette
                           colorCode={normalizedCurrentColor}
-                          handleColorCode={(value) => {
-                            if (!selectedTextObject) return;
-                            handleUpdateTextObject(selectedTextObject.id, {
-                              fill: value,
-                            });
-                            addRecentColor(value);
-                          }}
+                          handleColorCode={handleApplyTextColor}
                           onBack={() => openPicker('text', true)}
                         />
                       )}
@@ -521,26 +526,12 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                           onOpenPalette={() => openPalette('highlight')}
                           currentColor={normalizedHighlightColor}
                           recentlyUseColorList={recentTextColors}
-                          onSelectColor={(value) => {
-                            if (!selectedTextObject) return;
-                            handleUpdateTextObject(selectedTextObject.id, {
-                              backgroundColor: value,
-                              backgroundEnabled: value !== 'transparent',
-                            });
-                            addRecentColor(value);
-                          }}
+                          onSelectColor={handleApplyHighlightColor}
                         />
                       ) : (
                         <ColorPalette
                           colorCode={normalizedHighlightColor}
-                          handleColorCode={(value) => {
-                            if (!selectedTextObject) return;
-                            handleUpdateTextObject(selectedTextObject.id, {
-                              backgroundColor: value,
-                              backgroundEnabled: value !== 'transparent',
-                            });
-                            addRecentColor(value);
-                          }}
+                          handleColorCode={handleApplyHighlightColor}
                           onBack={() => openPicker('highlight', true)}
                         />
                       )}

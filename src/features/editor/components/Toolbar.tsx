@@ -16,9 +16,11 @@ import { TextIcon } from '@/commons/components/icons/TextIcon';
 import { UploadIcon } from '@/commons/components/icons/UploadIcon';
 import { getPenColorImg, getPenStrokeWidthImg } from '@/commons/utils/getImage';
 import { useColorHistoryStore } from '@/features/editor/store/colorHistoryStore';
+import type { TextObject } from '@/features/editor/types';
 
 import { AiEffectPopover } from './AiEffectPopover';
 import { DiagramPopup } from './DiagramPopup';
+import { TextEditor } from './TextEditor';
 import { ToolbarButton } from './ToolbarButton';
 import { ToolButton } from './ToolButton';
 
@@ -26,6 +28,8 @@ interface Props {
   activeTool: string;
   onToolChange: (tool: string) => void;
   onUploadImage?: (url: string) => void;
+  selectedTextObject?: TextObject;
+  handleUpdateTextObject?: (id: string, updates: Partial<TextObject>) => void;
   penStrokeWidth: number;
   handlePenStrokeWidth: (value: number) => void;
   penStrokeColor: string;
@@ -40,6 +44,8 @@ export const Toolbar: React.FC<Props> = ({
   activeTool,
   onToolChange,
   onUploadImage,
+  selectedTextObject,
+  handleUpdateTextObject,
   penStrokeWidth,
   handlePenStrokeWidth,
   penStrokeColor,
@@ -61,10 +67,18 @@ export const Toolbar: React.FC<Props> = ({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (!toolbarRef.current?.contains(e.target as Node)) {
-        setIsToolPopupOpen(false);
-        setColorPopupMode(null);
-      }
+      const target = e.target;
+      const isInsideToolbar = toolbarRef.current?.contains(target as Node);
+      const isInsidePortalPopup =
+        target instanceof Element &&
+        !!target.closest(
+          '[data-slot="popover-content"], [data-slot="select-content"]',
+        );
+
+      if (isInsideToolbar || isInsidePortalPopup) return;
+
+      setIsToolPopupOpen(false);
+      setColorPopupMode(null);
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -73,7 +87,10 @@ export const Toolbar: React.FC<Props> = ({
 
   useEffect(() => {
     const hasToolPopup =
-      activeTool === 'pen' || activeTool === 'eraser' || activeTool === 'crop';
+      activeTool === 'pen' ||
+      activeTool === 'eraser' ||
+      activeTool === 'crop' ||
+      activeTool === 'text';
 
     setIsToolPopupOpen(hasToolPopup);
     if (activeTool !== 'pen') {
@@ -93,6 +110,8 @@ export const Toolbar: React.FC<Props> = ({
   const penStrokeWidths = [2, 3, 5, 6];
   const displayColors = ['#E7000B', '#155DFC', '#FFD230', 'empty'];
   const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  const isTextPopupVisible =
+    activeTool === 'text' && !!selectedTextObject && !!handleUpdateTextObject;
 
   const onClickColorOption = (value: string) => {
     if (value === 'empty') {
@@ -123,7 +142,8 @@ export const Toolbar: React.FC<Props> = ({
       return;
     }
 
-    const hasPopup = tool === 'pen' || tool === 'eraser' || tool === 'crop';
+    const hasPopup =
+      tool === 'pen' || tool === 'eraser' || tool === 'crop' || tool === 'text';
 
     if (tool === activeTool) {
       if (hasPopup) setIsToolPopupOpen(true);
@@ -252,6 +272,14 @@ export const Toolbar: React.FC<Props> = ({
             <LassoIcon />
             자유형
           </button>
+        </div>
+      )}
+      {isTextPopupVisible && (
+        <div className="absolute top-full left-1/2 z-20 mt-[7px] h-[420px] w-[720px] -translate-x-1/2 overflow-hidden rounded-[8px] border border-[#90A1B9] bg-white shadow-[0_12px_24px_-4px_rgba(50,56,62,0.12)]">
+          <TextEditor
+            selectedTextObject={selectedTextObject}
+            handleUpdateTextObject={handleUpdateTextObject}
+          />
         </div>
       )}
       {isToolPopupOpen && activeTool === 'diagram' && (

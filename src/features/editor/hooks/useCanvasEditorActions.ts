@@ -219,7 +219,7 @@ export const useCanvasEditorActions = ({
 
     updateElements((prev) => [...prev, { ...newText, kind: 'text' }]);
     setSelectedId(newText.id);
-    setActiveTool('mouse');
+    setActiveTool('text');
   }, [pushUndo, setActiveTool, setSelectedId, updateElements]);
 
   const handleUpdateTextObject = useCallback(
