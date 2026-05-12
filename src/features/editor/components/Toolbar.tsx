@@ -1,20 +1,21 @@
 import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 import { Button } from '@/commons/components/Button';
 import { ColorPalette } from '@/commons/components/ColorPalette';
 import { ColorPickerPopup } from '@/commons/components/ColorPickerPopup';
-import { ChangeIcon } from '@/commons/components/icons/ChangeIcon';
-import { ClickIcon } from '@/commons/components/icons/ClickIcon';
-import { CropIcon } from '@/commons/components/icons/CropIcon';
-import { EraserIcon } from '@/commons/components/icons/EraserIcon';
 import { LassoIcon } from '@/commons/components/icons/LassoIcon';
-import { PencilIcon } from '@/commons/components/icons/PencilIcon';
 import { ShapeIcon } from '@/commons/components/icons/ShapeIcon';
-import { TextIcon } from '@/commons/components/icons/TextIcon';
-import { UploadIcon } from '@/commons/components/icons/UploadIcon';
 import { getPenColorImg, getPenStrokeWidthImg } from '@/commons/utils/getImage';
+import {
+  TOOLBAR_ALLOWED_IMAGE_TYPES,
+  TOOLBAR_DISPLAY_COLORS,
+  TOOLBAR_ITEMS,
+  TOOLBAR_PEN_STROKE_WIDTHS,
+  TOOLBAR_UPLOAD_ERROR_MESSAGE,
+} from '@/features/editor/constants/toolbar';
+import { useToolbarPopup } from '@/features/editor/hooks/useToolbarPopup';
 import { useColorHistoryStore } from '@/features/editor/store/colorHistoryStore';
 import type { TextObject } from '@/features/editor/types';
 
@@ -58,58 +59,21 @@ export const Toolbar: React.FC<Props> = ({
   const toolbarRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isToolPopupOpen, setIsToolPopupOpen] = useState(false);
-  const [colorPopupMode, setColorPopupMode] = useState<
-    'picker' | 'palette' | null
-  >(null);
+  const {
+    colorPopupMode,
+    hasPopup,
+    isToolPopupOpen,
+    setColorPopupMode,
+    setIsToolPopupOpen,
+    syncPopupState,
+  } = useToolbarPopup(toolbarRef);
   const recentColors = useColorHistoryStore((state) => state.recentColors);
   const addRecentColor = useColorHistoryStore((state) => state.addRecentColor);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target;
-      const isInsideToolbar = toolbarRef.current?.contains(target as Node);
-      const isInsidePortalPopup =
-        target instanceof Element &&
-        !!target.closest(
-          '[data-slot="popover-content"], [data-slot="select-content"]',
-        );
+    syncPopupState(activeTool);
+  }, [activeTool, syncPopupState]);
 
-      if (isInsideToolbar || isInsidePortalPopup) return;
-
-      setIsToolPopupOpen(false);
-      setColorPopupMode(null);
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    const hasToolPopup =
-      activeTool === 'pen' ||
-      activeTool === 'eraser' ||
-      activeTool === 'crop' ||
-      activeTool === 'text';
-
-    setIsToolPopupOpen(hasToolPopup);
-    if (activeTool !== 'pen') {
-      setColorPopupMode(null);
-    }
-  }, [activeTool]);
-
-  const tools = [
-    { tool: 'mouse', icon: <ClickIcon /> },
-    { tool: 'change', icon: <ChangeIcon /> },
-    { tool: 'crop', icon: <CropIcon /> },
-    { tool: 'text', icon: <TextIcon /> },
-    { tool: 'upload', icon: <UploadIcon /> },
-    { tool: 'pen', icon: <PencilIcon /> },
-    { tool: 'eraser', icon: <EraserIcon /> },
-  ];
-  const penStrokeWidths = [2, 3, 5, 6];
-  const displayColors = ['#E7000B', '#155DFC', '#FFD230', 'empty'];
-  const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
   const isTextPopupVisible =
     activeTool === 'text' && !!selectedTextObject && !!handleUpdateTextObject;
 
@@ -125,8 +89,12 @@ export const Toolbar: React.FC<Props> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!allowedImageTypes.includes(file.type)) {
-      window.alert('jpg, jpeg, png, webp 파일만 업로드 가능합니다.');
+    if (
+      !TOOLBAR_ALLOWED_IMAGE_TYPES.includes(
+        file.type as (typeof TOOLBAR_ALLOWED_IMAGE_TYPES)[number],
+      )
+    ) {
+      window.alert(TOOLBAR_UPLOAD_ERROR_MESSAGE);
       e.target.value = '';
       return;
     }
@@ -142,11 +110,8 @@ export const Toolbar: React.FC<Props> = ({
       return;
     }
 
-    const hasPopup =
-      tool === 'pen' || tool === 'eraser' || tool === 'crop' || tool === 'text';
-
     if (tool === activeTool) {
-      if (hasPopup) setIsToolPopupOpen(true);
+      if (hasPopup(tool)) setIsToolPopupOpen(true);
       return;
     }
 
@@ -163,15 +128,15 @@ export const Toolbar: React.FC<Props> = ({
         onChange={handleFileChange}
       />
       <div className="flex items-center justify-center gap-2.5 px-3 py-1.5 bg-white rounded-md shadow-[0_6px_12px_-2px_rgba(50,56,62,0.08)]">
-        {tools.map((el) => (
+        {TOOLBAR_ITEMS.map((item) => (
           <ToolButton
-            key={el.tool}
-            toolName={el.tool}
+            key={item.tool}
+            toolName={item.tool}
             activeTool={activeTool}
-            icon={el.icon}
-            label={el.tool}
+            icon={<item.icon />}
+            label={item.tool}
             onToolChange={onToolChange}
-            onClick={() => handleToolClick(el.tool)}
+            onClick={() => handleToolClick(item.tool)}
           />
         ))}
         <AiEffectPopover>
@@ -191,29 +156,32 @@ export const Toolbar: React.FC<Props> = ({
           ref={wrapperRef}
           className="absolute top-full mt-[7px] border flex items-center gap-[12px] border-[#90A1B9] p-[8px_10px] rounded-[6px] bg-[#F1F5F9] z-20"
         >
-          {penStrokeWidths.map((el) => (
+          {TOOLBAR_PEN_STROKE_WIDTHS.map((strokeWidth) => (
             <ToolbarButton
-              key={el}
-              tooltip={`${el}px`}
-              icon={getPenStrokeWidthImg(el)}
-              onClick={() => handlePenStrokeWidth(el)}
-              isActive={penStrokeWidth === el}
+              key={strokeWidth}
+              tooltip={`${strokeWidth}px`}
+              icon={getPenStrokeWidthImg(strokeWidth)}
+              onClick={() => handlePenStrokeWidth(strokeWidth)}
+              isActive={penStrokeWidth === strokeWidth}
               className="w-[34px] h-[34px] rounded-[6px]"
             />
           ))}
           {activeTool == 'pen' && (
             <>
               <div className="w-[2.5px] h-[25px] bg-[#45556C]" />
-              {displayColors.map((el) => {
-                const isPresetColor = displayColors.includes(penStrokeColor);
+              {TOOLBAR_DISPLAY_COLORS.map((color) => {
+                const isPresetColor = TOOLBAR_DISPLAY_COLORS.includes(
+                  penStrokeColor as (typeof TOOLBAR_DISPLAY_COLORS)[number],
+                );
                 const isActive =
-                  penStrokeColor === el || (el === 'empty' && !isPresetColor);
+                  penStrokeColor === color ||
+                  (color === 'empty' && !isPresetColor);
                 return (
                   <ToolbarButton
-                    key={el}
-                    tooltip={el}
-                    icon={getPenColorImg(el)}
-                    onClick={() => onClickColorOption(el)}
+                    key={color}
+                    tooltip={color}
+                    icon={getPenColorImg(color)}
+                    onClick={() => onClickColorOption(color)}
                     isActive={isActive}
                     className="w-[30px] h-[30px] p-[5px] rounded-[20px]"
                   />

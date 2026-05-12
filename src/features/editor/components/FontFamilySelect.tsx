@@ -9,26 +9,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DEFAULT_EDITOR_FONT,
+  EDITOR_GOOGLE_FONTS,
+} from '@/features/editor/constants/fonts';
 import type { TextObject } from '@/features/editor/types';
 
 interface FontFamilySelectProps {
   selectedTextObject?: TextObject;
   handleUpdateTextObject: (id: string, updates: Partial<TextObject>) => void;
 }
-
-const googleFonts = [
-  'Pretendard',
-  'Roboto',
-  'Open Sans',
-  'Lato',
-  'Montserrat',
-  'Oswald',
-  'Source Sans Pro',
-  'Raleway',
-  'PT Sans',
-  'Merriweather',
-  'Noto Sans KR',
-];
 
 export const FontFamilySelect: React.FC<FontFamilySelectProps> = ({
   selectedTextObject,
@@ -46,7 +36,7 @@ export const FontFamilySelect: React.FC<FontFamilySelectProps> = ({
 
   return (
     <Select
-      value={selectedTextObject?.fontFamily || 'Pretendard'}
+      value={selectedTextObject?.fontFamily || DEFAULT_EDITOR_FONT}
       onValueChange={handleFontChange}
     >
       <SelectTrigger className="border border-[#90A1B9] rounded-[6px] w-full focus:outline-0 p-[14px] h-[52px]">
@@ -54,7 +44,7 @@ export const FontFamilySelect: React.FC<FontFamilySelectProps> = ({
       </SelectTrigger>
       <SelectContent position="popper" className="z-[200] bg-white">
         <SelectGroup>
-          {googleFonts.map((font) => (
+          {EDITOR_GOOGLE_FONTS.map((font) => (
             <SelectItem key={font} value={font} style={{ fontFamily: font }}>
               {font}
             </SelectItem>

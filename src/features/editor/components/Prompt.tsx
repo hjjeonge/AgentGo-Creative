@@ -1,68 +1,34 @@
-import { useEffect, useRef, useState } from 'react';
 import type React from 'react';
+import { useState } from 'react';
 import { ArrowUp } from 'lucide-react';
 
-import Close from '@/assets/close-line.svg';
 import { IconButton } from '@/commons/components/IconButton';
+import { PROMPT_MAX_REFERENCE_IMAGES } from '@/features/editor/constants/prompt';
+import { usePromptFiles } from '@/features/editor/hooks/usePromptFiles';
 import type { PromptGeneratePayload } from '@/features/editor/types';
+
+import { PromptPreviewList } from './PromptPreviewList';
 
 interface Props {
   onGenerate?: (payload: PromptGeneratePayload) => Promise<void>;
   isSubmitting?: boolean;
 }
 
-type PreviewImage = {
-  file: File;
-  url: string;
-};
-
-const MAX_IMAGES = 10;
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-
 export const Prompt: React.FC<Props> = ({
   onGenerate,
   isSubmitting = false,
 }) => {
   const [prompt, setPrompt] = useState('');
-  const [images, setImages] = useState<PreviewImage[]>([]);
-
-  const imagesRef = useRef(images);
-
-  useEffect(() => {
-    imagesRef.current = images;
-  }, [images]);
+  const {
+    clearImages,
+    handleFiles,
+    handleRemoveImage,
+    images,
+    isMaxImages,
+    previewSize,
+  } = usePromptFiles();
 
   const canSend = prompt.trim().length > 0 && !isSubmitting;
-  const isMaxImages = images.length >= MAX_IMAGES;
-
-  const handleFiles = (fileList: FileList | null) => {
-    if (!fileList || isMaxImages) return;
-
-    const files = Array.from(fileList);
-
-    if (files.some((file) => !ALLOWED_IMAGE_TYPES.includes(file.type))) {
-      return alert(
-        'jpg, jpeg, png, webp, gif 이미지 파일만 업로드 가능합니다.',
-      );
-    }
-
-    const availableCount = MAX_IMAGES - images.length;
-    if (files.length > availableCount) {
-      alert(`레퍼런스 이미지는 최대 ${MAX_IMAGES}장까지 업로드할 수 있습니다.`);
-    }
-
-    const newImages = files.slice(0, availableCount).map((file) => ({
-      file,
-      url: URL.createObjectURL(file),
-    }));
-
-    setImages((prev) => [...prev, ...newImages]);
-  };
-
-  const handleRemoveImage = (index: number) => {
-    URL.revokeObjectURL(images[index].url);
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
 
   const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(e.target.value);
@@ -79,9 +45,8 @@ export const Prompt: React.FC<Props> = ({
         prompt: prompt.trim(),
         referenceFiles: images.map((img) => img.file),
       });
-      images.forEach((img) => URL.revokeObjectURL(img.url));
       setPrompt('');
-      setImages([]);
+      clearImages();
     } catch {
       // Error state is owned by the parent generate flow.
     }
@@ -94,39 +59,13 @@ export const Prompt: React.FC<Props> = ({
     }
   };
 
-  useEffect(() => {
-    return () => {
-      imagesRef.current.forEach((img) => URL.revokeObjectURL(img.url));
-    };
-  }, []);
-
-  const previewSize = images.length <= 1 ? 100 : 55;
-
   return (
     <div className="z-[40] w-full max-w-[768px] bg-white border border-[#155DFC] rounded-[8px] p-[10px_8px] flex flex-col gap-[12px] shadow-[0_20px_24px_-4px_rgba(50,56,62,0.08)]">
-      {images.length > 0 && (
-        <div className="flex items-center gap-[8px] flex-wrap">
-          {images.map((img, index) => (
-            <div
-              key={`${img.url}-${index}`}
-              className="relative rounded-[8px] overflow-hidden"
-              style={{ width: previewSize, height: previewSize }}
-            >
-              <img
-                src={img.url}
-                className="w-full h-full object-cover"
-                alt="preview"
-              />
-              <button
-                onClick={() => handleRemoveImage(index)}
-                className="absolute top-[4px] right-[4px] w-[16px] h-[16px] bg-black/60 rounded-full flex items-center justify-center"
-              >
-                <img src={Close} className="w-[10px] h-[10px]" alt="close" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+      <PromptPreviewList
+        images={images}
+        onRemoveImage={handleRemoveImage}
+        previewSize={previewSize}
+      />
       <div className="flex flex-col gap-[16px]">
         <textarea
           value={prompt}
@@ -165,7 +104,7 @@ export const Prompt: React.FC<Props> = ({
                   isMaxImages ? 'text-[#E7000B] font-medium' : 'text-[#64748B]'
                 }`}
               >
-                {images.length}/10
+                {images.length}/{PROMPT_MAX_REFERENCE_IMAGES}
               </span>
             )}
           </div>
