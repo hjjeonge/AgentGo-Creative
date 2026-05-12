@@ -378,26 +378,26 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
             breadcrumbPath={breadcrumbPath}
           />
         }
-        toolbar={
-          <Toolbar
-            activeTool={activeTool}
-            onToolChange={handleToolChange}
-            penStrokeWidth={penStrokeWidth}
-            handlePenStrokeWidth={handlePenStrokeWidth}
-            penStrokeColor={penStrokeColor}
-            handlePenStrokeColor={handlePenStrokeColor}
-            shapeType={shapeType}
-            setShapeType={handleAddShape}
-            shapeSelectMode={shapeSelectMode}
-            setShapeSelectMode={setShapeSelectMode}
-          />
-        }
         stage={
           <CanvasStageSection
             brushPreview={brushPreview}
             hasBaseImage={hasBaseImage}
             stageContainerRef={stageContainerRef}
             stageSize={stageSize}
+            toolbar={
+              <Toolbar
+                activeTool={activeTool}
+                onToolChange={handleToolChange}
+                penStrokeWidth={penStrokeWidth}
+                handlePenStrokeWidth={handlePenStrokeWidth}
+                penStrokeColor={penStrokeColor}
+                handlePenStrokeColor={handlePenStrokeColor}
+                shapeType={shapeType}
+                setShapeType={handleAddShape}
+                shapeSelectMode={shapeSelectMode}
+                setShapeSelectMode={setShapeSelectMode}
+              />
+            }
           >
             <EditorCanvas
               stageSize={stageSize}

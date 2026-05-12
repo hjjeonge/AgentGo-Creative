@@ -13,6 +13,7 @@ interface CanvasStageSectionProps {
   hasBaseImage: boolean;
   stageContainerRef: React.RefObject<HTMLDivElement | null>;
   stageSize: { width: number; height: number };
+  toolbar?: React.ReactNode;
 }
 
 export const CanvasStageSection: React.FC<CanvasStageSectionProps> = ({
@@ -21,13 +22,19 @@ export const CanvasStageSection: React.FC<CanvasStageSectionProps> = ({
   hasBaseImage,
   stageContainerRef,
   stageSize,
+  toolbar,
 }) => {
   return (
     <div className="flex-1 relative w-full shrink-0 flex items-center justify-center border border-[#E2E8F0] bg-[#F8FAFC] rounded-md shadow-[0_2px_4px_0px_rgba(50,56,62,0.08)]">
+      {toolbar ? (
+        <div className="absolute left-1/2 top-4 z-20 -translate-x-1/2">
+          {toolbar}
+        </div>
+      ) : null}
       {stageSize.width > 0 && stageSize.height > 0 && hasBaseImage ? (
         <div
           ref={stageContainerRef}
-          className="relative shrink-0 m-[20px]"
+          className="relative shrink-0 mb-[20px] mt-[84px]"
           style={{
             width: `${stageSize.width}px`,
             height: `${stageSize.height}px`,
@@ -53,7 +60,7 @@ export const CanvasStageSection: React.FC<CanvasStageSectionProps> = ({
           {children}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center mt-[20px] mb-[20px] gap-[8px] text-[#94A3B8] select-none rounded-[12px] border border-[#CBD5E1] bg-white h-[600px] w-[500px]">
+        <div className="mt-[84px] mb-[20px] flex h-[600px] w-[500px] select-none flex-col items-center justify-center gap-[8px] rounded-[12px] border border-[#CBD5E1] bg-white text-[#94A3B8]">
           <svg
             width="48"
             height="48"
