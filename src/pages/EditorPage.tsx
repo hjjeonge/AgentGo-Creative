@@ -12,12 +12,10 @@ export const EditorPage: React.FC = () => {
     canvasRef,
     handleAddText,
     handleGenerate,
-    handleNewProject,
     handleRestore,
     handleUpdateTextObject,
     handleUpload,
     handleWorkHistory,
-    hasCanvasImage,
     history,
     isGenerating,
     isHistoryOpen,
@@ -28,9 +26,6 @@ export const EditorPage: React.FC = () => {
   return (
     <div className="h-full w-full flex relative">
       <Aside
-        hasImage={hasCanvasImage}
-        onUpload={handleUpload}
-        onNewProject={handleNewProject}
         onAddText={handleAddText}
         selectedTextObject={selectedTextObject}
         handleUpdateTextObject={handleUpdateTextObject}
@@ -38,6 +33,7 @@ export const EditorPage: React.FC = () => {
       <Canvas
         ref={canvasRef}
         onGenerate={handleGenerate}
+        onUploadImage={handleUpload}
         breadcrumbLabel={breadcrumbLabel}
         breadcrumbPath={breadcrumbPath}
         onSelectedTextObjectChange={setSelectedTextObject}

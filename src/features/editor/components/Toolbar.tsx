@@ -25,6 +25,7 @@ import { ToolButton } from './ToolButton';
 interface Props {
   activeTool: string;
   onToolChange: (tool: string) => void;
+  onUploadImage?: (url: string) => void;
   penStrokeWidth: number;
   handlePenStrokeWidth: (value: number) => void;
   penStrokeColor: string;
@@ -38,6 +39,7 @@ interface Props {
 export const Toolbar: React.FC<Props> = ({
   activeTool,
   onToolChange,
+  onUploadImage,
   penStrokeWidth,
   handlePenStrokeWidth,
   penStrokeColor,
@@ -49,6 +51,7 @@ export const Toolbar: React.FC<Props> = ({
 }) => {
   const toolbarRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isToolPopupOpen, setIsToolPopupOpen] = useState(false);
   const [colorPopupMode, setColorPopupMode] = useState<
     'picker' | 'palette' | null
@@ -92,6 +95,7 @@ export const Toolbar: React.FC<Props> = ({
   ];
   const penStrokeWidths = [2, 3, 5, 6];
   const displayColors = ['#E7000B', '#155DFC', '#FFD230', 'empty'];
+  const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
   const onClickColorOption = (value: string) => {
     if (value === 'empty') {
@@ -101,7 +105,27 @@ export const Toolbar: React.FC<Props> = ({
     handlePenStrokeColor(value);
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!allowedImageTypes.includes(file.type)) {
+      window.alert('jpg, jpeg, png, webp 파일만 업로드 가능합니다.');
+      e.target.value = '';
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    onUploadImage?.(url);
+    e.target.value = '';
+  };
+
   const handleToolClick = (tool: string) => {
+    if (tool === 'upload') {
+      fileInputRef.current?.click();
+      return;
+    }
+
     const hasPopup =
       tool === 'pen' ||
       tool === 'eraser' ||
@@ -118,6 +142,13 @@ export const Toolbar: React.FC<Props> = ({
 
   return (
     <div ref={toolbarRef} className="relative flex flex-col items-center">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={handleFileChange}
+      />
       <div className="flex items-center justify-center gap-2.5 px-3 py-1.5 bg-white rounded-md shadow-[0_6px_12px_-2px_rgba(50,56,62,0.08)]">
         {tools.map((el) => (
           <ToolButton

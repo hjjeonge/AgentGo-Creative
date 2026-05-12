@@ -31,6 +31,7 @@ import { Toolbar } from './Toolbar';
 
 interface Props {
   onGenerate?: (payload: PromptGeneratePayload) => Promise<void>;
+  onUploadImage?: (url: string) => void;
   breadcrumbLabel?: string | null;
   breadcrumbPath?: string | null;
   onSelectedTextObjectChange?: (textObject?: TextObject) => void;
@@ -41,6 +42,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
   (
     {
       onGenerate,
+      onUploadImage,
       breadcrumbLabel,
       breadcrumbPath,
       onSelectedTextObjectChange,
@@ -388,6 +390,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
               <Toolbar
                 activeTool={activeTool}
                 onToolChange={handleToolChange}
+                onUploadImage={onUploadImage}
                 penStrokeWidth={penStrokeWidth}
                 handlePenStrokeWidth={handlePenStrokeWidth}
                 penStrokeColor={penStrokeColor}
