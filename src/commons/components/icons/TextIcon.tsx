@@ -4,13 +4,13 @@ export const TextIcon: React.FC = () => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="30"
-      height="27"
-      viewBox="0 0 34 27"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
       fill="none"
     >
       <path
-        d="M20 26.6667V5H11.6667V0H33.3333V5H25V26.6667H20ZM5 26.6667V13.3333H0V8.33333H15V13.3333H10V26.6667H5Z"
+        d="M7 20V7H2V4H15V7H10V20H7ZM16 20V12H13V9H22V12H19V20H16Z"
         fill="currentColor"
       />
     </svg>
