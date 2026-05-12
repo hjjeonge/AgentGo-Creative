@@ -58,7 +58,7 @@ export const CanvasStageSection: React.FC<CanvasStageSectionProps> = ({
   return (
     <>
       {hasBaseImage ? (
-        <div className="flex-1 relative w-full shrink-0 flex items-center justify-center border border-[#E2E8F0] bg-[#F8FAFC] rounded-md shadow-[0_2px_4px_0px_rgba(50,56,62,0.08)]">
+        <div className="relative flex w-full min-h-0 flex-1 items-center justify-center overflow-hidden rounded-md border border-[#E2E8F0] bg-[#F8FAFC] shadow-[0_2px_4px_0px_rgba(50,56,62,0.08)]">
           {toolbar ? (
             <div className="absolute left-1/2 top-4 z-20 -translate-x-1/2">
               {toolbar}
@@ -93,7 +93,7 @@ export const CanvasStageSection: React.FC<CanvasStageSectionProps> = ({
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex select-none flex-col items-center justify-center gap-4 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] text-[#E2E8F0]">
+        <div className="flex min-h-0 flex-1 select-none flex-col items-center justify-center gap-4 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] text-[#E2E8F0]">
           <input
             ref={fileInputRef}
             type="file"

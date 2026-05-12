@@ -12,10 +12,12 @@ export const CanvasLayout: React.FC<CanvasLayoutProps> = ({
   stage,
 }) => {
   return (
-    <section className="h-full flex-1 min-w-0 bg-white relative flex flex-col px-8 pt-3">
+    <section className="relative flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-white px-8 pt-3">
       {header}
       {stage}
-      <div className="flex items-center justify-center h-30">{prompt}</div>
+      <div className="flex shrink-0 items-center justify-center py-4">
+        {prompt}
+      </div>
     </section>
   );
 };

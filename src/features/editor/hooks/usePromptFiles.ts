@@ -33,7 +33,7 @@ export const usePromptFiles = () => {
 
   const isMaxImages = images.length >= PROMPT_MAX_REFERENCE_IMAGES;
   const previewSize = useMemo(
-    () => (images.length <= 1 ? 100 : 55),
+    () => (images.length <= 1 ? 80 : 56),
     [images.length],
   );
 

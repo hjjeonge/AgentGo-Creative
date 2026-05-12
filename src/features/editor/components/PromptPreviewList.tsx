@@ -1,6 +1,7 @@
 import type React from 'react';
+import { Trash2 } from 'lucide-react';
 
-import Close from '@/assets/close-line.svg';
+import { IconButton } from '@/commons/components/IconButton';
 
 interface PromptPreviewListProps {
   images: { url: string }[];
@@ -16,11 +17,11 @@ export const PromptPreviewList: React.FC<PromptPreviewListProps> = ({
   if (images.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-[8px] flex-wrap">
+    <div className="flex items-center gap-1 flex-wrap">
       {images.map((image, index) => (
         <div
           key={`${image.url}-${index}`}
-          className="relative rounded-[8px] overflow-hidden"
+          className="group relative rounded-[8px] overflow-hidden"
           style={{ width: previewSize, height: previewSize }}
         >
           <img
@@ -28,12 +29,13 @@ export const PromptPreviewList: React.FC<PromptPreviewListProps> = ({
             className="w-full h-full object-cover"
             alt="preview"
           />
-          <button
+          <IconButton
+            variant="neutral-outlined"
             onClick={() => onRemoveImage(index)}
-            className="absolute top-[4px] right-[4px] w-[16px] h-[16px] bg-black/60 rounded-full flex items-center justify-center"
+            className="absolute top-[4px] right-[4px] opacity-0 transition-opacity group-hover:opacity-100"
           >
-            <img src={Close} className="w-[10px] h-[10px]" alt="close" />
-          </button>
+            <Trash2 size={18} />
+          </IconButton>
         </div>
       ))}
     </div>

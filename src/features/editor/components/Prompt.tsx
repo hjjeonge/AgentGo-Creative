@@ -1,7 +1,8 @@
 import type React from 'react';
-import { useState } from 'react';
-import { ArrowUp } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { ArrowUp, Paperclip } from 'lucide-react';
 
+import { Button } from '@/commons/components/Button';
 import { IconButton } from '@/commons/components/IconButton';
 import { PROMPT_MAX_REFERENCE_IMAGES } from '@/features/editor/constants/prompt';
 import { usePromptFiles } from '@/features/editor/hooks/usePromptFiles';
@@ -18,6 +19,7 @@ export const Prompt: React.FC<Props> = ({
   onGenerate,
   isSubmitting = false,
 }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [prompt, setPrompt] = useState('');
   const {
     clearImages,
@@ -60,44 +62,45 @@ export const Prompt: React.FC<Props> = ({
   };
 
   return (
-    <div className="z-[40] w-full max-w-[768px] bg-white border border-[#155DFC] rounded-[8px] p-[10px_8px] flex flex-col gap-[12px] shadow-[0_20px_24px_-4px_rgba(50,56,62,0.08)]">
+    <div className="z-[40] w-full max-w-[768px] bg-white border border-[#155DFC] rounded-[8px] px-2.5 py-2 flex flex-col gap-4 shadow-[0_20px_24px_-4px_rgba(50,56,62,0.08)]">
       <PromptPreviewList
         images={images}
         onRemoveImage={handleRemoveImage}
         previewSize={previewSize}
       />
-      <div className="flex flex-col gap-[16px]">
+      <div className="flex flex-col gap-4">
         <textarea
           value={prompt}
           onChange={handlePromptChange}
           onKeyDown={handleKeyDown}
-          placeholder="AgentGo에게 물어보세요."
+          placeholder="무엇이든 물어보고 만들어보세요."
           disabled={isSubmitting}
-          className="w-full rounded-[8px] p-[10px] text-[14px] leading-[20px] max-h-[150px] overflow-y-auto resize-none outline-none"
+          className="w-full text-md max-h-[150px] overflow-y-auto resize-none outline-none text-text-primary"
           rows={1}
         />
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-[6px]">
-            <label
-              className={`text-sm rounded-xs border px-3 py-0.5 transition-colors font-bold ${
-                isMaxImages
-                  ? 'text-[#90A1B9] border-[#CAD5E2] cursor-not-allowed'
-                  : 'text-[#1D293D] border-border-neutral hover:bg-[#F8FAFF] cursor-pointer'
-              }`}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+              multiple
+              className="hidden"
+              disabled={isMaxImages || isSubmitting}
+              onChange={(e) => {
+                handleFiles(e.target.files);
+                e.currentTarget.value = '';
+              }}
+            />
+            <Button
+              variant="neutral-outlined"
+              size="sm"
+              startDecorator={<Paperclip size={18} />}
+              disabled={isMaxImages || isSubmitting}
+              onClick={() => fileInputRef.current?.click()}
             >
-              <input
-                type="file"
-                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                multiple
-                className="hidden"
-                disabled={isMaxImages || isSubmitting}
-                onChange={(e) => {
-                  handleFiles(e.target.files);
-                  e.currentTarget.value = '';
-                }}
-              />
               레퍼런스 첨부
-            </label>
+            </Button>
             {!!images.length && (
               <span
                 className={`text-[12px] ${

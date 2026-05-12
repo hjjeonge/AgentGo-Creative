@@ -20,7 +20,7 @@ export const EditorPage: React.FC = () => {
   } = useEditorPage();
 
   return (
-    <div className="h-full w-full flex relative">
+    <div className="relative flex h-full w-full min-h-0 overflow-hidden">
       <Canvas
         ref={canvasRef}
         onGenerate={handleGenerate}
