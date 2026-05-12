@@ -2,7 +2,7 @@ import type React from 'react';
 import { X } from 'lucide-react';
 
 import { IconButton } from '@/commons/components/IconButton';
-import { HistoryIcon } from '@/commons/components/icons/HistoryIcon';
+import { HistoryFillIcon } from '@/commons/components/icons/HistoryFillIcon';
 import type { HistoryItemRes } from '@/features/project/types';
 
 import { HistoryItem } from './HistoryItem';
@@ -54,7 +54,7 @@ export const HistoryPanel: React.FC<Props> = ({
           onClick={handleWorkHistory}
           className="absolute right-0 top-[12px] w-[57px] pl-4 h-8 border border-border-neutral border-r-0 rounded-[40px] rounded-r-none bg-white shadow-md hover:bg-[#E2E8F0]"
         >
-          <HistoryIcon />
+          <HistoryFillIcon />
         </button>
       )}
     </>

@@ -43,7 +43,7 @@ export const useEditorPage = () => {
   const breadcrumbLabel = searchParams.get('templateName');
   const breadcrumbPath = searchParams.get('templatePath');
 
-  const [isHistoryOpen, setIsHistoryOpen] = useState(true);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [history, setHistory] = useState<HistoryItemRes[]>([]);
   const [hasCanvasImage, setHasCanvasImage] = useState(false);
   const [projectTitle, setProjectTitle] = useState('새 프로젝트');

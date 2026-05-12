@@ -1,5 +1,7 @@
 import type React from 'react';
 
+import { IconButton } from '@/commons/components/IconButton';
+
 interface Props {
   toolName: string;
   onToolChange: (tool: string) => void;
@@ -18,16 +20,17 @@ export const ToolButton: React.FC<Props> = ({
   activeTool,
 }: Props) => {
   return (
-    <button
-      title={label}
-      onClick={onClick || (() => onToolChange(toolName))}
-      className={`w-[45px] h-[45px] p-[5px] flex items-center justify-center ${
-        activeTool === toolName
-          ? 'border border-[#1447E6] bg-[#EFF6FF] text-[#155DFC] rounded-[6px]'
-          : 'hover:bg-gray-100 rounded-[6px]'
-      }`}
-    >
-      {icon}
-    </button>
+    <>
+      <IconButton
+        onClick={onClick || (() => onToolChange(toolName))}
+        variant="neutral-outlined"
+        className={`${activeTool === toolName ? '!bg-[#cad5e2]' : ''}`}
+      >
+        {icon}
+      </IconButton>
+      {(label === 'mouse' || label === 'crop' || label === 'eraser') && (
+        <div className="w-[1px] h-6 bg-[#CAD5E2]" />
+      )}
+    </>
   );
 };

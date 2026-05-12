@@ -1,17 +1,23 @@
-import { useEffect, useRef, useState } from 'react';
 import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 
+import { Button } from '@/commons/components/Button';
 import { ColorPalette } from '@/commons/components/ColorPalette';
 import { ColorPickerPopup } from '@/commons/components/ColorPickerPopup';
+import { ChangeIcon } from '@/commons/components/icons/ChangeIcon';
 import { ClickIcon } from '@/commons/components/icons/ClickIcon';
-import { DiagramIcon } from '@/commons/components/icons/DiagramIcon';
+import { CropIcon } from '@/commons/components/icons/CropIcon';
 import { EraserIcon } from '@/commons/components/icons/EraserIcon';
 import { LassoIcon } from '@/commons/components/icons/LassoIcon';
 import { PencilIcon } from '@/commons/components/icons/PencilIcon';
 import { ShapeIcon } from '@/commons/components/icons/ShapeIcon';
+import { TextIcon } from '@/commons/components/icons/TextIcon';
+import { UploadIcon } from '@/commons/components/icons/UploadIcon';
 import { getPenColorImg, getPenStrokeWidthImg } from '@/commons/utils/getImage';
 import { useColorHistoryStore } from '@/features/editor/store/colorHistoryStore';
 
+import { AiEffectPopover } from './AiEffectPopover';
 import { DiagramPopup } from './DiagramPopup';
 import { ToolbarButton } from './ToolbarButton';
 import { ToolButton } from './ToolButton';
@@ -77,10 +83,12 @@ export const Toolbar: React.FC<Props> = ({
 
   const tools = [
     { tool: 'mouse', icon: <ClickIcon /> },
+    { tool: 'change', icon: <ChangeIcon /> },
+    { tool: 'crop', icon: <CropIcon /> },
+    { tool: 'text', icon: <TextIcon /> },
+    { tool: 'upload', icon: <UploadIcon /> },
     { tool: 'pen', icon: <PencilIcon /> },
     { tool: 'eraser', icon: <EraserIcon /> },
-    { tool: 'diagram', icon: <DiagramIcon /> },
-    { tool: 'shape', icon: <ShapeIcon /> },
   ];
   const penStrokeWidths = [2, 3, 5, 6];
   const displayColors = ['#E7000B', '#155DFC', '#FFD230', 'empty'];
@@ -110,7 +118,7 @@ export const Toolbar: React.FC<Props> = ({
 
   return (
     <div ref={toolbarRef} className="relative flex flex-col items-center">
-      <div className="flex items-center justify-center gap-[8px] w-[584px] p-[8px] bg-white rounded-[24px] border border-[#90A1B9] shadow-md">
+      <div className="flex items-center justify-center gap-2.5 px-3 py-1.5 bg-white rounded-md shadow-[0_6px_12px_-2px_rgba(50,56,62,0.08)]">
         {tools.map((el) => (
           <ToolButton
             key={el.tool}
@@ -122,6 +130,15 @@ export const Toolbar: React.FC<Props> = ({
             onClick={() => handleToolClick(el.tool)}
           />
         ))}
+        <AiEffectPopover>
+          <Button
+            variant="neutral-outlined"
+            endDecorator={<ChevronDown size={18} />}
+            size="sm"
+          >
+            Ai 요소
+          </Button>
+        </AiEffectPopover>
       </div>
 
       {/* 하단 서브 바 - absolute 로 캔버스 영역에 영향 없이 표시 */}
