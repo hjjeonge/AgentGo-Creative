@@ -73,10 +73,7 @@ export const Toolbar: React.FC<Props> = ({
 
   useEffect(() => {
     const hasToolPopup =
-      activeTool === 'pen' ||
-      activeTool === 'eraser' ||
-      activeTool === 'shape' ||
-      activeTool === 'diagram';
+      activeTool === 'pen' || activeTool === 'eraser' || activeTool === 'crop';
 
     setIsToolPopupOpen(hasToolPopup);
     if (activeTool !== 'pen') {
@@ -126,11 +123,7 @@ export const Toolbar: React.FC<Props> = ({
       return;
     }
 
-    const hasPopup =
-      tool === 'pen' ||
-      tool === 'eraser' ||
-      tool === 'shape' ||
-      tool === 'diagram';
+    const hasPopup = tool === 'pen' || tool === 'eraser' || tool === 'crop';
 
     if (tool === activeTool) {
       if (hasPopup) setIsToolPopupOpen(true);
@@ -235,7 +228,7 @@ export const Toolbar: React.FC<Props> = ({
           )}
         </div>
       )}
-      {isToolPopupOpen && activeTool === 'shape' && (
+      {isToolPopupOpen && activeTool === 'crop' && (
         <div className="absolute top-full mt-[7px] z-20 flex items-center gap-[6px] border border-[#90A1B9] p-[6px_10px] rounded-[6px] bg-[#F1F5F9]">
           <button
             onClick={() => setShapeSelectMode('rect')}

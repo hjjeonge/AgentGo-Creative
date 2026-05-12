@@ -271,7 +271,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     }, [baseImageElement, setStageSize]);
 
     const handleMouseDown = (e: any) => {
-      if (activeTool === 'shape') {
+      if (activeTool === 'crop') {
         const pos = e.target.getStage().getRelativePointerPosition();
         setSelectedId(null);
         setSelectedIds([]);
@@ -297,7 +297,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     };
 
     const handleMouseMove = (e: any) => {
-      if (activeTool === 'shape') {
+      if (activeTool === 'crop') {
         const pos = e.target.getStage().getRelativePointerPosition();
         if (shapeSelectMode === 'rect' && selectionStartRef.current) {
           const start = selectionStartRef.current;
@@ -319,7 +319,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     };
 
     const handleMouseUp = (e: any) => {
-      if (activeTool === 'shape') {
+      if (activeTool === 'crop') {
         if (shapeSelectMode === 'rect' && selectionStartRef.current) {
           const start = selectionStartRef.current;
           const pos = e?.target?.getStage()?.getRelativePointerPosition?.() as {
