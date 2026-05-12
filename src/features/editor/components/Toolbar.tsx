@@ -29,6 +29,7 @@ interface Props {
   activeTool: string;
   onToolChange: (tool: string) => void;
   onUploadImage?: (url: string) => void;
+  onChangeImage?: (url: string) => void;
   selectedTextObject?: TextObject;
   handleUpdateTextObject?: (id: string, updates: Partial<TextObject>) => void;
   penStrokeWidth: number;
@@ -45,6 +46,7 @@ export const Toolbar: React.FC<Props> = ({
   activeTool,
   onToolChange,
   onUploadImage,
+  onChangeImage,
   selectedTextObject,
   handleUpdateTextObject,
   penStrokeWidth,
@@ -59,6 +61,7 @@ export const Toolbar: React.FC<Props> = ({
   const toolbarRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const changeInputRef = useRef<HTMLInputElement>(null);
   const {
     colorPopupMode,
     hasPopup,
@@ -85,7 +88,10 @@ export const Toolbar: React.FC<Props> = ({
     handlePenStrokeColor(value);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    onSelectImage?: (url: string) => void,
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -100,13 +106,18 @@ export const Toolbar: React.FC<Props> = ({
     }
 
     const url = URL.createObjectURL(file);
-    onUploadImage?.(url);
+    onSelectImage?.(url);
     e.target.value = '';
   };
 
   const handleToolClick = (tool: string) => {
     if (tool === 'upload') {
       fileInputRef.current?.click();
+      return;
+    }
+
+    if (tool === 'change') {
+      changeInputRef.current?.click();
       return;
     }
 
@@ -125,7 +136,14 @@ export const Toolbar: React.FC<Props> = ({
         type="file"
         accept="image/jpeg,image/png,image/webp"
         className="hidden"
-        onChange={handleFileChange}
+        onChange={(e) => handleFileChange(e, onUploadImage)}
+      />
+      <input
+        ref={changeInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={(e) => handleFileChange(e, onChangeImage)}
       />
       <div className="flex items-center justify-center gap-2.5 px-3 py-1.5 bg-white rounded-md shadow-[0_6px_12px_-2px_rgba(50,56,62,0.08)]">
         {TOOLBAR_ITEMS.map((item) => (

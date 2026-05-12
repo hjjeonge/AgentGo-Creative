@@ -9,6 +9,7 @@ export const EditorPage: React.FC = () => {
     breadcrumbLabel,
     breadcrumbPath,
     canvasRef,
+    handleChangeImage,
     handleGenerate,
     handleRestore,
     handleUpload,
@@ -23,6 +24,7 @@ export const EditorPage: React.FC = () => {
       <Canvas
         ref={canvasRef}
         onGenerate={handleGenerate}
+        onChangeImage={handleChangeImage}
         onUploadImage={handleUpload}
         breadcrumbLabel={breadcrumbLabel}
         breadcrumbPath={breadcrumbPath}

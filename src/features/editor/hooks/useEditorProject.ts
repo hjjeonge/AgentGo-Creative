@@ -90,6 +90,11 @@ export const useEditorProject = ({
     setHasCanvasImage(true);
   };
 
+  const replaceProjectImage = (url: string) => {
+    canvasRef.current?.replaceBackgroundImage(url);
+    setHasCanvasImage(true);
+  };
+
   const clearProjectCanvas = () => {
     canvasRef.current?.clearCanvas();
     setHasCanvasImage(false);
@@ -103,6 +108,7 @@ export const useEditorProject = ({
     applyUploadedImage,
     clearProjectCanvas,
     getCanvasSnapshot,
+    replaceProjectImage,
     restoreGeneratedImage,
     restoreHistorySnapshot,
   };

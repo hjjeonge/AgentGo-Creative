@@ -4,6 +4,7 @@ import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import { loadGoogleFont } from '@/commons/utils/fontLoader';
 import type {
   CanvasElement,
+  ImageElement,
   CanvasSnapshot,
   TextObject,
 } from '@/features/editor/types';
@@ -369,6 +370,68 @@ export const useCanvasEditorActions = ({
     ],
   );
 
+  const replaceBackgroundImage = useCallback(
+    (url: string) => {
+      const existingBaseImage = elementsRef.current.find(
+        (element) => element.kind === 'image',
+      );
+
+      if (!existingBaseImage || existingBaseImage.kind !== 'image') {
+        setBackgroundImage(url);
+        return;
+      }
+
+      pushUndo();
+      const image = new window.Image();
+      image.crossOrigin = 'anonymous';
+      image.onload = () => {
+        const naturalWidth = Math.max(1, image.naturalWidth || image.width);
+        const naturalHeight = Math.max(1, image.naturalHeight || image.height);
+
+        backgroundImageRef.current = url;
+        setBackgroundImageState(url);
+        updateElements((prev) =>
+          prev.map((element) => {
+            if (
+              element.kind !== 'image' ||
+              element.id !== existingBaseImage.id
+            ) {
+              return element;
+            }
+
+            const nextImage: ImageElement = {
+              ...element,
+              imageUrl: url,
+              sourceWidth: naturalWidth,
+              sourceHeight: naturalHeight,
+              cropX: 0,
+              cropY: 0,
+              cropWidth: naturalWidth,
+              cropHeight: naturalHeight,
+            };
+
+            return nextImage;
+          }),
+        );
+        setSelectedId(existingBaseImage.id);
+        setSelectedIds([]);
+        setActiveTool('mouse');
+      };
+      image.src = url;
+    },
+    [
+      backgroundImageRef,
+      elementsRef,
+      pushUndo,
+      setActiveTool,
+      setBackgroundImage,
+      setBackgroundImageState,
+      setSelectedId,
+      setSelectedIds,
+      updateElements,
+    ],
+  );
+
   const restoreSnapshot = useCallback(
     (snapshot: CanvasSnapshot) => {
       const uploadedImage = snapshot.elements.find(
@@ -427,6 +490,7 @@ export const useCanvasEditorActions = ({
     handleUpdateTextObject,
     resetSelectionState,
     restoreSnapshot,
+    replaceBackgroundImage,
     setBackgroundImage,
     setPenStrokeColor,
     setPenStrokeWidth,

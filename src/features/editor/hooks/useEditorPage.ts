@@ -41,6 +41,7 @@ export const useEditorPage = () => {
     applyUploadedImage,
     clearProjectCanvas,
     getCanvasSnapshot,
+    replaceProjectImage,
     restoreGeneratedImage,
     restoreHistorySnapshot,
   } = useEditorProject({
@@ -110,6 +111,7 @@ export const useEditorPage = () => {
     handleNewProject: startNewProject,
     handleRestore: restoreHistorySnapshot,
     handleUpdateTextObject,
+    handleChangeImage: replaceProjectImage,
     handleUpload: applyUploadedImage,
     handleWorkHistory: toggleHistoryPanel,
     hasCanvasImage,
