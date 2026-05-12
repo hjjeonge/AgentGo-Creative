@@ -1,0 +1,348 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
+
+import { uploadFile } from '@/features/editor/api/file';
+import { useEditorGenerate } from '@/features/editor/hooks/useEditorGenerate';
+import type {
+  CanvasHandle,
+  CanvasSnapshot,
+  TextObject,
+} from '@/features/editor/types';
+import {
+  partitionCanvasElements,
+  toCanvasElements,
+} from '@/features/editor/utils/elementAdapters';
+import {
+  useProjectDetailQuery,
+  useProjectHistoryQuery,
+} from '@/features/project/queries';
+import type { HistoryItemRes } from '@/features/project/types';
+import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
+
+const MAX_HISTORY = 20;
+
+const getHistoryTimestamp = () => {
+  return new Date().toLocaleString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+};
+
+export const useEditorPage = () => {
+  const location = useLocation();
+  const { projectId = '' } = useParams();
+  const searchParams = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search],
+  );
+  const breadcrumbLabel = searchParams.get('templateName');
+  const breadcrumbPath = searchParams.get('templatePath');
+
+  const [isHistoryOpen, setIsHistoryOpen] = useState(true);
+  const [history, setHistory] = useState<HistoryItemRes[]>([]);
+  const [hasCanvasImage, setHasCanvasImage] = useState(false);
+  const [projectTitle, setProjectTitle] = useState('새 프로젝트');
+  const [selectedTextObject, setSelectedTextObject] = useState<
+    TextObject | undefined
+  >(undefined);
+
+  const canvasRef = useRef<CanvasHandle | null>(null);
+  const lastImageRef = useRef<string | null>(null);
+
+  const normalizeSnapshotForRender = useCallback(
+    (
+      snapshot: CanvasSnapshot,
+      fallbackImageUrl?: string | null,
+    ): CanvasSnapshot => {
+      const legacyCollections = partitionCanvasElements(snapshot.elements);
+      const normalizedFallback = resolveImageUrl(fallbackImageUrl);
+      const normalize = (url: string | null | undefined): string | null => {
+        if (!url) return null;
+        if (url.startsWith('blob:')) return normalizedFallback || null;
+        return resolveImageUrl(url);
+      };
+
+      const normalizedBackground = normalize(snapshot.backgroundImage);
+      const normalizedShapes = legacyCollections.shapes.map((shape) => {
+        if (shape.type !== 'uploaded_image') return shape;
+        return {
+          ...shape,
+          imageUrl: normalize(shape.imageUrl) || undefined,
+        };
+      });
+      const shapeBackground =
+        normalizedShapes.find(
+          (shape) => shape.type === 'uploaded_image' && shape.imageUrl,
+        )?.imageUrl || null;
+
+      return {
+        backgroundImage: normalizedBackground || shapeBackground,
+        elements: toCanvasElements({
+          lines: legacyCollections.lines,
+          shapes: normalizedShapes,
+          texts: legacyCollections.texts,
+        }),
+      };
+    },
+    [],
+  );
+
+  const snapshotHasImage = useCallback((snapshot: CanvasSnapshot) => {
+    return (
+      snapshot.backgroundImage !== null ||
+      partitionCanvasElements(snapshot.elements).shapes.some(
+        (shape) => shape.type === 'uploaded_image' && !!shape.imageUrl,
+      )
+    );
+  }, []);
+
+  const projectDetailQuery = useProjectDetailQuery(projectId);
+  const projectHistoryQuery = useProjectHistoryQuery(projectId);
+
+  const syncHistory = useCallback(
+    (entries: HistoryItemRes[], fallbackImageUrl?: string | null) => {
+      setHistory(
+        entries.map((entry) => ({
+          ...entry,
+          snapshot: normalizeSnapshotForRender(
+            entry.snapshot,
+            fallbackImageUrl,
+          ),
+        })),
+      );
+    },
+    [normalizeSnapshotForRender],
+  );
+
+  useEffect(() => {
+    if (!projectDetailQuery.data) return;
+
+    const thumbnailUrl = projectDetailQuery.data.thumbnail_url || null;
+    setProjectTitle(projectDetailQuery.data.title || '새 프로젝트');
+
+    const snapshot = projectDetailQuery.data.snapshot;
+    if (snapshot) {
+      const normalized = normalizeSnapshotForRender(snapshot, thumbnailUrl);
+      canvasRef.current?.restoreSnapshot(normalized);
+      setHasCanvasImage(snapshotHasImage(normalized));
+      return;
+    }
+
+    const normalizedThumbnail = resolveImageUrl(thumbnailUrl);
+    if (normalizedThumbnail) {
+      canvasRef.current?.restoreSnapshot({
+        backgroundImage: normalizedThumbnail,
+        elements: [],
+      });
+      setHasCanvasImage(true);
+      return;
+    }
+
+    setHasCanvasImage(false);
+  }, [normalizeSnapshotForRender, projectDetailQuery.data, snapshotHasImage]);
+
+  useEffect(() => {
+    if (!projectHistoryQuery.data) return;
+    syncHistory(
+      projectHistoryQuery.data,
+      projectDetailQuery.data?.thumbnail_url || null,
+    );
+  }, [
+    projectDetailQuery.data?.thumbnail_url,
+    projectHistoryQuery.data,
+    syncHistory,
+  ]);
+
+  useEffect(() => {
+    if (!projectDetailQuery.error && !projectHistoryQuery.error) return;
+    console.error(
+      'project load error ',
+      projectDetailQuery.error ?? projectHistoryQuery.error,
+    );
+  }, [projectDetailQuery.error, projectHistoryQuery.error]);
+
+  const handleWorkHistory = useCallback(() => {
+    setIsHistoryOpen((prev) => !prev);
+  }, []);
+
+  const handleUpload = useCallback((url: string) => {
+    canvasRef.current?.setBackgroundImage(url);
+    setHasCanvasImage(true);
+  }, []);
+
+  const handleNewProject = useCallback(() => {
+    const confirmed = window.confirm(
+      '현재 작업을 종료하고 새 프로젝트를 시작하시겠습니까?',
+    );
+    if (!confirmed) return;
+    canvasRef.current?.clearCanvas();
+    setHasCanvasImage(false);
+    setHistory([]);
+  }, []);
+
+  const handleAddText = useCallback(() => {
+    canvasRef.current?.addText();
+  }, []);
+
+  const handleUpdateTextObject = useCallback(
+    (id: string, updates: Partial<TextObject>) => {
+      canvasRef.current?.updateTextObject(id, updates);
+    },
+    [],
+  );
+
+  const addHistoryEntry = useCallback(
+    (
+      prompt: string,
+      snapshotOverride?: CanvasSnapshot,
+    ): { entryId: string; snapshot: CanvasSnapshot } | null => {
+      if (history.length >= MAX_HISTORY) {
+        window.alert(
+          `작업이력이 최대 ${MAX_HISTORY}개에 도달했습니다.\n기존 이력을 삭제 후 다시 시도해 주세요.`,
+        );
+        return null;
+      }
+
+      const snapshot = snapshotOverride ?? canvasRef.current?.getSnapshot();
+      if (!snapshot) return null;
+
+      const entryId = `history_${Date.now()}`;
+      const newEntry: HistoryItemRes = {
+        id: entryId,
+        title: prompt.length > 20 ? `${prompt.slice(0, 20)}…` : prompt,
+        timestamp: getHistoryTimestamp(),
+        snapshot,
+      };
+
+      setHistory((prev) => [newEntry, ...prev]);
+      return { entryId, snapshot };
+    },
+    [history.length],
+  );
+
+  const uploadBlobUrl = useCallback(
+    async (blobUrl: string, fileNamePrefix: string): Promise<string> => {
+      const blobRes = await fetch(blobUrl);
+      const blob = await blobRes.blob();
+      const file = new File([blob], `${fileNamePrefix}-${Date.now()}.png`, {
+        type: blob.type || 'image/png',
+      });
+      const uploaded = await uploadFile(file);
+      return uploaded.file_url;
+    },
+    [],
+  );
+
+  const persistSnapshotAssetUrls = useCallback(
+    async (snapshot: CanvasSnapshot): Promise<CanvasSnapshot> => {
+      const legacyCollections = partitionCanvasElements(snapshot.elements);
+      const urlCache = new Map<string, string>();
+
+      const persistUrl = async (
+        url: string | undefined,
+        fileNamePrefix: string,
+      ): Promise<string | undefined> => {
+        if (!url || !url.startsWith('blob:')) return url;
+
+        const cached = urlCache.get(url);
+        if (cached) return cached;
+
+        const uploadedUrl = await uploadBlobUrl(url, fileNamePrefix);
+        urlCache.set(url, uploadedUrl);
+        return uploadedUrl;
+      };
+
+      const nextBackgroundImage =
+        (await persistUrl(
+          snapshot.backgroundImage ?? undefined,
+          'snapshot-bg',
+        )) || null;
+
+      const nextShapes = await Promise.all(
+        legacyCollections.shapes.map(async (shape) => {
+          if (shape.type !== 'uploaded_image' || !shape.imageUrl) return shape;
+
+          const nextImageUrl = await persistUrl(
+            shape.imageUrl,
+            'snapshot-shape',
+          );
+          return nextImageUrl ? { ...shape, imageUrl: nextImageUrl } : shape;
+        }),
+      );
+
+      return {
+        backgroundImage: nextBackgroundImage,
+        elements: toCanvasElements({
+          lines: legacyCollections.lines,
+          shapes: nextShapes,
+          texts: legacyCollections.texts,
+        }),
+      };
+    },
+    [uploadBlobUrl],
+  );
+
+  const { isSubmitting: isGenerating, handleGenerate } = useEditorGenerate({
+    projectId,
+    projectTitle,
+    historyCount: history.length,
+    maxHistory: MAX_HISTORY,
+    canvasRef,
+    persistSnapshotAssetUrls,
+    refetchHistory: projectHistoryQuery.refetch,
+    setHasCanvasImage,
+  });
+
+  useEffect(() => {
+    const imageUrl = searchParams.get('image');
+    const prompt = searchParams.get('prompt') || '생성 중';
+
+    if (imageUrl && imageUrl !== lastImageRef.current) {
+      lastImageRef.current = imageUrl;
+      canvasRef.current?.clearCanvas();
+      canvasRef.current?.setBackgroundImage(imageUrl);
+      setHasCanvasImage(true);
+      addHistoryEntry(prompt);
+    }
+  }, [addHistoryEntry, searchParams]);
+
+  const handleRestore = useCallback(
+    (entry: HistoryItemRes) => {
+      const confirmed = window.confirm(
+        `"${entry.title}" 작업으로 돌아가시겠습니까?\n현재 작업 내용은 사라집니다.`,
+      );
+      if (!confirmed) return;
+
+      const normalizedSnapshot = normalizeSnapshotForRender(entry.snapshot);
+      canvasRef.current?.restoreSnapshot(normalizedSnapshot);
+      setHasCanvasImage(snapshotHasImage(normalizedSnapshot));
+    },
+    [normalizeSnapshotForRender, snapshotHasImage],
+  );
+
+  return {
+    breadcrumbLabel,
+    breadcrumbPath,
+    canvasRef,
+    handleAddText,
+    handleGenerate,
+    handleNewProject,
+    handleRestore,
+    handleUpdateTextObject,
+    handleUpload,
+    handleWorkHistory,
+    hasCanvasImage,
+    history,
+    isGenerating,
+    isHistoryOpen,
+    projectId,
+    projectTitle,
+    selectedTextObject,
+    setSelectedTextObject,
+  };
+};

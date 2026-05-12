@@ -1,7 +1,8 @@
 import type React from 'react';
+import { X } from 'lucide-react';
 
-import Arrow from '@/assets/arrow_down.svg';
-import Collapse from '@/assets/Collapse.svg';
+import { IconButton } from '@/commons/components/IconButton';
+import { HistoryIcon } from '@/commons/components/icons/HistoryIcon';
 import type { HistoryItemRes } from '@/features/project/types';
 
 import { HistoryItem } from './HistoryItem';
@@ -22,23 +23,25 @@ export const HistoryPanel: React.FC<Props> = ({
   return (
     <>
       {historyOpen ? (
-        <aside className="w-[280px] bg-[#fff]/ shrink-0 border-l border-[#569DFF]/20 py-[20px] flex flex-col gap-[24px]">
-          <div className="flex items-center justify-between px-[20px]">
-            <span className="text-[#9CA3AF] text-[12px] leading-[18px]">
-              작업이력 ({history.length}/20)
+        <aside className="absolute right-0 top-3 bottom-5 z-50 w-[280px] bg-white shrink-0 border border-border-neutral rounded-md border-r-0 rounded-r-none flex flex-col gap-3">
+          <div className="flex items-center justify-between px-4 py-2">
+            <span className="text-text-tertiary font-bold text-sm">
+              작업이력 ({history.length})
             </span>
-            <button
-              onClick={handleWorkHistory}
-              className="w-[28px] h-[28px] rounded-[6px] border border-[#569DFF]/20 bg-[#F8FAFF] flex items-center justify-center"
-            >
-              <img src={Collapse} />
-            </button>
+            <IconButton variant="primary-plain" onClick={handleWorkHistory}>
+              <X size={18} className="text-[#1D293D]" />
+            </IconButton>
           </div>
           <div className="flex flex-col gap-[8px] px-[12px] overflow-y-auto flex-1">
             {history.length === 0 ? (
-              <p className="text-[#94A3B8] text-[13px] text-center mt-[20px]">
-                아직 작업 이력이 없습니다.
-              </p>
+              <div className="flex flex-col gap-2 items-center text-text-tertiary text-sm text-center mt-12">
+                <p>작업 이력이 없습니다.</p>
+                <p>
+                  원하는 장면이나 스타일을
+                  <br />
+                  생성하세요.
+                </p>
+              </div>
             ) : (
               history.map((entry) => (
                 <HistoryItem key={entry.id} entry={entry} onClick={onRestore} />
@@ -49,9 +52,9 @@ export const HistoryPanel: React.FC<Props> = ({
       ) : (
         <button
           onClick={handleWorkHistory}
-          className="absolute right-0 top-[50%] p-[24px_7px] border border-[#62748E] border-[0.8px] border-r-0 rounded-[7px] rounded-r-none bg-[#F8FAFC] shadow-md"
+          className="absolute right-0 top-[12px] w-[57px] pl-4 h-8 border border-border-neutral border-r-0 rounded-[40px] rounded-r-none bg-white shadow-md hover:bg-[#E2E8F0]"
         >
-          <img src={Arrow} className="rotate-90" />
+          <HistoryIcon />
         </button>
       )}
     </>
