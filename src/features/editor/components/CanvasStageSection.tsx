@@ -1,4 +1,12 @@
+import { useRef } from 'react';
 import type React from 'react';
+
+import { Button } from '@/commons/components/Button';
+import { UploadCloudIcon } from '@/commons/components/icons/UploadCloudIcon';
+import {
+  TOOLBAR_ALLOWED_IMAGE_TYPES,
+  TOOLBAR_UPLOAD_ERROR_MESSAGE,
+} from '@/features/editor/constants/toolbar';
 
 interface BrushPreview {
   x: number;
@@ -11,6 +19,7 @@ interface CanvasStageSectionProps {
   brushPreview: BrushPreview;
   children: React.ReactNode;
   hasBaseImage: boolean;
+  onUploadImage?: (url: string) => void;
   stageContainerRef: React.RefObject<HTMLDivElement | null>;
   stageSize: { width: number; height: number };
   toolbar?: React.ReactNode;
@@ -20,63 +29,84 @@ export const CanvasStageSection: React.FC<CanvasStageSectionProps> = ({
   brushPreview,
   children,
   hasBaseImage,
+  onUploadImage,
   stageContainerRef,
   stageSize,
   toolbar,
 }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (
+      !TOOLBAR_ALLOWED_IMAGE_TYPES.includes(
+        file.type as (typeof TOOLBAR_ALLOWED_IMAGE_TYPES)[number],
+      )
+    ) {
+      window.alert(TOOLBAR_UPLOAD_ERROR_MESSAGE);
+      e.target.value = '';
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    onUploadImage?.(url);
+    e.target.value = '';
+  };
+
   return (
-    <div className="flex-1 relative w-full shrink-0 flex items-center justify-center border border-[#E2E8F0] bg-[#F8FAFC] rounded-md shadow-[0_2px_4px_0px_rgba(50,56,62,0.08)]">
-      {toolbar ? (
-        <div className="absolute left-1/2 top-4 z-20 -translate-x-1/2">
-          {toolbar}
-        </div>
-      ) : null}
-      {stageSize.width > 0 && stageSize.height > 0 && hasBaseImage ? (
-        <div
-          ref={stageContainerRef}
-          className="relative shrink-0 mb-[20px] mt-[84px]"
-          style={{
-            width: `${stageSize.width}px`,
-            height: `${stageSize.height}px`,
-          }}
-        >
-          {brushPreview.visible && (
-            <div
-              aria-hidden="true"
-              style={{
-                position: 'absolute',
-                left: brushPreview.x - brushPreview.size / 2,
-                top: brushPreview.y - brushPreview.size / 2,
-                width: brushPreview.size,
-                height: brushPreview.size,
-                borderRadius: '50%',
-                border: '1.5px solid rgba(21,93,252,0.9)',
-                boxShadow: '0 0 0 1px rgba(255,255,255,0.8)',
-                pointerEvents: 'none',
-                zIndex: 5,
-              }}
-            />
-          )}
-          {children}
+    <>
+      {hasBaseImage ? (
+        <div className="flex-1 relative w-full shrink-0 flex items-center justify-center border border-[#E2E8F0] bg-[#F8FAFC] rounded-md shadow-[0_2px_4px_0px_rgba(50,56,62,0.08)]">
+          {toolbar ? (
+            <div className="absolute left-1/2 top-4 z-20 -translate-x-1/2">
+              {toolbar}
+            </div>
+          ) : null}
+          <div
+            ref={stageContainerRef}
+            className="relative shrink-0 mb-[20px] mt-[84px]"
+            style={{
+              width: `${stageSize.width}px`,
+              height: `${stageSize.height}px`,
+            }}
+          >
+            {brushPreview.visible && (
+              <div
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  left: brushPreview.x - brushPreview.size / 2,
+                  top: brushPreview.y - brushPreview.size / 2,
+                  width: brushPreview.size,
+                  height: brushPreview.size,
+                  borderRadius: '50%',
+                  border: '1.5px solid rgba(21,93,252,0.9)',
+                  boxShadow: '0 0 0 1px rgba(255,255,255,0.8)',
+                  pointerEvents: 'none',
+                  zIndex: 5,
+                }}
+              />
+            )}
+            {children}
+          </div>
         </div>
       ) : (
-        <div className="mt-[84px] mb-[20px] flex h-[600px] w-[500px] select-none flex-col items-center justify-center gap-[8px] rounded-[12px] border border-[#CBD5E1] bg-white text-[#94A3B8]">
-          <svg
-            width="48"
-            height="48"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          >
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-            <path d="M3 9h18M9 21V9" />
-          </svg>
-          <span className="text-[14px]">
-            이미지를 업로드하거나 템플릿에서 생성해 주세요
-          </span>
+        <div className="flex-1 flex select-none flex-col items-center justify-center gap-4 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] text-[#E2E8F0]">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+          <UploadCloudIcon />
+          <Button onClick={() => fileInputRef.current?.click()}>
+            사진 업로드
+          </Button>
         </div>
       )}
-    </div>
+    </>
   );
 };

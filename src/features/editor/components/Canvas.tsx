@@ -388,6 +388,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           <CanvasStageSection
             brushPreview={brushPreview}
             hasBaseImage={hasBaseImage}
+            onUploadImage={onUploadImage}
             stageContainerRef={stageContainerRef}
             stageSize={stageSize}
             toolbar={
