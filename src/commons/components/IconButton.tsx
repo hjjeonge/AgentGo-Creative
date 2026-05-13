@@ -78,7 +78,6 @@ export const IconButton = ({
 
   return (
     <button
-      className={className}
       disabled={nativeDisabled}
       onBlur={(event) => {
         setPressed(false);
@@ -106,6 +105,7 @@ export const IconButton = ({
         onMouseUp?.(event);
       }}
       style={composedStyle}
+      className={className}
       type={type}
       {...props}
     >
