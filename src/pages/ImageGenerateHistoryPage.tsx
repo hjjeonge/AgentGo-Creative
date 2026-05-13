@@ -7,16 +7,19 @@ import { ListIcon } from '@/commons/components/icons/ListIcon';
 import type { ImageGenerationHistoryItem } from '@/features/history/api/type';
 import { DeletePopup } from '@/features/history/components/DeletePopup';
 import { GridList } from '@/features/history/components/GridList';
+import { Pagination } from '@/features/history/components/Pagination';
 import { Table } from '@/features/history/components/Table';
 import { imageGenerationHistoryMock } from '@/features/history/constants/mock';
 
 export const ImageGenerateHistoryPage: React.FC = () => {
   const [viewType, setViewType] = useState<'grid' | 'table'>('grid');
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedHistoryItem, setSelectedHistoryItem] =
     useState<ImageGenerationHistoryItem | null>(null);
 
   const handleViewType = (value: 'grid' | 'table') => {
     setViewType(value);
+    setCurrentPage(1);
   };
 
   const handleOpenDeletePopup = (item: ImageGenerationHistoryItem) => {
@@ -25,6 +28,37 @@ export const ImageGenerateHistoryPage: React.FC = () => {
 
   const handleCloseDeletePopup = () => {
     setSelectedHistoryItem(null);
+  };
+
+  const pageSize = viewType === 'grid' ? 12 : 10;
+  const totalPages = Math.max(
+    1,
+    Math.ceil(imageGenerationHistoryMock.length / pageSize),
+  );
+  const pageStartIndex = (currentPage - 1) * pageSize;
+  const paginatedHistoryList = imageGenerationHistoryMock.slice(
+    pageStartIndex,
+    pageStartIndex + pageSize,
+  );
+
+  const handleMoveFirstPage = () => {
+    setCurrentPage(1);
+  };
+
+  const handleMovePage = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleMovePreviousPage = () => {
+    setCurrentPage((prevPage) => Math.max(1, prevPage - 1));
+  };
+
+  const handleMoveNextPage = () => {
+    setCurrentPage((prevPage) => Math.min(totalPages, prevPage + 1));
+  };
+
+  const handleMoveLastPage = () => {
+    setCurrentPage(totalPages);
   };
 
   return (
@@ -53,15 +87,23 @@ export const ImageGenerateHistoryPage: React.FC = () => {
       <div>
         {viewType === 'grid' ? (
           <GridList
-            list={imageGenerationHistoryMock}
+            list={paginatedHistoryList}
             onRemove={handleOpenDeletePopup}
           />
         ) : (
-          <Table
-            list={imageGenerationHistoryMock}
-            onRemove={handleOpenDeletePopup}
-          />
+          <Table list={paginatedHistoryList} onRemove={handleOpenDeletePopup} />
         )}
+      </div>
+      <div className="mt-6">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onMovePage={handleMovePage}
+          onMoveFirstPage={handleMoveFirstPage}
+          onMovePreviousPage={handleMovePreviousPage}
+          onMoveNextPage={handleMoveNextPage}
+          onMoveLastPage={handleMoveLastPage}
+        />
       </div>
       {selectedHistoryItem ? (
         <DeletePopup
