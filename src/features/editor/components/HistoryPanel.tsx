@@ -1,7 +1,9 @@
+import { useEffect, useRef, useState } from 'react';
 import type React from 'react';
 import { X } from 'lucide-react';
 
 import { Button } from '@/commons/components/Button';
+import { CustomTooltip } from '@/commons/components/CustomTooltip';
 import { IconButton } from '@/commons/components/IconButton';
 import { HistoryFillIcon } from '@/commons/components/icons/HistoryFillIcon';
 import type { HistoryItemRes } from '@/features/project/types';
@@ -21,6 +23,42 @@ export const HistoryPanel: React.FC<Props> = ({
   history,
   onRestore,
 }) => {
+  const [isHistoryTooltipOpen, setIsHistoryTooltipOpen] = useState(false);
+  const [historyTooltipCount, setHistoryTooltipCount] = useState(0);
+  const prevHistoryLengthRef = useRef<number | null>(null);
+  const tooltipTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (prevHistoryLengthRef.current === null) {
+      prevHistoryLengthRef.current = history.length;
+      return;
+    }
+
+    if (history.length > prevHistoryLengthRef.current) {
+      setHistoryTooltipCount(history.length);
+      setIsHistoryTooltipOpen(true);
+
+      if (tooltipTimerRef.current) {
+        window.clearTimeout(tooltipTimerRef.current);
+      }
+
+      tooltipTimerRef.current = window.setTimeout(() => {
+        setIsHistoryTooltipOpen(false);
+        tooltipTimerRef.current = null;
+      }, 3000);
+    }
+
+    prevHistoryLengthRef.current = history.length;
+  }, [history.length]);
+
+  useEffect(() => {
+    return () => {
+      if (tooltipTimerRef.current) {
+        window.clearTimeout(tooltipTimerRef.current);
+      }
+    };
+  }, []);
+
   return (
     <>
       {historyOpen ? (
@@ -72,12 +110,21 @@ export const HistoryPanel: React.FC<Props> = ({
           </div>
         </aside>
       ) : (
-        <button
-          onClick={handleWorkHistory}
-          className="absolute right-0 top-[12px] w-[57px] pl-4 h-8 border border-border-neutral border-r-0 rounded-[40px] rounded-r-none bg-white shadow-md hover:bg-[#E2E8F0]"
+        <CustomTooltip
+          content={`작업 이력 ${historyTooltipCount}개가 누적되었습니다.`}
+          open={isHistoryTooltipOpen}
+          onOpenChange={setIsHistoryTooltipOpen}
+          side="bottom"
+          sideOffset={10}
+          contentClassName="text-lg"
         >
-          <HistoryFillIcon />
-        </button>
+          <button
+            onClick={handleWorkHistory}
+            className="absolute right-0 top-[12px] w-[57px] pl-4 h-8 border border-border-neutral border-r-0 rounded-[40px] rounded-r-none bg-white shadow-md hover:bg-[#E2E8F0]"
+          >
+            <HistoryFillIcon />
+          </button>
+        </CustomTooltip>
       )}
     </>
   );
