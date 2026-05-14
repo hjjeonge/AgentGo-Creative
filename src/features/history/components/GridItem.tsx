@@ -16,10 +16,7 @@ export const GridItem: React.FC<GridItemProps> = ({
 }: GridItemProps) => {
   return (
     <div className="flex flex-col gap-3.5 rounded-md border border-border-neutral relative group overflow-hidden">
-      <img
-        src={item.thumbnailUrl}
-        className="w-[421px] h-[214px] object-cover"
-      />
+      <img src={item.thumbnailUrl} className="w-full h-[214px] object-cover" />
       <div className="flex flex-col gap-1.5 p-4 pt-0">
         <span className="text-text-primary font-bold text-md">
           {item.title}
