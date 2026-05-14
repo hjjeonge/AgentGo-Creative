@@ -1,6 +1,7 @@
 import type React from 'react';
 import { X } from 'lucide-react';
 
+import { Button } from '@/commons/components/Button';
 import { IconButton } from '@/commons/components/IconButton';
 import { HistoryFillIcon } from '@/commons/components/icons/HistoryFillIcon';
 import type { HistoryItemRes } from '@/features/project/types';
@@ -43,9 +44,30 @@ export const HistoryPanel: React.FC<Props> = ({
                 </p>
               </div>
             ) : (
-              history.map((entry) => (
-                <HistoryItem key={entry.id} entry={entry} onClick={onRestore} />
-              ))
+              <div className="flex flex-col gap-4">
+                {history.length > 20 ? (
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-2 text-text-primary text-sm">
+                      <p>
+                        작업 이력이 최대 20개를 초과했습니다.
+                        <br />
+                        삭제 후 계속 진행해 주세요.
+                      </p>
+                      <Button variant="neutral-outlined" size="sm">
+                        전체 삭제
+                      </Button>
+                    </div>
+                    <div className="h-[1px] w-full bg-border-neutral" />
+                  </div>
+                ) : null}
+                {history.map((entry) => (
+                  <HistoryItem
+                    key={entry.id}
+                    entry={entry}
+                    onClick={onRestore}
+                  />
+                ))}
+              </div>
             )}
           </div>
         </aside>
