@@ -32,6 +32,7 @@ export const sidebarMenus: SidebarMenu[] = [
     Icon: HistoryIcon,
     label: '기록',
     to: '/history',
-    isActive: (pathname: string) => pathname === '/history',
+    isActive: (pathname: string) =>
+      pathname === '/history' || pathname.startsWith('/history/'),
   },
 ] as const;

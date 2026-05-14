@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 
 import {
@@ -18,12 +18,14 @@ import {
 export const useEditorPage = () => {
   const location = useLocation();
   const { projectId = '' } = useParams();
-  const searchParams = useMemo(
-    () => new URLSearchParams(location.search),
-    [location.search],
-  );
+  const searchParams = new URLSearchParams(location.search);
+  const isHistoryEditor = location.pathname.startsWith('/history/');
   const breadcrumbLabel = searchParams.get('templateName');
   const breadcrumbPath = searchParams.get('templatePath');
+  const historyId = searchParams.get('historyId');
+  const imageUrl = searchParams.get('image');
+  const prompt = searchParams.get('prompt') || '생성 중';
+  const lastRestoredHistoryIdRef = useRef<string | null>(null);
 
   const [hasCanvasImage, setHasCanvasImage] = useState(false);
   const [projectTitle, setProjectTitle] = useState(DEFAULT_PROJECT_TITLE);
@@ -39,6 +41,7 @@ export const useEditorPage = () => {
   const { persistSnapshotAssetUrls } = usePersistSnapshotAssets();
   const {
     applyUploadedImage,
+    applyHistorySnapshot,
     clearProjectCanvas,
     getCanvasSnapshot,
     replaceProjectImage,
@@ -92,19 +95,29 @@ export const useEditorPage = () => {
   });
 
   useEffect(() => {
-    const imageUrl = searchParams.get('image');
-    const prompt = searchParams.get('prompt') || '생성 중';
-
     if (imageUrl && imageUrl !== lastImageRef.current) {
       lastImageRef.current = imageUrl;
       restoreGeneratedImage(imageUrl);
       addHistoryEntry(prompt);
     }
-  }, [addHistoryEntry, restoreGeneratedImage, searchParams]);
+  }, [addHistoryEntry, imageUrl, prompt, restoreGeneratedImage]);
+
+  useEffect(() => {
+    if (!historyId || lastRestoredHistoryIdRef.current === historyId) return;
+
+    const matchedHistoryEntry = projectHistoryQuery.data?.find(
+      (entry) => entry.id === historyId,
+    );
+    if (!matchedHistoryEntry) return;
+
+    applyHistorySnapshot(matchedHistoryEntry);
+    lastRestoredHistoryIdRef.current = historyId;
+  }, [applyHistorySnapshot, historyId, projectHistoryQuery.data]);
 
   return {
-    breadcrumbLabel,
-    breadcrumbPath,
+    backPath: isHistoryEditor ? '/history' : '/',
+    breadcrumbLabel: isHistoryEditor ? '이미지 생성 기록' : breadcrumbLabel,
+    breadcrumbPath: isHistoryEditor ? '/history' : breadcrumbPath,
     canvasRef,
     handleAddText,
     handleGenerate,

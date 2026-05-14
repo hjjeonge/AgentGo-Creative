@@ -9,11 +9,6 @@ import { ImageGenerateHistoryPage } from '@/pages/ImageGenerateHistoryPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { TemplatePage } from '@/pages/TemplatePage';
 
-// const PrivateRoute: React.FC = () => {
-//   const token = getAccessToken();
-//   return token ? <Outlet /> : <Navigate to="/login" replace />;
-// };
-
 export const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
@@ -24,6 +19,7 @@ export const AppRouter: React.FC = () => {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/template" element={<TemplatePage />} />
           <Route path="/history" element={<ImageGenerateHistoryPage />} />
+          <Route path="/history/:projectId/edit" element={<EditorPage />} />
           <Route path="/editor/:projectId" element={<EditorPage />} />
           <Route path="/dam" element={<DAMPage />} />
         </Route>

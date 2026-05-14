@@ -8,6 +8,7 @@ export const EditorPage: React.FC = () => {
   const {
     breadcrumbLabel,
     breadcrumbPath,
+    backPath,
     canvasRef,
     handleChangeImage,
     handleGenerate,
@@ -28,6 +29,7 @@ export const EditorPage: React.FC = () => {
         onUploadImage={handleUpload}
         breadcrumbLabel={breadcrumbLabel}
         breadcrumbPath={breadcrumbPath}
+        backPath={backPath}
         isGenerating={isGenerating}
       />
       <HistoryPanel

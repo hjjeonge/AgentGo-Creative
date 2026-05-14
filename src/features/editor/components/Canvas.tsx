@@ -35,6 +35,7 @@ interface Props {
   onChangeImage?: (url: string) => void;
   breadcrumbLabel?: string | null;
   breadcrumbPath?: string | null;
+  backPath?: string;
   onSelectedTextObjectChange?: (textObject?: TextObject) => void;
   isGenerating?: boolean;
 }
@@ -47,6 +48,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       onChangeImage,
       breadcrumbLabel,
       breadcrumbPath,
+      backPath,
       onSelectedTextObjectChange,
       isGenerating = false,
     },
@@ -382,6 +384,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           <CanvasHeader
             breadcrumbLabel={breadcrumbLabel}
             breadcrumbPath={breadcrumbPath}
+            backPath={backPath}
           />
         }
         stage={

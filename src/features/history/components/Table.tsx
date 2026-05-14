@@ -8,9 +8,14 @@ import type { ImageGenerationHistoryItem } from '../api/type';
 interface TableProps {
   list: ImageGenerationHistoryItem[];
   onRemove: (item: ImageGenerationHistoryItem) => void;
+  onSelect: (item: ImageGenerationHistoryItem) => void;
 }
 
-export const Table: React.FC<TableProps> = ({ list, onRemove }: TableProps) => {
+export const Table: React.FC<TableProps> = ({
+  list,
+  onRemove,
+  onSelect,
+}: TableProps) => {
   return (
     <table className="border border-border-neutral w-full">
       <thead>
@@ -27,7 +32,8 @@ export const Table: React.FC<TableProps> = ({ list, onRemove }: TableProps) => {
         {list.map((el) => (
           <tr
             key={el.id}
-            className="border border-border-neutral text-[#1D293D]"
+            className="border border-border-neutral text-[#1D293D] cursor-pointer"
+            onClick={() => onSelect(el)}
           >
             <td className="px-2 py-1.5">{el.title}</td>
             <td className="px-2 py-1.5">{el.templateName ?? '--'}</td>
@@ -38,7 +44,10 @@ export const Table: React.FC<TableProps> = ({ list, onRemove }: TableProps) => {
               <Button
                 variant="neutral-outlined"
                 startDecorator={<Trash2 size={18} />}
-                onClick={() => onRemove(el)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onRemove(el);
+                }}
               >
                 삭제
               </Button>

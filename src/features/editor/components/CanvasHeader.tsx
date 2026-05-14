@@ -6,11 +6,13 @@ import { useNavigate } from 'react-router-dom';
 interface CanvasHeaderProps {
   breadcrumbLabel?: string | null;
   breadcrumbPath?: string | null;
+  backPath?: string;
 }
 
 export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
   breadcrumbLabel,
   breadcrumbPath,
+  backPath = '/',
 }) => {
   const navigate = useNavigate();
 
@@ -18,7 +20,7 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
     <>
       <div className="flex items-center gap-4">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate(backPath)}
           className="border border-border-neutral rounded-xs flex items-center justify-center p-2"
         >
           <ArrowLeft />
@@ -27,7 +29,7 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
           <span className="text-[#62748E]">홈</span>
           {breadcrumbLabel && breadcrumbPath ? (
             <>
-              <span className="text-[#94A3B8]">&gt;</span>
+              <span className="text-[#94A3B8]">/</span>
               <button
                 onClick={() => navigate(breadcrumbPath)}
                 className="text-[#64748B] hover:text-[#155DFC]"

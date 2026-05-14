@@ -1,5 +1,6 @@
 export interface ImageGenerationHistoryItem {
   id: string; // 작업물 ID
+  projectId: string; // 프로젝트 ID
   title: string; // 작업물 제목
   thumbnailUrl: string; // 대표/마지막 작업 이미지 URL
   templateName: string; // 사용한 템플릿명

@@ -1,5 +1,6 @@
 import type React from 'react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { IconButton } from '@/commons/components/IconButton';
 import { GridIcon } from '@/commons/components/icons/GridIcon';
@@ -12,6 +13,7 @@ import { Table } from '@/features/history/components/Table';
 import { imageGenerationHistoryMock } from '@/features/history/constants/mock';
 
 export const ImageGenerateHistoryPage: React.FC = () => {
+  const navigate = useNavigate();
   const [viewType, setViewType] = useState<'grid' | 'table'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedHistoryItem, setSelectedHistoryItem] =
@@ -61,6 +63,10 @@ export const ImageGenerateHistoryPage: React.FC = () => {
     setCurrentPage(totalPages);
   };
 
+  const handleSelectHistoryItem = (item: ImageGenerationHistoryItem) => {
+    navigate(`/history/${item.projectId}/edit?historyId=${item.id}`);
+  };
+
   return (
     <div className="h-full bg-white p-8">
       <div className="flex justify-between items-center mb-4">
@@ -89,9 +95,14 @@ export const ImageGenerateHistoryPage: React.FC = () => {
           <GridList
             list={paginatedHistoryList}
             onRemove={handleOpenDeletePopup}
+            onSelect={handleSelectHistoryItem}
           />
         ) : (
-          <Table list={paginatedHistoryList} onRemove={handleOpenDeletePopup} />
+          <Table
+            list={paginatedHistoryList}
+            onRemove={handleOpenDeletePopup}
+            onSelect={handleSelectHistoryItem}
+          />
         )}
       </div>
       <div className="mt-6">

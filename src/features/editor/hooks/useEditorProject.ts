@@ -68,15 +68,19 @@ export const useEditorProject = ({
     );
   }, [projectDetailError, projectHistoryError]);
 
+  const applyHistorySnapshot = (entry: HistoryItemRes) => {
+    const normalizedSnapshot = normalizeSnapshotForRender(entry.snapshot);
+    canvasRef.current?.restoreSnapshot(normalizedSnapshot);
+    setHasCanvasImage(snapshotHasImage(normalizedSnapshot));
+  };
+
   const restoreHistorySnapshot = (entry: HistoryItemRes) => {
     const confirmed = window.confirm(
       RESTORE_HISTORY_CONFIRM_MESSAGE(entry.title),
     );
     if (!confirmed) return;
 
-    const normalizedSnapshot = normalizeSnapshotForRender(entry.snapshot);
-    canvasRef.current?.restoreSnapshot(normalizedSnapshot);
-    setHasCanvasImage(snapshotHasImage(normalizedSnapshot));
+    applyHistorySnapshot(entry);
   };
 
   const restoreGeneratedImage = (imageUrl: string) => {
@@ -106,6 +110,7 @@ export const useEditorProject = ({
 
   return {
     applyUploadedImage,
+    applyHistorySnapshot,
     clearProjectCanvas,
     getCanvasSnapshot,
     replaceProjectImage,
