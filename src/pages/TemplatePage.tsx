@@ -98,7 +98,7 @@ export const TemplatePage: React.FC = () => {
         </div>
 
         {/* Template Fields */}
-        <div className="border border-border-neutral rounded-xs flex flex-col mt-4 mb-6">
+        <div className="border border-border-neutral rounded-sm flex flex-col mt-4 mb-6">
           <div className="font-bold text-text-primary text-lg border-b border-border-neutral px-6 py-4">
             {template.title} 템플릿 시작
           </div>

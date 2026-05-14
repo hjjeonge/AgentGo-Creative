@@ -125,7 +125,13 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
         required: true,
         isTargetImage: true,
       },
-      { key: 'product_name', label: '제품명', type: 'text', required: true },
+      {
+        key: 'product_name',
+        label: '제품명',
+        type: 'text',
+        required: true,
+        placeholder: '예: 벤쿠버 쇼파',
+      },
       {
         key: 'lighting',
         label: '조명 스타일',
