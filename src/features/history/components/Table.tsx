@@ -35,7 +35,15 @@ export const Table: React.FC<TableProps> = ({
             className="border border-border-neutral text-[#1D293D] cursor-pointer"
             onClick={() => onSelect(el)}
           >
-            <td className="px-2 py-1.5">{el.title}</td>
+            <td className="px-2 py-1.5">
+              <div className="flex items-center gap-1">
+                <img
+                  src={el.thumbnailUrl}
+                  className="w-20 h-20 object-cover rounded-sm"
+                />
+                <span>{el.title}</span>
+              </div>
+            </td>
             <td className="px-2 py-1.5">{el.templateName ?? '--'}</td>
             <td className="px-2 py-1.5">{el.createdAt}</td>
             <td className="px-2 py-1.5">{el.updatedAt ?? '--'}</td>
