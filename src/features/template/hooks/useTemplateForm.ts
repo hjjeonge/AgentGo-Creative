@@ -8,9 +8,14 @@ type FormFiles = Record<string, File[]>;
 
 const buildInitialValues = (fields: TemplateField[]): FormValues => {
   return fields.reduce<FormValues>((acc, field) => {
-    if (field.type === 'tags') {
+    if (field.type === 'tags' || field.type === 'channel_select') {
       acc[field.key] =
         field.key === 'target_audience' ? [...TARGET_KEYWORDS] : [];
+      return acc;
+    }
+
+    if (field.type === 'toggle') {
+      acc[field.key] = field.defaultValue ?? 'true';
       return acc;
     }
 
@@ -99,9 +104,11 @@ export const useTemplateForm = (fields: TemplateField[]) => {
       return (files[field.key]?.length ?? 0) > 0;
     }
 
-    if (field.type === 'tags') {
+    if (field.type === 'tags' || field.type === 'channel_select') {
       return getTagsValue(field.key).length > 0;
     }
+
+    if (field.type === 'toggle') return true;
 
     return getStringValue(field.key).trim().length > 0;
   };
