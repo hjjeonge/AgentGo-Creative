@@ -6,6 +6,7 @@ interface Props {
   title: string;
   onCancel: () => void;
   onRemove: () => void;
+  isLoading?: boolean;
 }
 
 export const DeletePopup: React.FC<Props> = ({

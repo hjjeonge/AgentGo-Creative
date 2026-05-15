@@ -91,12 +91,6 @@ export const TemplatePage: React.FC = () => {
           </div>
         </div>
 
-        <div className="m-6 rounded-[10px] border border-[#DBEAFE] bg-[#EFF6FF]  text-[13px] text-[#1E3A8A]">
-          {template.aiStatus === 'available'
-            ? `AI 연동 기준: ${template.aiFeature} API 입력 규격`
-            : 'AI 서버 미구현 템플릿입니다. 입력값은 현재 key-value 프롬프트로 조합되어 생성됩니다.'}
-        </div>
-
         {/* Template Fields */}
         <div className="border border-border-neutral rounded-sm flex flex-col mt-4 mb-6">
           <div className="font-bold text-text-primary text-lg border-b border-border-neutral px-6 py-4">

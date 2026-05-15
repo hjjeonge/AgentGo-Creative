@@ -1,5 +1,6 @@
 import type React from 'react';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
 import { IconButton } from '@/commons/components/IconButton';
@@ -10,14 +11,36 @@ import { DeletePopup } from '@/features/history/components/DeletePopup';
 import { GridList } from '@/features/history/components/GridList';
 import { Pagination } from '@/features/history/components/Pagination';
 import { Table } from '@/features/history/components/Table';
-import { imageGenerationHistoryMock } from '@/features/history/constants/mock';
+import {
+  useDeleteRecentProjectMutation,
+  useRecentProjectsQuery,
+} from '@/features/project/queries';
+import { projectQueryKeys } from '@/features/project/queries/queryKeys';
 
 export const ImageGenerateHistoryPage: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [viewType, setViewType] = useState<'grid' | 'table'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedHistoryItem, setSelectedHistoryItem] =
     useState<ImageGenerationHistoryItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const { data: recentProjects = [], isLoading } = useRecentProjectsQuery();
+  const { mutateAsync: deleteProject } = useDeleteRecentProjectMutation();
+
+  const historyList: ImageGenerationHistoryItem[] = recentProjects.map(
+    (project) => ({
+      id: project.id,
+      projectId: project.id,
+      title: project.title,
+      thumbnailUrl: project.thumbnail_url ?? '',
+      templateName: '',
+      createdAt: project.updated_at,
+      updatedAt: project.updated_at,
+      lastModifiedBy: '',
+    }),
+  );
 
   const handleViewType = (value: 'grid' | 'table') => {
     setViewType(value);
@@ -32,13 +55,24 @@ export const ImageGenerateHistoryPage: React.FC = () => {
     setSelectedHistoryItem(null);
   };
 
+  const handleConfirmDelete = async () => {
+    if (!selectedHistoryItem || isDeleting) return;
+    setIsDeleting(true);
+    try {
+      await deleteProject(selectedHistoryItem.projectId);
+      await queryClient.invalidateQueries({
+        queryKey: projectQueryKeys.recent(),
+      });
+    } finally {
+      setIsDeleting(false);
+      setSelectedHistoryItem(null);
+    }
+  };
+
   const pageSize = viewType === 'grid' ? 12 : 10;
-  const totalPages = Math.max(
-    1,
-    Math.ceil(imageGenerationHistoryMock.length / pageSize),
-  );
+  const totalPages = Math.max(1, Math.ceil(historyList.length / pageSize));
   const pageStartIndex = (currentPage - 1) * pageSize;
-  const paginatedHistoryList = imageGenerationHistoryMock.slice(
+  const paginatedHistoryList = historyList.slice(
     pageStartIndex,
     pageStartIndex + pageSize,
   );
@@ -66,6 +100,14 @@ export const ImageGenerateHistoryPage: React.FC = () => {
   const handleSelectHistoryItem = (item: ImageGenerationHistoryItem) => {
     navigate(`/history/${item.projectId}/edit?historyId=${item.id}`);
   };
+
+  if (isLoading) {
+    return (
+      <div className="h-full bg-white p-8 flex items-center justify-center">
+        <span className="text-text-secondary">불러오는 중...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full bg-white p-8">
@@ -120,7 +162,8 @@ export const ImageGenerateHistoryPage: React.FC = () => {
         <DeletePopup
           title={selectedHistoryItem.title}
           onCancel={handleCloseDeletePopup}
-          onRemove={handleCloseDeletePopup}
+          onRemove={handleConfirmDelete}
+          isLoading={isDeleting}
         />
       ) : null}
     </div>
