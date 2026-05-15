@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 
 import Logo from '@/assets/logo.svg';
 
+import { UserCard } from './UserCard';
+
 export const Header: React.FC = () => {
   const navigate = useNavigate();
 
@@ -11,7 +13,7 @@ export const Header: React.FC = () => {
       <button onClick={() => navigate('/')}>
         <img src={Logo} />
       </button>
-      {/* <UserCard /> */}
+      <UserCard />
     </div>
   );
 };
