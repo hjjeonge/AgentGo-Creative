@@ -223,6 +223,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
 
     useCanvasKeyboardShortcuts({
       activeTool,
+      isDisabled: isGenerating,
       backgroundImageRef,
       editingTextId,
       penStrokeWidth,
@@ -277,6 +278,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     }, [baseImageElement, setStageSize]);
 
     const handleMouseDown = (e: any) => {
+      if (isGenerating) return;
+
       if (activeTool === 'crop') {
         const pos = e.target.getStage().getRelativePointerPosition();
         setSelectedId(null);
@@ -303,6 +306,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     };
 
     const handleMouseMove = (e: any) => {
+      if (isGenerating) return;
+
       if (activeTool === 'crop') {
         const pos = e.target.getStage().getRelativePointerPosition();
         if (shapeSelectMode === 'rect' && selectionStartRef.current) {
@@ -325,6 +330,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
     };
 
     const handleMouseUp = (e: any) => {
+      if (isGenerating) return;
+
       if (activeTool === 'crop') {
         if (shapeSelectMode === 'rect' && selectionStartRef.current) {
           const start = selectionStartRef.current;
@@ -391,6 +398,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
           <CanvasStageSection
             brushPreview={brushPreview}
             hasBaseImage={hasBaseImage}
+            isGenerating={isGenerating}
             onUploadImage={onUploadImage}
             stageContainerRef={stageContainerRef}
             stageSize={stageSize}

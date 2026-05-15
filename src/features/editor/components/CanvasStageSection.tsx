@@ -19,16 +19,28 @@ interface CanvasStageSectionProps {
   brushPreview: BrushPreview;
   children: React.ReactNode;
   hasBaseImage: boolean;
+  isGenerating?: boolean;
   onUploadImage?: (url: string) => void;
   stageContainerRef: React.RefObject<HTMLDivElement | null>;
   stageSize: { width: number; height: number };
   toolbar?: React.ReactNode;
 }
 
+const generatingOverlay = (
+  <div className="absolute inset-0 z-30 flex items-center justify-center bg-white">
+    <div className="flex h-full w-full items-center justify-center rounded-[2px] bg-[linear-gradient(180deg,#FFCECC_0%,#B9D5FD_100%)]">
+      <div className="rounded-[32px] bg-[#45556C80] px-12 py-4 text-sm text-white">
+        생성 중...
+      </div>
+    </div>
+  </div>
+);
+
 export const CanvasStageSection: React.FC<CanvasStageSectionProps> = ({
   brushPreview,
   children,
   hasBaseImage,
+  isGenerating = false,
   onUploadImage,
   stageContainerRef,
   stageSize,
@@ -72,7 +84,7 @@ export const CanvasStageSection: React.FC<CanvasStageSectionProps> = ({
               height: `${stageSize.height}px`,
             }}
           >
-            {brushPreview.visible && (
+            {brushPreview.visible && !isGenerating && (
               <div
                 aria-hidden="true"
                 style={{
@@ -90,10 +102,11 @@ export const CanvasStageSection: React.FC<CanvasStageSectionProps> = ({
               />
             )}
             {children}
+            {isGenerating ? generatingOverlay : null}
           </div>
         </div>
       ) : (
-        <div className="flex min-h-0 flex-1 select-none flex-col items-center justify-center gap-4 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] text-[#E2E8F0]">
+        <div className="relative flex min-h-0 flex-1 select-none flex-col items-center justify-center gap-4 overflow-hidden rounded-md border border-[#E2E8F0] bg-[#F8FAFC] text-[#E2E8F0]">
           <input
             ref={fileInputRef}
             type="file"
@@ -105,6 +118,7 @@ export const CanvasStageSection: React.FC<CanvasStageSectionProps> = ({
           <Button onClick={() => fileInputRef.current?.click()}>
             사진 업로드
           </Button>
+          {isGenerating ? generatingOverlay : null}
         </div>
       )}
     </>

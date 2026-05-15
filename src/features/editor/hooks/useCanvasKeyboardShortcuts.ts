@@ -16,6 +16,7 @@ const isEditableTarget = (target: EventTarget | null) => {
 
 interface UseCanvasKeyboardShortcutsParams {
   activeTool: string;
+  isDisabled?: boolean;
   editingTextId: string | null;
   penStrokeWidth: number;
   redo: () => void;
@@ -34,6 +35,7 @@ interface UseCanvasKeyboardShortcutsParams {
 
 export const useCanvasKeyboardShortcuts = ({
   activeTool,
+  isDisabled = false,
   backgroundImageRef,
   editingTextId,
   penStrokeWidth,
@@ -51,6 +53,7 @@ export const useCanvasKeyboardShortcuts = ({
 }: UseCanvasKeyboardShortcutsParams) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isDisabled) return;
       if (isEditableTarget(e.target)) return;
 
       if (e.key === 'z' && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
@@ -113,6 +116,7 @@ export const useCanvasKeyboardShortcuts = ({
   }, [
     activeTool,
     backgroundImageRef,
+    isDisabled,
     editingTextId,
     penStrokeWidth,
     pushUndo,

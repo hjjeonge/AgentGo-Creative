@@ -38,6 +38,12 @@ export const EditorPage: React.FC = () => {
         history={history}
         onRestore={handleRestore}
       />
+      {isGenerating ? (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 z-[60] cursor-wait bg-transparent"
+        />
+      ) : null}
     </div>
   );
 };
