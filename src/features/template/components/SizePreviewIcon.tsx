@@ -8,9 +8,19 @@ interface Props {
 export const SizePreviewIcon: React.FC<Props> = ({ ratio, active }) => {
   const dims: Record<string, { w: number; h: number }> = {
     '1:1': { w: 28, h: 28 },
+    '3:2': { w: 36, h: 24 },
+    '2:3': { w: 24, h: 36 },
+    '3:4': { w: 27, h: 36 },
+    '4:3': { w: 36, h: 27 },
     '4:5': { w: 22, h: 28 },
-    '16:9': { w: 36, h: 20 },
+    '5:4': { w: 30, h: 24 },
     '9:16': { w: 20, h: 36 },
+    '16:9': { w: 36, h: 20 },
+    '1:4': { w: 9, h: 36 },
+    '4:1': { w: 36, h: 9 },
+    '1:8': { w: 6, h: 36 },
+    '8:1': { w: 36, h: 6 },
+    '21:9': { w: 36, h: 15 },
   };
   const d = dims[ratio] ?? { w: 28, h: 28 };
   const color = active ? '#155DFC' : '#94A3B8';

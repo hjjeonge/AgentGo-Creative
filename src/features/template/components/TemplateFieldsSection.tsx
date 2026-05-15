@@ -57,6 +57,8 @@ export const TemplateFieldsSection: React.FC<TemplateFieldsSectionProps> = ({
             handleMultiFiles(field.key, selected)
           }
           onRemoveFile={(index) => removeFile(field.key, index)}
+          refFile={files[`${field.key}_ref`]?.[0] ?? null}
+          onRefFileChange={(file) => handleSingleFile(`${field.key}_ref`, file)}
         />
       ))}
     </div>

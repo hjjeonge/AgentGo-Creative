@@ -26,23 +26,31 @@ export const FileField: React.FC<FileFieldProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = `file-input-${field.key}`;
   const isMulti = !field.isTargetImage;
+  const isExcelField = field.key === 'products_excel';
 
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const allowedTypes = [
-    'image/jpeg',
-    'image/png',
-    'image/webp',
-    'image/gif',
-    'application/pdf',
-  ];
+  const allowedTypes = isExcelField
+    ? [
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      ]
+    : ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
+
+  const acceptAttr = isExcelField
+    ? '.xls,.xlsx'
+    : 'image/jpeg,image/png,image/webp,image/gif,application/pdf';
 
   const handleFiles = (files: File[]) => {
     if (!files.length) return;
 
     const invalidFile = files.find((file) => !allowedTypes.includes(file.type));
     if (invalidFile) {
-      alert('jpg, jpeg, png, webp, gif, pdf 파일만 업로드 가능합니다.');
+      alert(
+        isExcelField
+          ? 'xls, xlsx 파일만 업로드 가능합니다.'
+          : 'jpg, jpeg, png, webp, gif, pdf 파일만 업로드 가능합니다.',
+      );
       return;
     }
 
@@ -87,7 +95,7 @@ export const FileField: React.FC<FileFieldProps> = ({
         id={inputId}
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
+        accept={acceptAttr}
         multiple={isMulti}
         className="hidden"
         onChange={(event) => {
@@ -109,11 +117,17 @@ export const FileField: React.FC<FileFieldProps> = ({
                 >
                   <div className="flex flex-col items-center gap-2 text-md text-text-primary font-bold">
                     <div className="flex gap-1">
-                      <span>타겟 이미지나 파일을 업로드하세요.</span>
+                      <span>
+                        {isExcelField
+                          ? '엑셀 파일을 업로드하세요.'
+                          : '타겟 이미지나 파일을 업로드하세요.'}
+                      </span>
                       <span className="text-[#E7000B]">*</span>
                     </div>
                     <span className="text-sm text-text-tertiary font-normal">
-                      드래그 앤 드롭 하거나 클릭하여 파일 업로드
+                      {isExcelField
+                        ? '.xls, .xlsx 파일 지원'
+                        : '드래그 앤 드롭 하거나 클릭하여 파일 업로드'}
                     </span>
                   </div>
 
@@ -122,7 +136,7 @@ export const FileField: React.FC<FileFieldProps> = ({
                     startDecorator={<Paperclip />}
                     variant="primary-outlined"
                   >
-                    사진 및 파일 추가
+                    {isExcelField ? '엑셀 파일 추가' : '사진 및 파일 추가'}
                   </Button>
                 </label>
               </div>
