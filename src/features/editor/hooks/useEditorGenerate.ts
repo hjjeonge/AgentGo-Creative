@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { RefObject } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { uploadFile } from '@/features/editor/api/file';
 import { generateImage, getImageJob } from '@/features/editor/api/image';
@@ -51,6 +52,7 @@ export const useEditorGenerate = ({
 }: Params) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { mutateAsync: updateProject } = useUpdateProjectMutation();
+  const { pathname } = useLocation();
 
   const uploadCanvasBlob = async (blob: Blob, fileNamePrefix: string) => {
     const file = new File([blob], `${fileNamePrefix}-${Date.now()}.png`, {
@@ -61,6 +63,17 @@ export const useEditorGenerate = ({
   };
 
   const resolveTargetImageUrl = async () => {
+    const isNewGenerate = historyCount === 0 && pathname === '/editor/new';
+    const hasCanvasImage = canvasRef.current?.hasImage() ?? false;
+
+    if (!hasCanvasImage && isNewGenerate) {
+      return null;
+    }
+
+    if (!hasCanvasImage) {
+      throw new Error('캔버스 이미지를 확인할 수 없습니다.');
+    }
+
     const canvasBlob = await canvasRef.current?.exportAsBlob();
     if (!canvasBlob) {
       throw new Error('캔버스 이미지를 확인할 수 없습니다.');
@@ -116,7 +129,9 @@ export const useEditorGenerate = ({
               }),
             )
           : [];
-      const generateReferenceUrls = [targetImageUrl, ...referenceUrls];
+      const generateReferenceUrls = targetImageUrl
+        ? [targetImageUrl, ...referenceUrls]
+        : referenceUrls;
 
       const generateRes = await generateImage({
         prompt,
