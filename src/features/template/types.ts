@@ -5,7 +5,9 @@ export type TemplateFieldType =
   | 'tags'
   | 'size'
   | 'file'
-  | 'files';
+  | 'files'
+  | 'channel_select'
+  | 'toggle';
 
 export interface TemplateField {
   key: string;
@@ -16,6 +18,8 @@ export interface TemplateField {
   options?: string[];
   maxItems?: number;
   isTargetImage?: boolean;
+  defaultValue?: string;
+  withRef?: boolean;
 }
 
 export interface TemplateConfig {
