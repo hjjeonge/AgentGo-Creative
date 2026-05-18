@@ -1,4 +1,5 @@
 import type React from 'react';
+import dayjs from 'dayjs';
 import { Trash2 } from 'lucide-react';
 
 import { IconButton } from '@/commons/components/IconButton';
@@ -31,7 +32,9 @@ export const HistoryItem: React.FC<Props> = ({ entry, onClick }) => {
         <img src={previewUrl ?? ''} className="w-10 h-10 rounded-xs" />
         <div className="flex flex-col gap-0.5 text-text-primary font-sm">
           <span>{entry.title}</span>
-          <span className="text-[#314158] text-sm">{entry.timestamp}</span>
+          <span className="text-[#314158] text-sm">
+            {dayjs(entry.timestamp).format('YYYY년MM월DD일 hh:mm:ss')}
+          </span>
         </div>
       </button>
       <IconButton variant="neutral-outlined">
