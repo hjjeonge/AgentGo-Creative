@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { Trash2 } from 'lucide-react';
 
 import { IconButton } from '@/commons/components/IconButton';
+import { getLocaleTime } from '@/commons/utils/getLocaleTime';
 import { partitionCanvasElements } from '@/features/editor/utils/elementAdapters';
 import type { HistoryItemRes } from '@/features/project/types';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
@@ -13,6 +14,8 @@ interface Props {
 }
 
 export const HistoryItem: React.FC<Props> = ({ entry, onClick }) => {
+  const displayTimestamp = getLocaleTime(entry.timestamp);
+
   const uploadedImageShape = partitionCanvasElements(
     'elements' in entry.snapshot && Array.isArray(entry.snapshot.elements)
       ? entry.snapshot.elements
@@ -33,7 +36,7 @@ export const HistoryItem: React.FC<Props> = ({ entry, onClick }) => {
         <div className="flex flex-col gap-0.5 text-text-primary font-sm">
           <span>{entry.title}</span>
           <span className="text-[#314158] text-sm">
-            {dayjs(entry.timestamp).format('YYYY년MM월DD일 hh:mm:ss')}
+            {dayjs(displayTimestamp).format('YYYY년MM월DD일 HH:mm:ss')}
           </span>
         </div>
       </button>
