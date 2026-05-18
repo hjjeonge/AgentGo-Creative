@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import type React from 'react';
+import { Download } from 'lucide-react';
 
 import { Button } from '@/commons/components/Button';
 import { UploadCloudIcon } from '@/commons/components/icons/UploadCloudIcon';
@@ -20,6 +21,7 @@ interface CanvasStageSectionProps {
   children: React.ReactNode;
   hasBaseImage: boolean;
   isGenerating?: boolean;
+  onDownloadCanvas?: () => void;
   onUploadImage?: (url: string) => void;
   stageContainerRef: React.RefObject<HTMLDivElement | null>;
   toolbar?: React.ReactNode;
@@ -40,6 +42,7 @@ export const CanvasStageSection: React.FC<CanvasStageSectionProps> = ({
   children,
   hasBaseImage,
   isGenerating = false,
+  onDownloadCanvas,
   onUploadImage,
   stageContainerRef,
   toolbar,
@@ -71,6 +74,18 @@ export const CanvasStageSection: React.FC<CanvasStageSectionProps> = ({
         {toolbar ? (
           <div className="absolute left-1/2 top-4 z-20 -translate-x-1/2">
             {toolbar}
+          </div>
+        ) : null}
+        {hasBaseImage ? (
+          <div className="absolute right-4 top-4 z-20">
+            <Button
+              variant="neutral-outlined"
+              size="sm"
+              onClick={onDownloadCanvas}
+              startDecorator={<Download size={18} />}
+            >
+              다운로드
+            </Button>
           </div>
         ) : null}
         <div

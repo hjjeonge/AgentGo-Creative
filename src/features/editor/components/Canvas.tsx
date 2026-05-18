@@ -102,6 +102,17 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       stageRef.current = stage;
     }, []);
 
+    const handleDownloadCanvas = useCallback(() => {
+      const stage = stageRef.current;
+      if (!stage) return;
+
+      const dataUrl = stage.toDataURL({ pixelRatio: 1 });
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `canvas-${Date.now()}.png`;
+      link.click();
+    }, []);
+
     const hasBaseImage =
       backgroundImage !== null ||
       elements.some((element) => element.kind === 'image');
@@ -408,6 +419,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
             brushPreview={brushPreview}
             hasBaseImage={hasBaseImage}
             isGenerating={isGenerating}
+            onDownloadCanvas={handleDownloadCanvas}
             onUploadImage={onUploadImage}
             stageContainerRef={stageContainerRef}
             toolbar={
