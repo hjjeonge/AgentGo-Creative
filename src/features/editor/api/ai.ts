@@ -38,6 +38,12 @@ export const generateKeyVisual = (params: KeyVisualParams) => {
   if (params.system_prompt) {
     form.append('system_prompt', params.system_prompt);
   }
+  if (params.output_format) {
+    form.append('output_format', params.output_format);
+  }
+  if (params.platform) {
+    form.append('platform', params.platform);
+  }
 
   return axiosInstance.post<AIProxyResponse<KeyVisualResult>>(
     '/api/ai/key-visual',

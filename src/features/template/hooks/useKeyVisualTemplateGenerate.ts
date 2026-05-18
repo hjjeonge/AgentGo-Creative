@@ -16,8 +16,6 @@ const buildKeyVisualFeedback = ({
   TemplateGenerateContext,
   'template' | 'getStringValue' | 'getTagsValue'
 >) => {
-  const sizeValue = getStringValue('size') || undefined;
-
   if (template.key === 'sns_marketing') {
     const targets = getTagsValue('target_audience');
     return compactLines([
@@ -29,7 +27,6 @@ const buildKeyVisualFeedback = ({
       getStringValue('concept')
         ? `컨셉: ${getStringValue('concept')}`
         : undefined,
-      sizeValue ? `사이즈: ${sizeValue}` : undefined,
     ]);
   }
 
@@ -47,7 +44,6 @@ const buildKeyVisualFeedback = ({
     getStringValue('feedback')
       ? `연출 지시: ${getStringValue('feedback')}`
       : undefined,
-    sizeValue ? `사이즈: ${sizeValue}` : undefined,
   ]);
 };
 
@@ -75,6 +71,8 @@ export const useKeyVisualTemplateGenerate = ({
     const response = await generateKeyVisual({
       file: sourceImage,
       feedback: prompt,
+      output_format: getStringValue('size') || undefined,
+      platform: getStringValue('platform') || undefined,
     });
     const result = response.data.result;
 

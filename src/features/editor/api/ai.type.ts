@@ -17,6 +17,8 @@ export interface KeyVisualParams {
   feedback: string;
   guide_attributes?: Record<string, string>;
   system_prompt?: string;
+  output_format?: string;
+  platform?: string;
 }
 
 export interface TranslationItem {

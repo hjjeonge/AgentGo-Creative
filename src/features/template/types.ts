@@ -20,6 +20,7 @@ export interface TemplateField {
   isTargetImage?: boolean;
   defaultValue?: string;
   withRef?: boolean;
+  showWhen?: { key: string; value: string };
 }
 
 export interface TemplateConfig {

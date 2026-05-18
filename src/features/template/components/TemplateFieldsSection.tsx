@@ -38,29 +38,36 @@ export const TemplateFieldsSection: React.FC<TemplateFieldsSectionProps> = ({
 }) => {
   return (
     <div className="flex flex-col gap-6 px-6 py-8">
-      {fields.map((field) => (
-        <TemplateFieldRenderer
-          key={field.key}
-          field={field}
-          stringValue={getStringValue(field.key)}
-          selectedTags={getTagsValue(field.key)}
-          selectedFiles={files[field.key] ?? []}
-          currentTagInput={tagInput[field.key] ?? ''}
-          onSetStringValue={(value) => setStringValue(field.key, value)}
-          onSetTagInput={(value) => setTagInputValue(field.key, value)}
-          onAddTag={(raw) => addTag(field, raw)}
-          onRemoveTag={(tag) => removeTag(field.key, tag)}
-          onSingleFileChange={(selected) =>
-            handleSingleFile(field.key, selected)
-          }
-          onMultiFilesChange={(selected) =>
-            handleMultiFiles(field.key, selected)
-          }
-          onRemoveFile={(index) => removeFile(field.key, index)}
-          refFile={files[`${field.key}_ref`]?.[0] ?? null}
-          onRefFileChange={(file) => handleSingleFile(`${field.key}_ref`, file)}
-        />
-      ))}
+      {fields
+        .filter((field) => {
+          if (!field.showWhen) return true;
+          return getStringValue(field.showWhen.key) === field.showWhen.value;
+        })
+        .map((field) => (
+          <TemplateFieldRenderer
+            key={field.key}
+            field={field}
+            stringValue={getStringValue(field.key)}
+            selectedTags={getTagsValue(field.key)}
+            selectedFiles={files[field.key] ?? []}
+            currentTagInput={tagInput[field.key] ?? ''}
+            onSetStringValue={(value) => setStringValue(field.key, value)}
+            onSetTagInput={(value) => setTagInputValue(field.key, value)}
+            onAddTag={(raw) => addTag(field, raw)}
+            onRemoveTag={(tag) => removeTag(field.key, tag)}
+            onSingleFileChange={(selected) =>
+              handleSingleFile(field.key, selected)
+            }
+            onMultiFilesChange={(selected) =>
+              handleMultiFiles(field.key, selected)
+            }
+            onRemoveFile={(index) => removeFile(field.key, index)}
+            refFile={files[`${field.key}_ref`]?.[0] ?? null}
+            onRefFileChange={(file) =>
+              handleSingleFile(`${field.key}_ref`, file)
+            }
+          />
+        ))}
     </div>
   );
 };

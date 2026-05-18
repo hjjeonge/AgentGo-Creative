@@ -5,6 +5,7 @@ import template_infographic from '@/assets/template_infographic.png';
 import template_marketing from '@/assets/template_marketing.png';
 import template_studio from '@/assets/template_studio.png';
 import template_translation from '@/assets/template_translation.png';
+import { PLATFORM_OPTIONS } from '@/features/template/constants/platformGuides';
 import { COMMON_SIZE_RATIOS } from '@/features/template/constants/sizeOptions';
 import type { TemplateConfig } from '@/features/template/types';
 
@@ -33,20 +34,14 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
         label: '제품명',
         type: 'text',
         required: true,
-        placeholder: '예: 밀크 클렌징 폼',
+        placeholder: '브랜딩할 제품명을 입력핵주세요.',
       },
       {
         key: 'platform',
-        label: '플랫폼',
+        label: '업로드 매체',
         type: 'select',
         required: true,
-        options: [
-          '인스타그램 피드',
-          '인스타그램 스토리',
-          '페이스북',
-          '카카오채널',
-          '기타',
-        ],
+        options: PLATFORM_OPTIONS,
       },
       {
         key: 'target_audience',
@@ -56,10 +51,17 @@ export const TEMPLATE_CONFIGS: TemplateConfig[] = [
         maxItems: 5,
       },
       {
-        key: 'copy_text',
+        key: 'copy_text_enabled',
         label: '카피 문구',
+        type: 'toggle',
+        defaultValue: 'false',
+      },
+      {
+        key: 'copy_text',
+        label: '',
         type: 'textarea',
         placeholder: '이미지에 넣을 카피 문구를 입력해 주세요.',
+        showWhen: { key: 'copy_text_enabled', value: 'true' },
       },
       {
         key: 'feedback',
