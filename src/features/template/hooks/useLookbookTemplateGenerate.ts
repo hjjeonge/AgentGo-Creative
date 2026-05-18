@@ -3,7 +3,7 @@ import {
   submitLookbookJob,
 } from '@/features/editor/api/ai';
 
-import { toDataUrl, wait } from './templateGenerate.utils';
+import { resolveGeneratedImageSource, wait } from './templateGenerate.utils';
 
 import type {
   TemplateGenerateContext,
@@ -67,7 +67,8 @@ export const useLookbookTemplateGenerate = ({
     }
 
     const result = job.result;
-    if (!result?.image_base64) {
+    const imageUrl = resolveGeneratedImageSource(result);
+    if (!imageUrl) {
       throw new Error('룩북 생성 결과를 받지 못했습니다.');
     }
 
@@ -81,7 +82,7 @@ export const useLookbookTemplateGenerate = ({
       .join('\n');
 
     return {
-      imageUrl: toDataUrl(result.mime_type || 'image/png', result.image_base64),
+      imageUrl,
       prompt,
     };
   };

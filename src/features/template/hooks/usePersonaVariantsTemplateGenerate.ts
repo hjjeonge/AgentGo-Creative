@@ -3,7 +3,7 @@ import {
   submitPersonaVariantsJob,
 } from '@/features/editor/api/ai';
 
-import { wait } from './templateGenerate.utils';
+import { resolveGeneratedImageSource, wait } from './templateGenerate.utils';
 
 import type {
   TemplateGenerateContext,
@@ -61,7 +61,8 @@ export const usePersonaVariantsTemplateGenerate = ({
 
     const results = job.result?.results;
     const firstResult = results?.[0];
-    if (!firstResult?.image_base64) {
+    const imageUrl = resolveGeneratedImageSource(firstResult);
+    if (!imageUrl) {
       throw new Error('페르소나 변형 생성 결과를 받지 못했습니다.');
     }
 
@@ -72,7 +73,7 @@ export const usePersonaVariantsTemplateGenerate = ({
     ].join('\n');
 
     return {
-      imageUrl: `data:${firstResult.mime_type || 'image/png'};base64,${firstResult.image_base64}`,
+      imageUrl,
       prompt,
       message:
         results && results.length > 1

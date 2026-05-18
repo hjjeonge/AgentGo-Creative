@@ -2,7 +2,7 @@ import { renderDetailCut } from '@/features/editor/api/ai';
 import { buildPrompt } from '@/features/template/utils/buildPrompt';
 import { buildTemplateInputs } from '@/features/template/utils/buildTemplateInputs';
 
-import { toDataUrl } from './templateGenerate.utils';
+import { resolveGeneratedImageSource } from './templateGenerate.utils';
 
 import type {
   TemplateGenerateContext,
@@ -43,13 +43,13 @@ export const useDetailCutTemplateGenerate = ({
       source_angles: sourceAngles.length > 0 ? sourceAngles : undefined,
     });
     const result = response.data.result;
-
-    if (!result?.image_base64) {
+    const imageUrl = resolveGeneratedImageSource(result);
+    if (!imageUrl) {
       throw new Error('디테일컷 생성 결과를 받지 못했습니다.');
     }
 
     return {
-      imageUrl: toDataUrl(result.mime_type, result.image_base64),
+      imageUrl,
       prompt,
     };
   };

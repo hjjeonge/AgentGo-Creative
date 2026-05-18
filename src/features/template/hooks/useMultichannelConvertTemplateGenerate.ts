@@ -1,6 +1,6 @@
 import { convertMultichannel } from '@/features/editor/api/ai';
 
-import { toDataUrl } from './templateGenerate.utils';
+import { resolveGeneratedImageSource } from './templateGenerate.utils';
 
 import type {
   TemplateGenerateContext,
@@ -36,12 +36,16 @@ export const useMultichannelConvertTemplateGenerate = ({
     }
 
     const first = conversions[0];
+    const imageUrl = resolveGeneratedImageSource(first);
+    if (!imageUrl) {
+      throw new Error('멀티채널 변환 결과를 받지 못했습니다.');
+    }
     const prompt = ['멀티채널 변환', `포맷: ${targetFormats.join(', ')}`].join(
       '\n',
     );
 
     return {
-      imageUrl: toDataUrl(first.mime_type || 'image/png', first.image_base64),
+      imageUrl,
       prompt,
       message:
         conversions.length > 1

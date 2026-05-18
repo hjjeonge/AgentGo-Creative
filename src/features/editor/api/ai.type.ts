@@ -40,7 +40,8 @@ export interface MultilingualJobResult {
 }
 
 export interface DetailCutResult {
-  image_base64: string;
+  image_url: string;
+  image_base64?: string;
   mime_type: string;
   product_name: string;
   target_angle: string;
@@ -55,7 +56,8 @@ export interface DetailCutParams {
 
 export interface PersonaVariantItem {
   persona: string;
-  image_base64: string;
+  image_url: string;
+  image_base64?: string;
   mime_type: string;
   copy_text: string;
   ab_test_label: string;
@@ -92,7 +94,8 @@ export interface MultichannelConversionItem {
   format: string;
   width: number;
   height: number;
-  image_base64: string;
+  image_url: string;
+  image_base64?: string;
   mime_type: string;
 }
 
@@ -122,6 +125,7 @@ export interface BrandLayoutParams {
 
 export interface LookbookJobResult {
   job_id: string;
+  image_url?: string;
   image_base64?: string;
   mime_type?: string;
   style_desc?: string;

@@ -442,13 +442,21 @@ export const useCanvasEditorActions = ({
         (uploadedImage?.kind === 'image' ? uploadedImage.imageUrl : null) ||
         null;
 
+      backgroundImageRef.current = nextBackgroundImage;
       setElements(snapshot.elements);
       setBackgroundImageState(nextBackgroundImage);
-      if (!uploadedImage && nextBackgroundImage) {
+      if (uploadedImage?.kind === 'image') {
+        setStageSize({
+          width: Math.max(1, Math.round(uploadedImage.width)),
+          height: Math.max(1, Math.round(uploadedImage.height)),
+        });
+      } else if (nextBackgroundImage) {
         addUploadedImageShape(nextBackgroundImage, {
-          replaceExisting: false,
+          replaceExisting: true,
           selectImage: false,
         });
+      } else {
+        setStageSize({ width: 0, height: 0 });
       }
 
       setSelectedId(null);
@@ -457,15 +465,18 @@ export const useCanvasEditorActions = ({
     },
     [
       addUploadedImageShape,
+      backgroundImageRef,
       setBackgroundImageState,
       setEditingTextId,
       setElements,
       setSelectedId,
       setSelectedIds,
+      setStageSize,
     ],
   );
 
   const clearCanvas = useCallback(() => {
+    backgroundImageRef.current = null;
     setElements([]);
     setBackgroundImageState(null);
     setStageSize({ width: 0, height: 0 });
@@ -473,6 +484,7 @@ export const useCanvasEditorActions = ({
     setSelectedIds([]);
     setEditingTextId(null);
   }, [
+    backgroundImageRef,
     setBackgroundImageState,
     setEditingTextId,
     setElements,
