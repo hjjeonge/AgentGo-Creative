@@ -29,7 +29,6 @@ interface EditorCanvasProps {
   handleMouseMove: (e: any) => void;
   handleMouseUp: (e: any) => void;
   elements: CanvasElement[];
-  baseImageId: string | null;
   selectedId: string | null;
   currentLine: DrawLine | null;
   setSelectedId: (id: string | null) => void;
@@ -73,7 +72,6 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
   handleMouseMove,
   handleMouseUp,
   elements,
-  baseImageId,
   selectedId,
   currentLine,
   setSelectedId,
@@ -446,12 +444,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
     ? (elements.find((element) => element.id === selectedId) ?? null)
     : null;
   const imageTransformerEnabled =
-    selectedElement?.kind === 'image' &&
-    selectedElement.id === baseImageId &&
-    selectedIds.length <= 1;
-  const transformerAnchors = imageTransformerEnabled
-    ? (['bottom-right'] as const)
-    : (['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const);
+    selectedElement?.kind === 'image' && selectedIds.length <= 1;
 
   return (
     <div style={{ position: 'relative', cursor: 'default' }}>
@@ -472,7 +465,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
               x={shape.x}
               y={shape.y}
               rotation={shape.rotation ?? 0}
-              draggable={activeTool === 'mouse' && shape.id !== baseImageId}
+              draggable={activeTool === 'mouse'}
               onClick={() => setSelectedId(shape.id)}
               onTap={() => setSelectedId(shape.id)}
               ref={(node) => {
@@ -741,7 +734,12 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
             ref={trRef}
             rotateEnabled={!imageTransformerEnabled}
             keepRatio={true}
-            enabledAnchors={[...transformerAnchors]}
+            enabledAnchors={[
+              'top-left',
+              'top-right',
+              'bottom-left',
+              'bottom-right',
+            ]}
           />
         </Layer>
         <Layer>

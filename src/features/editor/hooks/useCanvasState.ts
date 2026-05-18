@@ -1,9 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 
+import {
+  DEFAULT_STAGE_HEIGHT,
+  DEFAULT_STAGE_WIDTH,
+} from '@/features/editor/constants/editor';
 import type { CanvasElement, DrawLine, Rect } from '@/features/editor/types';
 
 export const useCanvasState = () => {
-  const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
+  const [stageSize, setStageSize] = useState({
+    width: DEFAULT_STAGE_WIDTH,
+    height: DEFAULT_STAGE_HEIGHT,
+  });
   const [backgroundImage, setBackgroundImageState] = useState<string | null>(
     null,
   );

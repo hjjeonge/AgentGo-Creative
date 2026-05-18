@@ -1,5 +1,7 @@
 export const MAX_HISTORY_COUNT = 20;
 export const DEFAULT_PROJECT_TITLE = '새 프로젝트';
+export const DEFAULT_STAGE_WIDTH = 960;
+export const DEFAULT_STAGE_HEIGHT = 600;
 
 export const CREATE_NEW_PROJECT_CONFIRM_MESSAGE =
   '현재 작업을 종료하고 새 프로젝트를 시작하시겠습니까?';

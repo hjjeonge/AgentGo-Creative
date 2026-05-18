@@ -3,7 +3,6 @@
   useCallback,
   useEffect,
   useImperativeHandle,
-  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -103,10 +102,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       stageRef.current = stage;
     }, []);
 
-    const baseImageElement = useMemo(
-      () => elements.find((element) => element.kind === 'image') ?? null,
-      [elements],
-    );
     const hasBaseImage =
       backgroundImage !== null ||
       elements.some((element) => element.kind === 'image');
@@ -128,6 +123,32 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         container.removeEventListener('mousemove', handlePointerMove);
     }, [hasBaseImage, stageSize.height, stageSize.width]);
 
+    useEffect(() => {
+      const container = stageContainerRef.current;
+      if (!container) return;
+
+      const updateStageSize = () => {
+        const nextWidth = Math.max(1, Math.round(container.clientWidth));
+        const nextHeight = Math.max(1, Math.round(container.clientHeight));
+
+        setStageSize((prev) =>
+          prev.width === nextWidth && prev.height === nextHeight
+            ? prev
+            : { width: nextWidth, height: nextHeight },
+        );
+      };
+
+      updateStageSize();
+      const observer = new ResizeObserver(() => {
+        updateStageSize();
+      });
+      observer.observe(container);
+
+      return () => {
+        observer.disconnect();
+      };
+    }, [setStageSize]);
+
     const { pushUndo, undo, redo } = useUndoRedo({
       elementsRef,
       backgroundImageRef,
@@ -144,7 +165,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         selectedIds,
         editingTextId,
         elements,
-        baseImageId: baseImageElement?.id ?? null,
         objectRefs,
         trRef,
         pushUndo,
@@ -153,7 +173,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
         setEditingTextId,
         setActiveTool,
         setElements,
-        setStageSize,
       });
 
     const { cropByRect, cropByLasso } = useCrop({
@@ -217,7 +236,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       setSelectedIds,
       setSelectionRect,
       setShapeType,
-      setStageSize,
       stageSize,
     });
 
@@ -267,15 +285,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
       },
       clearCanvas,
     }));
-
-    useEffect(() => {
-      if (baseImageElement?.kind !== 'image') return;
-
-      setStageSize({
-        width: Math.max(1, Math.round(baseImageElement.width)),
-        height: Math.max(1, Math.round(baseImageElement.height)),
-      });
-    }, [baseImageElement, setStageSize]);
 
     const handleMouseDown = (e: any) => {
       if (isGenerating) return;
@@ -401,7 +410,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
             isGenerating={isGenerating}
             onUploadImage={onUploadImage}
             stageContainerRef={stageContainerRef}
-            stageSize={stageSize}
             toolbar={
               <Toolbar
                 activeTool={activeTool}
@@ -428,7 +436,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(
               handleMouseMove={handleMouseMove}
               handleMouseUp={handleMouseUp}
               elements={elements}
-              baseImageId={baseImageElement?.id ?? null}
               selectedId={selectedId}
               currentLine={currentLine}
               setSelectedId={handleSelectObject}

@@ -2,6 +2,10 @@ import { useCallback } from 'react';
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 
 import { loadGoogleFont } from '@/commons/utils/fontLoader';
+import {
+  DEFAULT_STAGE_HEIGHT,
+  DEFAULT_STAGE_WIDTH,
+} from '@/features/editor/constants/editor';
 import type {
   CanvasElement,
   ImageElement,
@@ -9,7 +13,6 @@ import type {
   TextObject,
 } from '@/features/editor/types';
 
-const DEFAULT_CANVAS_HEIGHT = 600;
 const DEFAULT_PLACEHOLDER_TEXT = '텍스트를 입력하세요';
 const UPLOADED_IMAGE_SHAPE_PREFIX = 'shape_uploaded_image_';
 
@@ -53,7 +56,6 @@ interface UseCanvasEditorActionsParams {
     value: { x: number; y: number; width: number; height: number } | null,
   ) => void;
   setShapeType: (value: string) => void;
-  setStageSize: (value: { width: number; height: number }) => void;
   selectionStartRef: MutableRefObject<{ x: number; y: number } | null>;
   stageSize: { width: number; height: number };
 }
@@ -77,7 +79,6 @@ export const useCanvasEditorActions = ({
   setSelectedIds,
   setSelectionRect,
   setShapeType,
-  setStageSize,
   stageSize,
 }: UseCanvasEditorActionsParams) => {
   const updateElements = useCallback(
@@ -99,56 +100,33 @@ export const useCanvasEditorActions = ({
         const naturalWidth = Math.max(1, image.naturalWidth || image.width);
         const naturalHeight = Math.max(1, image.naturalHeight || image.height);
         const currentStageWidth =
-          stageSize.width > 0
-            ? stageSize.width
-            : Math.max(
-                1,
-                Math.round(
-                  (naturalWidth * DEFAULT_CANVAS_HEIGHT) / naturalHeight,
-                ),
-              );
+          stageSize.width > 0 ? stageSize.width : DEFAULT_STAGE_WIDTH;
         const currentStageHeight =
-          stageSize.height > 0 ? stageSize.height : DEFAULT_CANVAS_HEIGHT;
-        const ratio = replaceExisting
-          ? DEFAULT_CANVAS_HEIGHT / naturalHeight
-          : Math.min(
-              currentStageWidth / naturalWidth,
-              currentStageHeight / naturalHeight,
-              1,
-            );
+          stageSize.height > 0 ? stageSize.height : DEFAULT_STAGE_HEIGHT;
+        const ratio = Math.min(
+          currentStageWidth / naturalWidth,
+          currentStageHeight / naturalHeight,
+          1,
+        );
         const targetWidth = Math.max(1, Math.round(naturalWidth * ratio));
         const targetHeight = Math.max(1, Math.round(naturalHeight * ratio));
         const imageShapeId = `${UPLOADED_IMAGE_SHAPE_PREFIX}${Date.now()}_${Math.floor(Math.random() * 10000)}`;
-
-        if (replaceExisting) {
-          setStageSize({
-            width: targetWidth,
-            height: targetHeight,
-          });
-        }
 
         updateElements((prev) => {
           const base = replaceExisting
             ? prev.filter((element) => element.kind !== 'image')
             : prev;
-          const nextStageWidth = replaceExisting
-            ? targetWidth
-            : currentStageWidth;
-          const nextStageHeight = replaceExisting
-            ? targetHeight
-            : currentStageHeight;
 
           return [
             ...base,
             {
               id: imageShapeId,
               kind: 'image',
-              x: replaceExisting
-                ? 0
-                : Math.max(0, Math.round((nextStageWidth - targetWidth) / 2)),
-              y: replaceExisting
-                ? 0
-                : Math.max(0, Math.round((nextStageHeight - targetHeight) / 2)),
+              x: Math.max(0, Math.round((currentStageWidth - targetWidth) / 2)),
+              y: Math.max(
+                0,
+                Math.round((currentStageHeight - targetHeight) / 2),
+              ),
               width: targetWidth,
               height: targetHeight,
               imageUrl: url,
@@ -170,14 +148,7 @@ export const useCanvasEditorActions = ({
       };
       image.src = url;
     },
-    [
-      setActiveTool,
-      setSelectedId,
-      setSelectedIds,
-      setStageSize,
-      stageSize,
-      updateElements,
-    ],
+    [setActiveTool, setSelectedId, setSelectedIds, stageSize, updateElements],
   );
 
   const handleAddText = useCallback(() => {
@@ -445,18 +416,11 @@ export const useCanvasEditorActions = ({
       backgroundImageRef.current = nextBackgroundImage;
       setElements(snapshot.elements);
       setBackgroundImageState(nextBackgroundImage);
-      if (uploadedImage?.kind === 'image') {
-        setStageSize({
-          width: Math.max(1, Math.round(uploadedImage.width)),
-          height: Math.max(1, Math.round(uploadedImage.height)),
-        });
-      } else if (nextBackgroundImage) {
+      if (!uploadedImage?.kind && nextBackgroundImage) {
         addUploadedImageShape(nextBackgroundImage, {
           replaceExisting: true,
           selectImage: false,
         });
-      } else {
-        setStageSize({ width: 0, height: 0 });
       }
 
       setSelectedId(null);
@@ -471,7 +435,6 @@ export const useCanvasEditorActions = ({
       setElements,
       setSelectedId,
       setSelectedIds,
-      setStageSize,
     ],
   );
 
@@ -479,7 +442,6 @@ export const useCanvasEditorActions = ({
     backgroundImageRef.current = null;
     setElements([]);
     setBackgroundImageState(null);
-    setStageSize({ width: 0, height: 0 });
     setSelectedId(null);
     setSelectedIds([]);
     setEditingTextId(null);
@@ -490,7 +452,6 @@ export const useCanvasEditorActions = ({
     setElements,
     setSelectedId,
     setSelectedIds,
-    setStageSize,
   ]);
 
   return {
