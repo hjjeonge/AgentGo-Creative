@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type React from 'react';
 
 import Add from '@/assets/add.svg';
@@ -64,7 +64,6 @@ export const TextEditor: React.FC<TextEditorProps> = ({
     'text' | 'highlight' | 'stroke' | 'shadow' | null
   >(null);
   const [isSpecialCharOpen, setIsSpecialCharOpen] = useState(false);
-  const specialCharRef = useRef<HTMLDivElement>(null);
   const recentTextColors = useColorHistoryStore((state) => state.recentColors);
   const addRecentColor = useColorHistoryStore((state) => state.addRecentColor);
 
@@ -101,23 +100,29 @@ export const TextEditor: React.FC<TextEditorProps> = ({
     setActivePopupTarget(null);
   };
 
+  const handleApplyTextColor = (value: string) => {
+    if (!selectedTextObject) return;
+    handleUpdateTextObject(selectedTextObject.id, {
+      fill: value,
+    });
+    addRecentColor(value);
+  };
+
+  const handleApplyHighlightColor = (value: string) => {
+    if (!selectedTextObject) return;
+    handleUpdateTextObject(selectedTextObject.id, {
+      backgroundColor: value,
+      backgroundEnabled: value !== 'transparent',
+    });
+    addRecentColor(value);
+  };
+
   const handleInsertSpecialChar = (char: string) => {
     if (!selectedTextObject) return;
     handleUpdateTextObject(selectedTextObject.id, {
       text: selectedTextObject.text + char,
     });
   };
-
-  useEffect(() => {
-    if (!isSpecialCharOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (!specialCharRef.current?.contains(e.target as Node)) {
-        setIsSpecialCharOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isSpecialCharOpen]);
 
   useEffect(() => {
     if (!selectedTextObject) {
@@ -299,7 +304,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({
   ];
 
   return (
-    <div className="relative h-full overflow-auto p-[20px] flex flex-col gap-[7px]">
+    <div className="relative flex h-full flex-col gap-[7px] overflow-x-visible overflow-y-auto p-6">
       <div className="flex flex-col gap-[14px]">
         <FontFamilySelect
           selectedTextObject={selectedTextObject}
@@ -462,24 +467,12 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                           onOpenPalette={() => openPalette('text')}
                           currentColor={normalizedCurrentColor}
                           recentlyUseColorList={recentTextColors}
-                          onSelectColor={(value) => {
-                            if (!selectedTextObject) return;
-                            handleUpdateTextObject(selectedTextObject.id, {
-                              fill: value,
-                            });
-                            addRecentColor(value);
-                          }}
+                          onSelectColor={handleApplyTextColor}
                         />
                       ) : (
                         <ColorPalette
                           colorCode={normalizedCurrentColor}
-                          handleColorCode={(value) => {
-                            if (!selectedTextObject) return;
-                            handleUpdateTextObject(selectedTextObject.id, {
-                              fill: value,
-                            });
-                            addRecentColor(value);
-                          }}
+                          handleColorCode={handleApplyTextColor}
                           onBack={() => openPicker('text', true)}
                         />
                       )}
@@ -521,26 +514,12 @@ export const TextEditor: React.FC<TextEditorProps> = ({
                           onOpenPalette={() => openPalette('highlight')}
                           currentColor={normalizedHighlightColor}
                           recentlyUseColorList={recentTextColors}
-                          onSelectColor={(value) => {
-                            if (!selectedTextObject) return;
-                            handleUpdateTextObject(selectedTextObject.id, {
-                              backgroundColor: value,
-                              backgroundEnabled: value !== 'transparent',
-                            });
-                            addRecentColor(value);
-                          }}
+                          onSelectColor={handleApplyHighlightColor}
                         />
                       ) : (
                         <ColorPalette
                           colorCode={normalizedHighlightColor}
-                          handleColorCode={(value) => {
-                            if (!selectedTextObject) return;
-                            handleUpdateTextObject(selectedTextObject.id, {
-                              backgroundColor: value,
-                              backgroundEnabled: value !== 'transparent',
-                            });
-                            addRecentColor(value);
-                          }}
+                          handleColorCode={handleApplyHighlightColor}
                           onBack={() => openPicker('highlight', true)}
                         />
                       )}
@@ -550,20 +529,28 @@ export const TextEditor: React.FC<TextEditorProps> = ({
               }
 
               return (
-                <div key={el.name} className="relative" ref={specialCharRef}>
-                  <ToolbarButton
-                    icon={el.img}
-                    tooltip={el.tooltip}
-                    onClick={() => setIsSpecialCharOpen((prev) => !prev)}
-                    isActive={isSpecialCharOpen}
-                  />
-                  {isSpecialCharOpen && (
-                    <SpecialCharPopup
-                      onInsert={handleInsertSpecialChar}
-                      onClose={() => setIsSpecialCharOpen(false)}
-                    />
-                  )}
-                </div>
+                <Popover
+                  key={el.name}
+                  open={isSpecialCharOpen}
+                  onOpenChange={setIsSpecialCharOpen}
+                >
+                  <PopoverTrigger asChild>
+                    <div className="relative">
+                      <ToolbarButton
+                        icon={el.img}
+                        tooltip={el.tooltip}
+                        isActive={isSpecialCharOpen}
+                      />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    sideOffset={6}
+                    className="z-[220] w-fit border-none bg-transparent p-0 shadow-none"
+                  >
+                    <SpecialCharPopup onInsert={handleInsertSpecialChar} />
+                  </PopoverContent>
+                </Popover>
               );
             })}
           </div>

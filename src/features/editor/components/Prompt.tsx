@@ -1,71 +1,42 @@
-import { useEffect, useRef, useState } from 'react';
 import type React from 'react';
+import { useRef, useState } from 'react';
+import { ArrowUp, Paperclip } from 'lucide-react';
 
-import Close from '@/assets/close-line.svg';
+import { Button } from '@/commons/components/Button';
+import { IconButton } from '@/commons/components/IconButton';
+import { PROMPT_MAX_REFERENCE_IMAGES } from '@/features/editor/constants/prompt';
+import { usePromptFiles } from '@/features/editor/hooks/usePromptFiles';
 import type { PromptGeneratePayload } from '@/features/editor/types';
+
+import { PromptPreviewList } from './PromptPreviewList';
 
 interface Props {
   onGenerate?: (payload: PromptGeneratePayload) => Promise<void>;
   isSubmitting?: boolean;
 }
 
-type PreviewImage = {
-  file: File;
-  url: string;
-};
-
-const MAX_IMAGES = 10;
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-
 export const Prompt: React.FC<Props> = ({
   onGenerate,
   isSubmitting = false,
 }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [prompt, setPrompt] = useState('');
-  const [images, setImages] = useState<PreviewImage[]>([]);
-
-  const imagesRef = useRef(images);
-
-  useEffect(() => {
-    imagesRef.current = images;
-  }, [images]);
+  const {
+    clearImages,
+    handleFiles,
+    handleRemoveImage,
+    images,
+    isMaxImages,
+    previewSize,
+  } = usePromptFiles();
 
   const canSend = prompt.trim().length > 0 && !isSubmitting;
-  const isMaxImages = images.length >= MAX_IMAGES;
-
-  const handleFiles = (fileList: FileList | null) => {
-    if (!fileList || isMaxImages) return;
-
-    const files = Array.from(fileList);
-
-    if (files.some((file) => !ALLOWED_IMAGE_TYPES.includes(file.type))) {
-      return alert(
-        'jpg, jpeg, png, webp, gif 이미지 파일만 업로드 가능합니다.',
-      );
-    }
-
-    const availableCount = MAX_IMAGES - images.length;
-    if (files.length > availableCount) {
-      alert(`레퍼런스 이미지는 최대 ${MAX_IMAGES}장까지 업로드할 수 있습니다.`);
-    }
-
-    const newImages = files.slice(0, availableCount).map((file) => ({
-      file,
-      url: URL.createObjectURL(file),
-    }));
-
-    setImages((prev) => [...prev, ...newImages]);
-  };
-
-  const handleRemoveImage = (index: number) => {
-    URL.revokeObjectURL(images[index].url);
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
 
   const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(e.target.value);
     e.target.style.height = 'auto';
-    e.target.style.height = `${Math.min(e.target.scrollHeight, 320)}px`;
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 96)}px`;
   };
 
   const handleSend = async () => {
@@ -77,9 +48,11 @@ export const Prompt: React.FC<Props> = ({
         prompt: prompt.trim(),
         referenceFiles: images.map((img) => img.file),
       });
-      images.forEach((img) => URL.revokeObjectURL(img.url));
       setPrompt('');
-      setImages([]);
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+      }
+      clearImages();
     } catch {
       // Error state is owned by the parent generate flow.
     }
@@ -92,95 +65,62 @@ export const Prompt: React.FC<Props> = ({
     }
   };
 
-  useEffect(() => {
-    return () => {
-      imagesRef.current.forEach((img) => URL.revokeObjectURL(img.url));
-    };
-  }, []);
-
-  const previewSize = images.length <= 1 ? 100 : 55;
-
   return (
-    <div className="z-[40] w-full max-w-[768px] bg-white border border-[#155DFC] rounded-[8px] p-[10px_8px] flex flex-col gap-[12px] mb-[20px]">
-      {images.length > 0 && (
-        <div className="flex items-center gap-[8px] flex-wrap">
-          {images.map((img, index) => (
-            <div
-              key={`${img.url}-${index}`}
-              className="relative rounded-[8px] overflow-hidden"
-              style={{ width: previewSize, height: previewSize }}
-            >
-              <img
-                src={img.url}
-                className="w-full h-full object-cover"
-                alt="preview"
-              />
-              <button
-                onClick={() => handleRemoveImage(index)}
-                className="absolute top-[4px] right-[4px] w-[16px] h-[16px] bg-black/60 rounded-full flex items-center justify-center"
-              >
-                <img src={Close} className="w-[10px] h-[10px]" alt="close" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-      <div className="flex flex-col gap-[16px]">
+    <div className="z-[40] flex max-h-[190px] w-full max-w-[768px] flex-col overflow-hidden rounded-[8px] border border-[#155DFC] bg-white px-2.5 py-2 shadow-[0_20px_24px_-4px_rgba(50,56,62,0.08)]">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
+        <PromptPreviewList
+          images={images}
+          onRemoveImage={handleRemoveImage}
+          previewSize={previewSize}
+        />
         <textarea
+          ref={textareaRef}
           value={prompt}
           onChange={handlePromptChange}
           onKeyDown={handleKeyDown}
-          placeholder="AgentGo에게 물어보세요."
+          placeholder="무엇이든 물어보고 만들어보세요."
           disabled={isSubmitting}
-          className="w-full rounded-[8px] p-[10px] text-[14px] leading-[20px] max-h-[150px] overflow-y-auto resize-none outline-none"
+          className="min-h-6 w-full resize-none overflow-y-auto text-md text-text-primary outline-none"
           rows={1}
         />
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-[6px]">
-            <label
-              className={`text-[12px] leading-[19.88px] rounded-[4px] border px-[10px] py-[4px] transition-colors ${
-                isMaxImages
-                  ? 'text-[#90A1B9] border-[#CAD5E2] cursor-not-allowed'
-                  : 'text-[#0F172B] border-[#CAD5E2] hover:bg-[#F8FAFF] cursor-pointer'
+      </div>
+      <div className="mt-3 flex shrink-0 items-center justify-between">
+        <div className="flex items-center gap-[6px]">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+            multiple
+            className="hidden"
+            disabled={isMaxImages || isSubmitting}
+            onChange={(e) => {
+              handleFiles(e.target.files);
+              e.currentTarget.value = '';
+            }}
+          />
+          <Button
+            variant="neutral-outlined"
+            size="sm"
+            startDecorator={<Paperclip size={18} />}
+            disabled={isMaxImages || isSubmitting}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            레퍼런스 첨부
+          </Button>
+          {!!images.length && (
+            <span
+              className={`text-[12px] ${
+                isMaxImages ? 'text-[#E7000B] font-medium' : 'text-[#64748B]'
               }`}
             >
-              <input
-                type="file"
-                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                multiple
-                className="hidden"
-                disabled={isMaxImages || isSubmitting}
-                onChange={(e) => {
-                  handleFiles(e.target.files);
-                  e.currentTarget.value = '';
-                }}
-              />
-              레퍼런스 첨부
-            </label>
-            {!!images.length && (
-              <span
-                className={`text-[12px] ${
-                  isMaxImages ? 'text-[#E7000B] font-medium' : 'text-[#64748B]'
-                }`}
-              >
-                {images.length}/10
-              </span>
-            )}
-          </div>
-          <button
-            onClick={handleSend}
-            disabled={!canSend}
-            className={`w-[32px] h-[32px] rounded-[4px] flex items-center justify-center transition-colors ${
-              canSend
-                ? 'bg-[#155DFC] hover:bg-[#0044CC]'
-                : 'bg-[#90A1B9] cursor-not-allowed'
-            }`}
-          >
-            <span className="text-white text-[16px] leading-none">
-              {isSubmitting ? '…' : '↑'}
+              {images.length}/{PROMPT_MAX_REFERENCE_IMAGES}
             </span>
-          </button>
+          )}
         </div>
+
+        <IconButton onClick={handleSend} disabled={!canSend}>
+          <ArrowUp size={18} />
+        </IconButton>
       </div>
     </div>
   );

@@ -49,7 +49,13 @@ export const useSelection = ({
   const handleSelectObject = (id: string | null) => {
     selectSingleId(id);
     setEditingTextId(null);
-    setActiveTool('mouse');
+    if (!id) {
+      setActiveTool('mouse');
+      return;
+    }
+
+    const selectedElement = elements.find((element) => element.id === id);
+    setActiveTool(selectedElement?.kind === 'text' ? 'text' : 'mouse');
   };
 
   useEffect(() => {

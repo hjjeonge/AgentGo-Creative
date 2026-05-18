@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
 import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import Dots from '@/assets/dots.svg';
 import { clearTokens, getAccessToken } from '@/commons/utils/tokenManager';
 import { useLogoutMutation } from '@/features/auth/queries/useLogoutMutation';
 import { useUserProfileQuery } from '@/features/auth/queries/useUserProfileQuery';
@@ -11,33 +10,13 @@ export const UserCard: React.FC = () => {
   const navigate = useNavigate();
   const { mutateAsync: logoutMutateAsync } = useLogoutMutation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [name, setName] = useState('User');
-  const [email, setEmail] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
   const [isAuthed, setIsAuthed] = useState(!!getAccessToken());
   const wrapRef = useRef<HTMLDivElement>(null);
   const token = getAccessToken();
-  const isDevToken = import.meta.env.DEV && token === 'dev-token';
 
   const { data: userProfile, isError } = useUserProfileQuery({
-    enabled: Boolean(token) && !isDevToken,
+    enabled: Boolean(token),
   });
-
-  useEffect(() => {
-    if (!token) return;
-    if (isDevToken) {
-      setName('테스트');
-      setEmail('test@itcen.com');
-      setIsAdmin(true);
-    }
-  }, [isDevToken, token]);
-
-  useEffect(() => {
-    if (!userProfile) return;
-    setName(userProfile.name);
-    setEmail(userProfile.email);
-    setIsAdmin(!!userProfile.is_admin);
-  }, [userProfile]);
 
   useEffect(() => {
     if (!isError) return;
@@ -77,38 +56,33 @@ export const UserCard: React.FC = () => {
   }
 
   const menuItems = [
-    ...(isAdmin ? [{ label: '관리자', action: 'admin' }] : []),
+    ...(userProfile?.is_admin
+      ? [{ label: 'AgentGo DAM으로 이동', action: 'admin' }]
+      : []),
     { label: '로그아웃', action: 'logout' },
   ];
 
   return (
     <div ref={wrapRef} className="relative">
-      <div className="w-[270px] h-[42px] p-[14px] rounded-[8px] border border-[#569DFF]/20 bg-[#F8FAFF] flex items-center justify-between">
-        <div className="w-[28px] h-[28px] bg-[linear-gradient(135deg,#0055E9_0%,#6A14D9_100%)] flex items-center justify-center rounded-full text-[12px] text-white leading-[18px] font-bold shrink-0">
-          {name.charAt(0)}
+      <div
+        className={`flex items-center gap-1.5 p-[3px_9px] rounded-xs hover:bg-[#E2E8F0] cursor-pointer ${menuOpen && 'bg-[#E2E8F0]'}`}
+        onClick={() => setMenuOpen((prev) => !prev)}
+      >
+        <div className="border border-border-neutral w-8 h-8 rounded-full flex items-center justify-center text-[#1D293D] text-sm bg-white">
+          {userProfile?.name.charAt(0) ?? ''}
         </div>
-        <div className="flex-1 flex items-center gap-[3px] justify-center">
-          <span className="text-[#1E1E1E] text-[13px] font-semibold leading-tight truncate">
-            {name}
-          </span>
-          <span className="text-[#9CA3AF] text-[11px] leading-tight truncate">
-            {email}
-          </span>
+        <div className="text-text-secondary font-bold text-sm">
+          {userProfile?.name ?? ''}
         </div>
-        <button onClick={() => setMenuOpen((prev) => !prev)}>
-          <img src={Dots} />
-        </button>
       </div>
 
       {menuOpen && (
-        <div className="absolute top-[calc(100%+4px)] right-0 z-[100] bg-white border border-[#E2E8F0] rounded-[8px] shadow-lg py-[4px] min-w-[120px]">
+        <div className="absolute top-10 right-0 z-[100] bg-white border border-border-neutral rounded-xs py-1 min-w-[216px]">
           {menuItems.map((item) => (
             <button
               key={item.action}
               onClick={() => handleAction(item.action)}
-              className={`w-full text-left px-[16px] py-[10px] text-[14px] hover:bg-[#F1F5F9] ${
-                item.action === 'logout' ? 'text-[#E11D48]' : 'text-[#0F172B]'
-              }`}
+              className={`w-full text-left px-3 py-1.5 text-[14px] hover:bg-[#F1F5F9] text-[#1D293D] `}
             >
               {item.label}
             </button>

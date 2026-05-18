@@ -15,23 +15,18 @@ export interface TemplateField {
   placeholder?: string;
   options?: string[];
   maxItems?: number;
+  isTargetImage?: boolean;
 }
 
 export interface TemplateConfig {
   key: string;
   title: string;
   comment: string;
-  icon: string;
+  imgSrc: string;
   aiStatus: 'available' | 'planned';
   aiFeature: string;
   fields: TemplateField[];
-}
-
-export interface FavoriteTemplateRes {
-  id: string;
-  imgUrl: string;
-  title: string;
-  summary: string;
+  isLike: boolean;
 }
 
 export interface TemplateRes {

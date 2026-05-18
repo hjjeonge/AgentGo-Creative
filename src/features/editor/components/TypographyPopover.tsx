@@ -28,9 +28,9 @@ export const TypographyPopover: React.FC<Props> = ({
   return (
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent align="start" className="p-0 w-fit">
-        <div className="flex flex-col gap-[8px] p-[7px] rounded-[8px] text-[16px] leading-[24px] text-[#0F172B">
-          <div className="flex items-center justify-between p-[7px]">
+      <PopoverContent align="start" className="p-0 w-fit border-none">
+        <div className="flex flex-col gap-[8px] p-[7px] rounded-[8px] text-[16px] leading-[24px] text-[#0F172B] bg-white">
+          <div className="flex items-center justify-between gap-10 p-[7px]">
             <span>자간</span>
             <input
               type="number"
@@ -38,10 +38,10 @@ export const TypographyPopover: React.FC<Props> = ({
               onChange={(e) =>
                 onChangeLetterSpacing(parseFloat(e.target.value) || 0)
               }
-              className="border border-[#CAD5E2] rounded-[6px] p-[7px]"
+              className="border border-[#CAD5E2] rounded-[6px] p-[7px] outline-none w-40"
             />
           </div>
-          <div className="flex items-center justify-between p-[7px]">
+          <div className="flex items-center justify-between gap-10 p-[7px]">
             <span className="text-[16px] leading-[24px] text-[#0F172B]">
               행간
             </span>
@@ -54,10 +54,10 @@ export const TypographyPopover: React.FC<Props> = ({
                   Math.max(0.1, parseFloat(e.target.value) || 0),
                 )
               }
-              className="border border-[#CAD5E2] rounded-[6px] p-[7px]"
+              className="border border-[#CAD5E2] rounded-[6px] p-[7px] outline-none w-40"
             />
           </div>
-          <div className="flex items-center justify-between p-[7px]">
+          <div className="flex items-center justify-between gap-10 p-[7px]">
             <span className="text-[16px] leading-[24px] text-[#0F172B]">
               장평
             </span>
@@ -68,7 +68,7 @@ export const TypographyPopover: React.FC<Props> = ({
               onChange={(e) =>
                 onChangeScaleX(Math.max(0.1, parseFloat(e.target.value) || 0))
               }
-              className="border border-[#CAD5E2] rounded-[6px] p-[7px]"
+              className="border border-[#CAD5E2] rounded-[6px] p-[7px] outline-none w-40"
             />
           </div>
         </div>

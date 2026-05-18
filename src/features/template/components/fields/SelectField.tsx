@@ -1,5 +1,6 @@
 import type React from 'react';
 
+import { CustomSelect } from '@/commons/components/CustomSelect';
 import type { TemplateField } from '@/features/template/types';
 
 import { FormRow } from '../FormRow';
@@ -15,20 +16,21 @@ export const SelectField: React.FC<SelectFieldProps> = ({
   value,
   onChange,
 }) => {
+  const optionList = (field.options ?? []).map((option) => ({
+    value: option,
+    label: option,
+  }));
+
+  const selectedOption = optionList.find((option) => option.value === value);
+
   return (
     <FormRow label={field.label} required={field.required}>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full h-[44px] border border-[#CBD5E1] rounded-[8px] px-[12px] text-[14px] text-[#0F172B] outline-none focus:border-[#155DFC] bg-white"
-      >
-        <option value="">선택해 주세요</option>
-        {(field.options ?? []).map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
+      <CustomSelect
+        optionList={optionList}
+        selectedOption={selectedOption}
+        onOptionSelect={(option) => onChange(option.value)}
+        placeholder={field.placeholder ?? '선택'}
+      />
     </FormRow>
   );
 };

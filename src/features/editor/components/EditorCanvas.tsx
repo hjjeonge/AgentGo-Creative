@@ -91,7 +91,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [shapeImages, setShapeImages] = useState<
-    Record<string, HTMLImageElement>
+    Record<string, { image: HTMLImageElement; imageUrl: string }>
   >({});
   const { lines, shapes, texts } = useMemo(
     () => partitionCanvasElements(elements),
@@ -117,16 +117,33 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
     }
 
     let disposed = false;
+    const imageShapeIds = new Set(imageShapes.map((shape) => shape.id));
+
+    setShapeImages((prev) => {
+      const nextEntries = Object.entries(prev).filter(([id]) =>
+        imageShapeIds.has(id),
+      );
+      if (nextEntries.length === Object.keys(prev).length) return prev;
+      return Object.fromEntries(nextEntries);
+    });
+
     imageShapes.forEach((shape) => {
       const key = shape.id;
       const imageUrl = shape.imageUrl;
-      if (!imageUrl || shapeImages[key]) return;
+      const cached = shapeImages[key];
+      if (!imageUrl || cached?.imageUrl === imageUrl) return;
       const img = new window.Image();
       img.crossOrigin = 'anonymous';
       img.src = imageUrl;
       img.onload = () => {
         if (disposed) return;
-        setShapeImages((prev) => ({ ...prev, [key]: img }));
+        setShapeImages((prev) => ({
+          ...prev,
+          [key]: {
+            image: img,
+            imageUrl,
+          },
+        }));
       };
     });
 
@@ -480,7 +497,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
                   }}
                 >
                   <KonvaImage
-                    image={shapeImages[shape.id] ?? null}
+                    image={shapeImages[shape.id]?.image ?? null}
                     x={0}
                     y={0}
                     width={Math.max(1, shape.width)}
@@ -499,7 +516,7 @@ export const EditorCanvas: React.FC<EditorCanvasProps> = ({
                 </Group>
               ) : (
                 <KonvaImage
-                  image={shapeImages[shape.id] ?? null}
+                  image={shapeImages[shape.id]?.image ?? null}
                   x={0}
                   y={0}
                   width={Math.max(1, shape.width)}

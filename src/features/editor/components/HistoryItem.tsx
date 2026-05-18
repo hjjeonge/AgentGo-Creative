@@ -1,5 +1,7 @@
 import type React from 'react';
+import { Trash2 } from 'lucide-react';
 
+import { IconButton } from '@/commons/components/IconButton';
 import { partitionCanvasElements } from '@/features/editor/utils/elementAdapters';
 import type { HistoryItemRes } from '@/features/project/types';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
@@ -20,31 +22,21 @@ export const HistoryItem: React.FC<Props> = ({ entry, onClick }) => {
   );
 
   return (
-    <div
-      className="overflow-hidden rounded-[10px] flex items-center justify-center p-[1px] bg-[linear-gradient(135deg,rgba(86,157,255,0.3)_0%,rgba(0,85,233,0.2)_50%,rgba(106,20,217,0.25)_100%)] box-border cursor-pointer hover:opacity-80"
-      onClick={() => onClick(entry)}
-    >
-      <div className="bg-[#F8FAFF] p-[12px] flex items-center gap-[12px] w-full rounded-[9px]">
-        <div className="w-[64px] h-[48px] rounded-[8px] bg-[#E2E8F0] shrink-0 overflow-hidden flex items-center justify-center">
-          {previewUrl ? (
-            <img
-              src={previewUrl}
-              className="w-full h-full object-cover"
-              alt={entry.title}
-            />
-          ) : (
-            <span className="text-[#90A1B9] text-[10px]">미리보기</span>
-          )}
+    <div className="flex items-center justify-between border-b border-border-neutral pb-2">
+      <button
+        type="button"
+        onClick={() => onClick(entry)}
+        className="flex min-w-0 flex-1 items-center gap-1 text-left"
+      >
+        <img src={previewUrl ?? ''} className="w-10 h-10 rounded-xs" />
+        <div className="flex flex-col gap-0.5 text-text-primary font-sm">
+          <span>{entry.title}</span>
+          <span className="text-[#314158] text-sm">{entry.timestamp}</span>
         </div>
-        <div className="flex-1 flex flex-col gap-[4px]">
-          <span className="text-[#1E1E1E] text-[14px] leading-[19.88px] font-bold truncate">
-            {entry.title}
-          </span>
-          <span className="text-[#90A1B9] text-[12px] leading-[18px]">
-            {entry.timestamp}
-          </span>
-        </div>
-      </div>
+      </button>
+      <IconButton variant="neutral-outlined">
+        <Trash2 size={16} />
+      </IconButton>
     </div>
   );
 };
