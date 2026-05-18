@@ -11,6 +11,7 @@ import type {
 } from '@/features/editor/types';
 import { useUpdateProjectMutation } from '@/features/project/queries';
 import { resolveImageUrl } from '@/features/template/utils/resolveImageUrl';
+import { API_BASE_URL } from '@/services/axiosInstance';
 
 interface Params {
   projectId: string;
@@ -26,7 +27,6 @@ interface Params {
 }
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   return error instanceof Error && error.message ? error.message : fallback;

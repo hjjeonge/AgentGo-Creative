@@ -25,7 +25,7 @@ export const Aside: React.FC<Props> = ({ asideOpen, handleAside }: Props) => {
 
   useEffect(() => {
     if (isError) {
-      console.log('최근 프로젝트 목록 조회에 실패했습니다.');
+      console.error('최근 프로젝트 목록 조회에 실패했습니다.');
       return;
     }
 

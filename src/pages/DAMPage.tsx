@@ -43,8 +43,7 @@ import { FileDetailModal } from '@/features/dam/components/FileDetailModal';
 import { NewFileModal } from '@/features/dam/components/NewFileModal';
 import { PermissionModal } from '@/features/dam/components/PermissionModal';
 import { RenameModal } from '@/features/dam/components/RenameModal';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import { API_BASE_URL } from '@/services/axiosInstance';
 
 const toFileType = (fileType: string): DAMFile['type'] => {
   if (fileType === 'image') return 'image';
@@ -431,7 +430,8 @@ export const DAMPage: React.FC = () => {
       anchor.click();
       document.body.removeChild(anchor);
       URL.revokeObjectURL(url);
-    } catch {
+    } catch (e) {
+      console.error('Blob 다운로드 실패, 직접 링크로 재시도:', e);
       const src =
         resolveUrl(downloadAssetUrl(fileId)) || file.thumbnail || file.url;
       if (!src) return;
@@ -469,7 +469,8 @@ export const DAMPage: React.FC = () => {
       try {
         const detail = await getAssetDetail(fileId);
         setDetailFile(toFileFromDetail(detail));
-      } catch {
+      } catch (e) {
+        console.error('에셋 상세 조회 실패, 기본 파일 정보로 표시:', e);
         setDetailFile(file);
       }
       return;
@@ -494,8 +495,8 @@ export const DAMPage: React.FC = () => {
           },
           ...prev,
         ]);
-      } catch {
-        // ignore
+      } catch (e) {
+        console.error('에셋 복사 실패:', e);
       }
       return;
     }
@@ -507,8 +508,8 @@ export const DAMPage: React.FC = () => {
         await deleteAsset(fileId);
         setFiles((prev) => prev.filter((item) => item.id !== fileId));
         if (detailFile?.id === fileId) setDetailFile(null);
-      } catch {
-        // ignore
+      } catch (e) {
+        console.error('에셋 삭제 실패:', e);
       }
     }
   };
@@ -552,8 +553,8 @@ export const DAMPage: React.FC = () => {
     );
     try {
       await updateWorkspaceTask(taskId, { status });
-    } catch {
-      // keep optimistic update
+    } catch (e) {
+      console.error('태스크 상태 업데이트 실패 (낙관적 업데이트 유지):', e);
     }
   };
 
@@ -562,7 +563,8 @@ export const DAMPage: React.FC = () => {
     try {
       const result = await createCollectionShareLink(activeCollection.id);
       setCollectionShareUrl(result.url);
-    } catch {
+    } catch (e) {
+      console.error('컬렉션 공유 링크 생성 실패:', e);
       setCollectionShareUrl(null);
     }
   };
@@ -618,7 +620,10 @@ export const DAMPage: React.FC = () => {
 
           <div className="flex-1 flex items-center gap-[8px] text-[16px] font-semibold text-[#0F172B] truncate">
             {breadcrumbs.map((crumb, index) => (
-              <span key={crumb} className="flex items-center gap-[8px]">
+              <span
+                key={`${index}-${crumb}`}
+                className="flex items-center gap-[8px]"
+              >
                 {index > 0 && (
                   <span className="text-[#94A3B8] font-normal">&gt;</span>
                 )}
@@ -675,7 +680,7 @@ export const DAMPage: React.FC = () => {
         {isWorkspaceView ? (
           <DAMWorkspaceView
             tasks={tasks}
-            onTaskClick={(id) => console.log('Task Clicked:', id)}
+            onTaskClick={() => {}}
             onTaskStatusChange={handleWorkspaceTaskStatus}
           />
         ) : (

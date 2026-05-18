@@ -9,7 +9,8 @@ import {
 } from '@/commons/utils/tokenManager';
 import { postRefreshToken } from '@/features/auth/api';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+export const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:8000';
 export const AI_REQUEST_TIMEOUT_MS = 240000;
 
 const axiosInstance = axios.create({

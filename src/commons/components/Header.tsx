@@ -9,7 +9,7 @@ export const Header: React.FC = () => {
   return (
     <div className="h-[52px] fixed left-0 top-0 right-0 bg-white p-[24px_32px] flex items-center justify-between border-b border-border-neutral">
       <button onClick={() => navigate('/')}>
-        <img src={Logo} />
+        <img src={Logo} alt="AgentGo Creative" />
       </button>
       {/*<UserCard />*/}
     </div>
